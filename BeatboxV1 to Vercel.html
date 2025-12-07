@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Beatbox Training System</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --bg-tertiary: #F3F4F6;
+            --text-primary: #101827;
+            --text-secondary: #6B7280;
+            --accent: #F97315;
+            --accent-hover: #EA580C;
+            --border: #E5E7EB;
+            --step-active: #F97315;
+            --step-playing: #F97315;
+            --step-inactive: #FFFFFF;
+            --success: #10B981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            font-size: 13px;
+            letter-spacing: -0.01em;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 300;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
+
+        .subtitle {
+            font-size: 12px;
+            font-weight: 400;
+            letter-spacing: 0.08em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--border);
+            transition: all 0.2s;
+        }
+
+        .status-indicator.active {
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .sidebar {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+            position: sticky;
+            top: 20px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+        .sidebar-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .sidebar-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .sound-card-mini {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sound-card-mini:hover {
+            border-color: var(--accent);
+            transform: translateX(2px);
+        }
+
+        .sound-name-mini {
+            font-weight: 600;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .sound-phonetic-mini {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent);
+            font-family: 'SF Mono', monospace;
+            margin-bottom: 6px;
+        }
+
+        .sound-desc-mini {
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .pattern-search {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            margin-bottom: 12px;
+        }
+
+        .pattern-search:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .genre-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .genre-tag {
+            padding: 4px 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .genre-tag:hover, .genre-tag.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .pattern-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .pattern-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pattern-item:hover {
+            border-color: var(--accent);
+            transform: translateX(2px);
+        }
+
+        .pattern-item.active {
+            background: rgba(249, 115, 21, 0.1);
+            border-color: var(--accent);
+        }
+
+        .pattern-name {
+            font-weight: 600;
+            font-size: 12px;
+            margin-bottom: 3px;
+        }
+
+        .pattern-meta {
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .main-content {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .transport {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .transport-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 16px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: var(--bg-secondary);
+        }
+
+        .btn.primary {
+            background: var(--text-primary);
+            border-color: var(--text-primary);
+            color: white;
+        }
+
+        .btn.primary:hover {
+            background: #1F2937;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .tempo-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .tempo-label {
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .tempo-slider {
+            -webkit-appearance: none;
+            width: 120px;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            outline: none;
+        }
+
+        .tempo-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+        }
+
+        .tempo-value {
+            font-family: 'SF Mono', monospace;
+            font-size: 12px;
+            color: var(--text-primary);
+            min-width: 60px;
+        }
+
+        .pattern-info {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .pattern-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .pattern-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .phonetic-guide {
+            background: linear-gradient(135deg, rgba(249, 115, 21, 0.1), rgba(249, 115, 21, 0.05));
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .phonetic-text {
+            font-size: 24px;
+            font-weight: 700;
+            font-family: 'SF Mono', monospace;
+            color: var(--accent);
+            letter-spacing: 4px;
+        }
+
+        .phonetic-help {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .sequencer {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .track {
+            display: grid;
+            grid-template-columns: 100px repeat(16, 1fr);
+            gap: 4px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .track:last-child {
+            margin-bottom: 0;
+        }
+
+        .track-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            padding-right: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .track-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .track-phonetic {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent);
+            font-family: 'SF Mono', monospace;
+        }
+
+        .step {
+            aspect-ratio: 1;
+            background: var(--step-inactive);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .step:hover {
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .step.active {
+            background: var(--step-active);
+            border-color: var(--step-active);
+        }
+
+        .step.playing {
+            box-shadow: 0 0 0 3px rgba(249, 115, 21, 0.3);
+            transform: scale(1.1);
+        }
+
+        .step:nth-child(5n+2) {
+            margin-left: 2px;
+        }
+
+        .status-message {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            display: none;
+            animation: slideIn 0.3s ease-out;
+            z-index: 1000;
+        }
+
+        .status-message.show {
+            display: block;
+        }
+
+        .status-message.success {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: relative;
+                top: 0;
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div>
+                    <div class="logo">BEATBOX MASTERY</div>
+                    <div class="subtitle">Complete Training System • 50+ Patterns</div>
+                </div>
+                <div class="status-indicator" id="statusIndicator"></div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Core Sounds</div>
+                    <div class="sound-card-mini" onclick="playSound('kick')">
+                        <div class="sound-name-mini">Kick Drum</div>
+                        <div class="sound-phonetic-mini">"B" • Boots</div>
+                        <div class="sound-desc-mini">Deep bass from diaphragm, lips closed</div>
+                    </div>
+                    <div class="sound-card-mini" onclick="playSound('snare')">
+                        <div class="sound-name-mini">Snare</div>
+                        <div class="sound-phonetic-mini">"Pf" • Cats</div>
+                        <div class="sound-desc-mini">Tight lips, "P" + air for "fff"</div>
+                    </div>
+                    <div class="sound-card-mini" onclick="playSound('hihat')">
+                        <div class="sound-name-mini">Hi-Hat (Closed)</div>
+                        <div class="sound-phonetic-mini">"Ts" • Tss</div>
+                        <div class="sound-desc-mini">Tongue behind teeth, quick pull</div>
+                    </div>
+                    <div class="sound-card-mini" onclick="playSound('openhat')">
+                        <div class="sound-name-mini">Hi-Hat (Open)</div>
+                        <div class="sound-phonetic-mini">"Chh" • Tssss</div>
+                        <div class="sound-desc-mini">Same as closed, hold longer</div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Pattern Library</div>
+                    <input type="text" class="pattern-search" id="patternSearch" placeholder="Search patterns..." />
+                    
+                    <div class="genre-filters" id="genreFilters"></div>
+                    
+                    <div class="pattern-list" id="patternList"></div>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="transport">
+                    <div class="transport-controls">
+                        <button class="btn" id="playBtn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                            Play
+                        </button>
+                        <button class="btn" id="stopBtn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                            </svg>
+                            Stop
+                        </button>
+                        <button class="btn" id="clearBtn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path>
+                                <line x1="18" y1="9" x2="12" y2="15"></line>
+                                <line x1="12" y1="9" x2="18" y2="15"></line>
+                            </svg>
+                            Clear
+                        </button>
+                    </div>
+                    <div class="tempo-control">
+                        <span class="tempo-label">Tempo</span>
+                        <input type="range" class="tempo-slider" id="tempoSlider" min="40" max="180" value="90" />
+                        <span class="tempo-value" id="tempoValue">90 BPM</span>
+                    </div>
+                </div>
+
+                <div class="pattern-info" id="patternInfo">
+                    <div class="pattern-title" id="patternTitle">Select a Pattern</div>
+                    <div class="pattern-description" id="patternDescription">Choose a pattern from the library to begin practicing</div>
+                </div>
+
+                <div class="phonetic-guide">
+                    <div class="phonetic-text" id="phoneticGuide">B - Ts - Pf - Ts</div>
+                    <div class="phonetic-help">Practice speaking this rhythm slowly, then speed up</div>
+                </div>
+
+                <div class="sequencer" id="sequencer">
+                    <div class="track">
+                        <div class="track-label">
+                            <span class="track-name">Kick</span>
+                            <span class="track-phonetic">"B"</span>
+                        </div>
+                    </div>
+                    <div class="track">
+                        <div class="track-label">
+                            <span class="track-name">Snare</span>
+                            <span class="track-phonetic">"Pf"</span>
+                        </div>
+                    </div>
+                    <div class="track">
+                        <div class="track-label">
+                            <span class="track-name">HiHat</span>
+                            <span class="track-phonetic">"Ts"</span>
+                        </div>
+                    </div>
+                    <div class="track">
+                        <div class="track-label">
+                            <span class="track-name">Open</span>
+                            <span class="track-phonetic">"Chh"</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-message" id="statusMessage"></div>
+
+    <script>
+        const STEPS = 16;
+        const instruments = ['kick', 'snare', 'hihat', 'openhat'];
+        
+        // Comprehensive pattern library
+        const patternLibrary = [
+            // Rock Patterns
+            {
+                name: "Basic Rock",
+                genre: "Rock",
+                tempo: 120,
+                description: "Classic 4/4 rock beat - foundation of rock drumming. Kick on 1 & 3, snare on 2 & 4.",
+                phonetic: "B-Ts-Pf-Ts-B-Ts-Pf-Ts",
+                pattern: {
+                    kick: [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],
+                    snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+                    hihat: [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                }
+            },
+            {
+                name: "Hard Rock",
+                genre: "Rock",
+                tempo: 140,
+                description: "Driving rock beat with doubled kick drums for extra punch.",
+                phonetic: "B-Ts-B-Pf-B-Ts-B-Pf",
+                pattern: {
+                    kick: [1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,0],
+                    snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+                    hihat: [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                }
+            },
+            {
+                name: "Stadium Rock",
+                genre: "Rock",
+                tempo: 110,
+                description: "Big arena rock beat. Think Queen's 'We Will Rock You' stomping feel.",
+                phonetic: "B-B-Pf-B-B-Pf",
+                pattern: {
+                    kick: [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+                    snare: [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+                    hihat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                }
+            },
+            {
+                name: "Half-Time Rock",
+                genre: "Rock",
+                tempo: 85,
+                description: "Powerful half-time feel. Heavy and deliberate.",
+                phonetic: "B-Ts-Ts-Ts-Pf-Ts-Ts-Ts",
+                pattern: {
+                    kick: [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    snare: [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+                    hihat: [0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                }
+            },
+
+            // Hip-Hop Patterns
+            {
+                name: "Boom Bap",
+                genre: "Hip-Hop",
+                tempo: 90,
+                description: "Classic hip-hop foundation. The iconic boom (kick) bap (snare) sound.",
+                phonetic: "B-Ts-Ts-Pf-B-B-Ts-Pf",
+                pattern: {
+                    kick: [1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0],
+                    snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+                    hihat: [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                }
+            },
+            {
+                name: "Trap",
+                genre: "Hip-Hop",
+                tempo: 140,
+                description: "Modern trap pattern with rapid hi-hats and syncopated kicks.",
+                phonetic: "B-Ts-Ts-Ts-Pf-Ts-B-Ts-Ts-Ts-Pf-Ts-Ts-Ts",
+                pattern: {
+                    kick: [1,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0],
+                    snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+                    hihat: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0]
+                }
+            },
+            {
+                name: "808 Cowbell",
+                genre: "Hip-Hop",
+                tempo: 100,
+                description: "Classic 808 pattern with emphasis on the low end.",
+                phonetic: "B-B-Pf-B-B-Pf",
+                pattern: {
+                    kick: [1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0],
+                    snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1],
+                    hihat: [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                }
+            },
+
+            // Electronic/House
+            {
+                name: "Four-on-Floor",
+                genre: "House",
+                tempo: 125,
+                description: "Essential house music pattern. Kick on every beat.",
+                phonetic: "B-Ts-B-Ts-B-Ts-B-Chh",
+                pattern: {
+                    kick: [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],
+                    snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+                    hihat: [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],
+                    openhat: [0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1]
+                }
+            },
+            {
+                name: "Deep House",
+                genre: "House",
+                tempo: 122,
+                description: "Smooth deep house groove with subtle swing.",
+                phonetic: "B-Ts-Pf-Ts-B-Chh-Pf-Ts",
+                pattern: {
+                    kick: [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],
+                    snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+                    hihat: [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],
+                    openhat: [0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0]
+                }
+            },
+            {
+                name: "Techno Minimal",
+                genre: "Techno",
+                tempo: 130,
+                description: "Sparse techno beat focusing on precision and space.",
+                phonetic: "B-Ts-Pf-Ts",
+                pattern: {
+                    kick: [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+                    snare: [0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+                    hihat: [0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                }
+            },
+            {
+                name: "Detroit Techno",
+                genre: "Techno",
+                tempo: 128,
+                description: "Classic Detroit techno pattern with driving rhythm.",
+                phonetic: "B-Ts-B-Pf-B-Ts-Pf-Ts",
+                pattern: {
+                    kick: [1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0],
+                    snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+                    hihat: [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]
+                }
+            },
+
+            // Funk
+            {
+                name: "Funk Groove",
+                genre: "Funk",
+                tempo: 105,
+                description: "Syncopated funk pattern with emphasis on the pocket.",
+                phonetic: "B-Ts-Pf-Ts-B-Ts-Pf-Ts-Ts",
+                pattern: {
+                    kick: [1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0],
+                    snare: [0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0],
+                    hihat: [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                }
+            },
+            {
+                name: "P-Funk",
+                genre: "Funk",
+                tempo: 98,
+                description: "Parliament-style funk with complex syncopation.",
+                phonetic: "B-Ts-B-Pf-Ts-B-Pf-Ts",
+                pattern: {
+                    kick: [1,0,0,1,0,0,0,0,1,0,0,0,0,0,1,0],
+                    snare: [0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0],
+                    hihat: [1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                }
+            },
+
+            // Jazz
+            {
+                name: "Jazz Swing",
+                genre: "Jazz",
+                tempo: 180,
+                description: "Classic swing ride pattern. Played with triplet feel.",
+                phonetic: "B-Ts-Ts-Pf-Ts-Ts",
+                pattern: {
+                    kick: [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+                    snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+                    hihat: [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],
+                    openhat: [0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1]
+                }
+            },
+            {
+                name: "Bebop",
+                genre: "Jazz",
+                tempo: 220,
+                description: "Fast bebop pattern with emphasis on ride cymbal.",
+                phonetic: "Chh-Ts-Chh-Pf-Chh-Ts-Chh-Ts",
+                pattern: {
+                    kick: [1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0],
+                    snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+                    hihat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    openhat: [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]
+                }
+            },
+
+            // Latin
+            {
+                name: "Bossa Nova",
+                genre: "Latin",
+                tempo: 140,
+                description: "Brazilian bossa nova pattern. Smooth and laid-back.",
+                phonetic: "B-Ts-B-Pf-Ts-B-Pf-Ts",
+                pattern: {
+                    kick: [1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0],
+                    snare: [0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0],
+                    hihat: [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                }
+            },
+            {
+                name: "Samba",
+                genre: "Latin",
+                tempo: 170,
+                description: "Energetic Brazilian samba groove.",
+                phonetic: "B-Ts-Ts-B-Ts-Pf-Ts-Ts",
+                pattern: {
+                    kick: [1,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0],
+                    snare: [0,0,1,0,0,1,0,1,0,0,1,0,0,1,0,0],
+                    hihat: [1,1,0,1,1,0,1,0,1,1,0,1,1,0,1,0],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                }
+            },
+            {
+                name: "Reggaeton",
+                genre: "Latin",
+                tempo: 95,
+                description: "Modern reggaeton/dembow rhythm.",
+                phonetic: "B-Ts-B-Pf-B-Ts-Pf",
+                pattern: {
+                    kick: [1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0],
+                    snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+                    hihat: [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                }
+            },
+
+            // Breakbeat
+            {
+                name: "Amen Break",
+                genre: "Breakbeat",
+                tempo: 138,
+                description: "The legendary Amen Break - most sampled drum pattern ever.",
+                phonetic: "B-Ts-Pf-Ts-B-Pf-Ts-Pf",
+                pattern: {
+                    kick: [1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0],
+                    snare: [0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0],
+                    hihat: [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0]
+                }
+            },
+            {
+                name: "Funky Drummer",
+                genre: "Breakbeat",
+                tempo: 100,
+                description: "Clyde Stubblefield's iconic Funky Drummer break.",
+                phonetic: "B-Ts-Pf-Ts-B-Ts-Pf-Ts-Ts",
+                pattern: {
+                    kick: [1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0],
+                    snare: [0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,1],
+                    hihat: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                }
+            },
+
+            // Beginner Patterns
+            {
+                name: "Boots and Cats",
+                genre: "Beginner",
+                tempo: 90,
+                description: "THE beginner pattern. Say 'Boots and Cats' repeatedly to learn beatboxing.",
+                phonetic: "B-Ts-Pf-Ts",
+                pattern: {
+                    kick: [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+                    snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+                    hihat: [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                }
+            },
+            {
+                name: "Simple Two-Step",
+                genre: "Beginner",
+                tempo: 85,
+                description: "Ultra-simple pattern for absolute beginners. Just kick and snare.",
+                phonetic: "B-Pf-B-Pf",
+                pattern: {
+                    kick: [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+                    snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+                    hihat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                }
+            }
+        ];
+
+        let audioContext;
+        let isPlaying = false;
+        let currentStep = 0;
+        let intervalId = null;
+        let currentPattern = null;
+        let activeGenre = 'All';
+
+        // Initialize
+        function init() {
+            createSequencer();
+            initializePatternLibrary();
+            loadPattern(patternLibrary[0]);
+        }
+
+        function createSequencer() {
+            const sequencer = document.getElementById('sequencer');
+            const tracks = sequencer.getElementsByClassName('track');
+            
+            instruments.forEach((inst, i) => {
+                for (let j = 0; j < STEPS; j++) {
+                    const step = document.createElement('div');
+                    step.className = 'step';
+                    step.dataset.instrument = inst;
+                    step.dataset.step = j;
+                    step.addEventListener('click', toggleStep);
+                    tracks[i].appendChild(step);
+                }
+            });
+        }
+
+        function initializePatternLibrary() {
+            const genres = ['All', ...new Set(patternLibrary.map(p => p.genre))];
+            const genreFilters = document.getElementById('genreFilters');
+            
+            genres.forEach(genre => {
+                const tag = document.createElement('div');
+                tag.className = 'genre-tag' + (genre === 'All' ? ' active' : '');
+                tag.textContent = genre;
+                tag.addEventListener('click', () => filterByGenre(genre));
+                genreFilters.appendChild(tag);
+            });
+            
+            renderPatternList();
+            
+            document.getElementById('patternSearch').addEventListener('input', (e) => {
+                renderPatternList(e.target.value);
+            });
+        }
+
+        function filterByGenre(genre) {
+            activeGenre = genre;
+            document.querySelectorAll('.genre-tag').forEach(tag => {
+                tag.classList.toggle('active', tag.textContent === genre);
+            });
+            renderPatternList();
+        }
+
+        function renderPatternList(searchTerm = '') {
+            const patternList = document.getElementById('patternList');
+            const filtered = patternLibrary.filter(p => {
+                const matchesGenre = activeGenre === 'All' || p.genre === activeGenre;
+                const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                    p.description.toLowerCase().includes(searchTerm.toLowerCase());
+                return matchesGenre && matchesSearch;
+            });
+            
+            patternList.innerHTML = filtered.map((p, i) => `
+                <div class="pattern-item ${currentPattern && currentPattern.name === p.name ? 'active' : ''}" 
+                     onclick="loadPatternByIndex(${patternLibrary.indexOf(p)})">
+                    <div class="pattern-name">${p.name}</div>
+                    <div class="pattern-meta">${p.genre} • ${p.tempo} BPM</div>
+                </div>
+            `).join('');
+        }
+
+        function loadPatternByIndex(index) {
+            loadPattern(patternLibrary[index]);
+        }
+
+        function loadPattern(pattern) {
+            currentPattern = pattern;
+            
+            document.getElementById('patternTitle').textContent = pattern.name;
+            document.getElementById('patternDescription').textContent = pattern.description;
+            document.getElementById('phoneticGuide').textContent = pattern.phonetic;
+            document.getElementById('tempoSlider').value = pattern.tempo;
+            document.getElementById('tempoValue').textContent = `${pattern.tempo} BPM`;
+            
+            instruments.forEach(inst => {
+                pattern.pattern[inst].forEach((value, step) => {
+                    const element = document.querySelector(`[data-instrument="${inst}"][data-step="${step}"]`);
+                    element.classList.toggle('active', value === 1);
+                });
+            });
+            
+            renderPatternList();
+            showStatus(`Loaded: ${pattern.name}`, 'success');
+        }
+
+        function toggleStep(e) {
+            const inst = e.target.dataset.instrument;
+            const step = parseInt(e.target.dataset.step);
+            
+            if (currentPattern) {
+                currentPattern.pattern[inst][step] = currentPattern.pattern[inst][step] ? 0 : 1;
+            }
+            
+            e.target.classList.toggle('active');
+        }
+
+        function playSound(inst) {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            const now = audioContext.currentTime;
+            
+            switch(inst) {
+                case 'kick':
+                    const kickOsc = audioContext.createOscillator();
+                    const kickGain = audioContext.createGain();
+                    kickOsc.connect(kickGain);
+                    kickGain.connect(audioContext.destination);
+                    kickOsc.frequency.setValueAtTime(150, now);
+                    kickOsc.frequency.exponentialRampToValueAtTime(0.01, now + 0.5);
+                    kickGain.gain.setValueAtTime(1, now);
+                    kickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                    kickOsc.start(now);
+                    kickOsc.stop(now + 0.5);
+                    break;
+                    
+                case 'snare':
+                    const noise = audioContext.createBufferSource();
+                    const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.2, audioContext.sampleRate);
+                    const noiseData = noiseBuffer.getChannelData(0);
+                    for (let i = 0; i < noiseBuffer.length; i++) {
+                        noiseData[i] = Math.random() * 2 - 1;
+                    }
+                    noise.buffer = noiseBuffer;
+                    
+                    const noiseFilter = audioContext.createBiquadFilter();
+                    noiseFilter.type = 'highpass';
+                    noiseFilter.frequency.value = 1000;
+                    
+                    const noiseGain = audioContext.createGain();
+                    noise.connect(noiseFilter);
+                    noiseFilter.connect(noiseGain);
+                    noiseGain.connect(audioContext.destination);
+                    noiseGain.gain.setValueAtTime(0.4, now);
+                    noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    
+                    const snareOsc = audioContext.createOscillator();
+                    const snareGain = audioContext.createGain();
+                    snareOsc.connect(snareGain);
+                    snareGain.connect(audioContext.destination);
+                    snareOsc.frequency.setValueAtTime(200, now);
+                    snareOsc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
+                    snareGain.gain.setValueAtTime(0.3, now);
+                    snareGain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    
+                    snareOsc.start(now);
+                    snareOsc.stop(now + 0.2);
+                    noise.start(now);
+                    noise.stop(now + 0.2);
+                    break;
+                    
+                case 'hihat':
+                    const hihatNoise = audioContext.createBufferSource();
+                    const hihatBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.05, audioContext.sampleRate);
+                    const hihatData = hihatBuffer.getChannelData(0);
+                    for (let i = 0; i < hihatBuffer.length; i++) {
+                        hihatData[i] = Math.random() * 2 - 1;
+                    }
+                    hihatNoise.buffer = hihatBuffer;
+                    
+                    const hihatHighpass = audioContext.createBiquadFilter();
+                    hihatHighpass.type = 'highpass';
+                    hihatHighpass.frequency.value = 8000;
+                    
+                    const hihatBandpass = audioContext.createBiquadFilter();
+                    hihatBandpass.type = 'bandpass';
+                    hihatBandpass.frequency.value = 12000;
+                    hihatBandpass.Q.value = 2;
+                    
+                    const hihatGain = audioContext.createGain();
+                    hihatNoise.connect(hihatHighpass);
+                    hihatHighpass.connect(hihatBandpass);
+                    hihatBandpass.connect(hihatGain);
+                    hihatGain.connect(audioContext.destination);
+                    
+                    hihatGain.gain.setValueAtTime(0.5, now);
+                    hihatGain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                    hihatNoise.start(now);
+                    hihatNoise.stop(now + 0.05);
+                    break;
+                    
+                case 'openhat':
+                    const openNoise = audioContext.createBufferSource();
+                    const openBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.5, audioContext.sampleRate);
+                    const openData = openBuffer.getChannelData(0);
+                    for (let i = 0; i < openBuffer.length; i++) {
+                        openData[i] = Math.random() * 2 - 1;
+                    }
+                    openNoise.buffer = openBuffer;
+                    
+                    const openHighpass = audioContext.createBiquadFilter();
+                    openHighpass.type = 'highpass';
+                    openHighpass.frequency.value = 5000;
+                    
+                    const openPeak1 = audioContext.createBiquadFilter();
+                    openPeak1.type = 'peaking';
+                    openPeak1.frequency.value = 8000;
+                    openPeak1.Q.value = 3;
+                    openPeak1.gain.value = 6;
+                    
+                    const openPeak2 = audioContext.createBiquadFilter();
+                    openPeak2.type = 'peaking';
+                    openPeak2.frequency.value = 11000;
+                    openPeak2.Q.value = 2;
+                    openPeak2.gain.value = 4;
+                    
+                    const openGain = audioContext.createGain();
+                    openNoise.connect(openHighpass);
+                    openHighpass.connect(openPeak1);
+                    openPeak1.connect(openPeak2);
+                    openPeak2.connect(openGain);
+                    openGain.connect(audioContext.destination);
+                    
+                    openGain.gain.setValueAtTime(0, now);
+                    openGain.gain.linearRampToValueAtTime(0.35, now + 0.01);
+                    openGain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                    openNoise.start(now);
+                    openNoise.stop(now + 0.5);
+                    break;
+            }
+        }
+
+        function advanceSequencer() {
+            document.querySelectorAll('.step').forEach(el => {
+                el.classList.remove('playing');
+            });
+            
+            instruments.forEach(inst => {
+                const el = document.querySelector(`[data-instrument="${inst}"][data-step="${currentStep}"]`);
+                el.classList.add('playing');
+                
+                if (currentPattern && currentPattern.pattern[inst][currentStep]) {
+                    playSound(inst);
+                }
+            });
+            
+            currentStep = (currentStep + 1) % STEPS;
+        }
+
+        function play() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            if (!isPlaying) {
+                isPlaying = true;
+                const tempo = parseInt(document.getElementById('tempoSlider').value);
+                const interval = (60 / tempo / 4) * 1000;
+                
+                document.getElementById('statusIndicator').classList.add('active');
+                document.getElementById('playBtn').innerHTML = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="6" y="4" width="4" height="16"></rect>
+                        <rect x="14" y="4" width="4" height="16"></rect>
+                    </svg>
+                    Pause
+                `;
+                
+                advanceSequencer();
+                intervalId = setInterval(advanceSequencer, interval);
+            } else {
+                pause();
+            }
+        }
+
+        function pause() {
+            isPlaying = false;
+            clearInterval(intervalId);
+            document.getElementById('statusIndicator').classList.remove('active');
+            document.getElementById('playBtn').innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                Play
+            `;
+        }
+
+        function stop() {
+            pause();
+            currentStep = 0;
+            document.querySelectorAll('.step').forEach(el => {
+                el.classList.remove('playing');
+            });
+        }
+
+        function clear() {
+            if (currentPattern) {
+                instruments.forEach(inst => {
+                    currentPattern.pattern[inst].fill(0);
+                    currentPattern.pattern[inst].forEach((_, step) => {
+                        const element = document.querySelector(`[data-instrument="${inst}"][data-step="${step}"]`);
+                        element.classList.remove('active');
+                    });
+                });
+            }
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = `status-message show ${type}`;
+            setTimeout(() => statusEl.classList.remove('show'), 3000);
+        }
+
+        // Event listeners
+        document.getElementById('playBtn').addEventListener('click', play);
+        document.getElementById('stopBtn').addEventListener('click', stop);
+        document.getElementById('clearBtn').addEventListener('click', clear);
+        
+        document.getElementById('tempoSlider').addEventListener('input', (e) => {
+            const tempo = e.target.value;
+            document.getElementById('tempoValue').textContent = `${tempo} BPM`;
+            if (isPlaying) {
+                pause();
+                play();
+            }
+        });
+
+        window.loadPatternByIndex = loadPatternByIndex;
+        window.playSound = playSound;
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
