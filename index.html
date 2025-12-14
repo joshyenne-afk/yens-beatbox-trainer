@@ -544,7 +544,7 @@
         }
 
         .sound-select-card.completed::after {
-            content: 'âœ“';
+            content: '✓';
             position: absolute;
             top: 8px;
             right: 8px;
@@ -1042,7 +1042,7 @@
                                 <div class="drill-instruction">
                                     <div class="drill-instruction-title">Technique</div>
                                     <div class="drill-instruction-text" id="drillInstruction">
-                                        Tongue tip contacts ridge behind upper front teeth. Short, sharp burst with teeth lightly closed. Remove all vocalizationâ€”consonant only.
+                                        Tongue tip contacts ridge behind upper front teeth. Short, sharp burst with teeth lightly closed. Remove all vocalization—consonant only.
                                     </div>
                                 </div>
                             </div>
@@ -1098,7 +1098,7 @@
 
                         <div style="text-align: center; margin-top: 24px;">
                             <button class="btn" id="advanceToPhase2" onclick="advanceToPhase2()" style="display: none;">
-                                Advance to Phase 2: Combinations â†’
+                                Advance to Phase 2: Combinations →
                             </button>
                         </div>
                     </div>
@@ -1125,7 +1125,7 @@
                                 <div class="combo-sound">
                                     <div class="combo-phonetic" id="comboSound1">B</div>
                                 </div>
-                                <div class="combo-arrow">â†’</div>
+                                <div class="combo-arrow">→</div>
                                 <div class="combo-sound">
                                     <div class="combo-phonetic" id="comboSound2">t</div>
                                 </div>
@@ -1185,9 +1185,9 @@
                         </div>
 
                         <div style="text-align: center; margin-top: 24px;">
-                            <button class="btn" onclick="backToPhase1()">â† Back to Phase 1</button>
+                            <button class="btn" onclick="backToPhase1()">← Back to Phase 1</button>
                             <button class="btn" id="advanceToPatterns" onclick="advanceToPatterns()" style="display: none; margin-left: 12px;">
-                                Ready for Patterns â†’
+                                Ready for Patterns →
                             </button>
                         </div>
                     </div>
@@ -1279,17 +1279,17 @@
             hihat: {
                 phonetic: '{ t }',
                 name: 'Hi-Hat (Closed)',
-                instruction: 'Tongue tip contacts ridge behind upper front teeth. Make the letter "t" sound from "hat" or "cat"â€”remove all vocalization, keeping only the consonant. Short, sharp burst with teeth lightly closed.'
+                instruction: 'Tongue tip contacts ridge behind upper front teeth. Make the letter "t" sound from "hat" or "cat"—remove all vocalization, keeping only the consonant. Short, sharp burst with teeth lightly closed.'
             },
             snare: {
                 phonetic: '{ K }',
                 name: 'K-Snare',
-                instruction: 'Make a hard "K" sound as in "kit" with strong accentâ€”the "cats" in "boots and cats". Back of tongue contacts soft palate. Short, percussive click. This is your foundational snare.'
+                instruction: 'Make a hard "K" sound as in "kit" with strong accent—the "cats" in "boots and cats". Back of tongue contacts soft palate. Short, percussive click. This is your foundational snare.'
             },
             kick: {
                 phonetic: '{ B }',
                 name: 'Kick Drum',
-                instruction: 'Say "boo" out loud, then whisper it (no vocal cord vibration). Isolate just the "B" consonant with heavy emphasis. Build pressure with lips tightly closed, release in one burstâ€”let lips vibrate briefly.'
+                instruction: 'Say "boo" out loud, then whisper it (no vocal cord vibration). Isolate just the "B" consonant with heavy emphasis. Build pressure with lips tightly closed, release in one burst—let lips vibrate briefly.'
             }
         };
 
@@ -1374,7 +1374,7 @@
                 name: "Hi-Hat Fill",
                 genre: "Beginner",
                 tempo: 70,
-                description: "Kick â†’ 3 hi-hats â†’ Snare â†’ 3 hi-hats. Builds subdivision control.",
+                description: "Kick ←’ 3 hi-hats ←’ Snare ←’ 3 hi-hats. Builds subdivision control.",
                 phonetic: "B t t t K t t t",
                 pattern: {
                     kick: [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
@@ -1631,7 +1631,7 @@
             // Update UI
             const card = document.querySelector(`[data-sound="${trainingState.currentSound}"]`);
             card.classList.add('completed');
-            document.getElementById(`${trainingState.currentSound}-status`).textContent = 'Completed âœ“';
+            document.getElementById(`${trainingState.currentSound}-status`).textContent = 'Completed ✓';
             
             // Calculate and show accuracy
             const expectedBeats = Math.floor(DRILL_DURATION * (drillState.tempo / 60));
@@ -1920,10 +1920,10 @@
             });
             
             patternList.innerHTML = filtered.map((p, i) => `
-                <div class="pattern-item ${currentPattern && currentPattern.name === p.name ? 'active' : ''}" 
+                <div class="pattern-item ${currentPattern && currentPattern.name === p.name ? 'active' : ''}"
                      onclick="loadPatternByIndex(${patternLibrary.indexOf(p)})">
                     <div class="pattern-name">${p.name}</div>
-                    <div class="pattern-meta">${p.genre} â€¢ ${p.tempo} BPM</div>
+                    <div class="pattern-meta">${p.genre} • ${p.tempo} BPM</div>
                 </div>
             `).join('');
         }
