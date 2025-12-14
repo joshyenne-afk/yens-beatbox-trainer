@@ -890,6 +890,11 @@
             color: var(--success);
         }
 
+        .status-message.error {
+            border-color: var(--error);
+            color: var(--error);
+        }
+
         @keyframes slideIn {
             from {
                 opacity: 0;
@@ -1348,7 +1353,7 @@
                 name: "Boots and Cats",
                 genre: "Beginner",
                 tempo: 60,
-                description: "THE beginner pattern. Say 'Boots and Cats' repeatedly. Start at 60 BPM.",
+                description: "THE beginner pattern. Say 'Boots and Cats and Boots and Cats'. Classic 2-beat loop.",
                 phonetic: "B - t - K - t",
                 pattern: {
                     kick: [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
@@ -1387,10 +1392,10 @@
                 name: "Basic Rock",
                 genre: "Rock",
                 tempo: 90,
-                description: "Classic 4/4 rock beat. Kick on 1 & 3, snare on 2 & 4.",
+                description: "Classic 4/4 rock beat. Kick on 1 & 3, snare on 2 & 4, steady 8th note hi-hats.",
                 phonetic: "B-t-K-t-B-t-K-t",
                 pattern: {
-                    kick: [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],
+                    kick: [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
                     snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
                     hihat: [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],
                     openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
@@ -1467,7 +1472,18 @@
                     const mode = tab.dataset.mode;
                     document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
-                    
+
+                    // Stop any running drills or sequencer when switching modes
+                    if (drillState.isRunning) {
+                        stopDrill();
+                    }
+                    if (comboState.isRunning) {
+                        stopComboDrill();
+                    }
+                    if (isPlaying) {
+                        stop();
+                    }
+
                     if (mode === 'training') {
                         document.getElementById('trainingContainer').classList.add('active');
                         document.getElementById('sequencerContainer').classList.remove('active');
@@ -1480,14 +1496,24 @@
         }
 
         function setupEventListeners() {
-            // Drill tempo slider
+            // Drill tempo slider - prevent changes during active drill
             document.getElementById('drillTempoSlider').addEventListener('input', (e) => {
+                if (drillState.isRunning) {
+                    e.target.value = drillState.tempo; // Reset to current tempo
+                    showStatus('Stop the drill before changing tempo', 'error');
+                    return;
+                }
                 drillState.tempo = parseInt(e.target.value);
                 document.getElementById('drillTempoValue').textContent = `${drillState.tempo} BPM`;
             });
 
-            // Combo tempo slider
+            // Combo tempo slider - prevent changes during active drill
             document.getElementById('comboTempoSlider').addEventListener('input', (e) => {
+                if (comboState.isRunning) {
+                    e.target.value = comboState.tempo; // Reset to current tempo
+                    showStatus('Stop the drill before changing tempo', 'error');
+                    return;
+                }
                 comboState.tempo = parseInt(e.target.value);
                 document.getElementById('comboTempoValue').textContent = `${comboState.tempo} BPM`;
             });
@@ -1552,7 +1578,12 @@
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
-            
+
+            // Resume audio context (required for modern browsers)
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+
             drillState.isRunning = true;
             drillState.currentBeat = 0;
             
@@ -1719,7 +1750,12 @@
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
-            
+
+            // Resume audio context (required for modern browsers)
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+
             comboState.isRunning = true;
             comboState.currentBeat = 0;
             
@@ -2111,12 +2147,17 @@
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
-            
+
+            // Resume audio context (required for modern browsers)
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+
             if (!isPlaying) {
                 isPlaying = true;
                 const tempo = parseInt(document.getElementById('tempoSlider').value);
                 const interval = (60 / tempo / 4) * 1000;
-                
+
                 document.getElementById('statusIndicator').classList.add('active');
                 document.getElementById('playBtn').innerHTML = `
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -2125,7 +2166,7 @@
                     </svg>
                     Pause
                 `;
-                
+
                 advanceSequencer();
                 intervalId = setInterval(advanceSequencer, interval);
             } else {
