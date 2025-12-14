@@ -2081,125 +2081,190 @@
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
-            
+
             const now = audioContext.currentTime;
-            
+
             switch(inst) {
                 case 'kick':
+                    // Punchy kick with attack click and bass body
                     const kickOsc = audioContext.createOscillator();
                     const kickGain = audioContext.createGain();
-                    kickOsc.connect(kickGain);
+                    const kickFilter = audioContext.createBiquadFilter();
+
+                    kickFilter.type = 'lowpass';
+                    kickFilter.frequency.value = 800;
+                    kickFilter.Q.value = 1;
+
+                    kickOsc.connect(kickFilter);
+                    kickFilter.connect(kickGain);
                     kickGain.connect(audioContext.destination);
-                    kickOsc.frequency.setValueAtTime(150, now);
-                    kickOsc.frequency.exponentialRampToValueAtTime(0.01, now + 0.5);
-                    kickGain.gain.setValueAtTime(1, now);
-                    kickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+
+                    // Frequency sweep for punch (starts high, drops fast)
+                    kickOsc.frequency.setValueAtTime(180, now);
+                    kickOsc.frequency.exponentialRampToValueAtTime(60, now + 0.05);
+                    kickOsc.frequency.exponentialRampToValueAtTime(45, now + 0.15);
+
+                    // Attack + decay envelope
+                    kickGain.gain.setValueAtTime(1.2, now);
+                    kickGain.gain.exponentialRampToValueAtTime(0.8, now + 0.01);
+                    kickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+
                     kickOsc.start(now);
-                    kickOsc.stop(now + 0.5);
+                    kickOsc.stop(now + 0.3);
                     break;
                     
                 case 'snare':
+                    // Crispy snare with body and snap
                     const noise = audioContext.createBufferSource();
-                    const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.2, audioContext.sampleRate);
+                    const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.15, audioContext.sampleRate);
                     const noiseData = noiseBuffer.getChannelData(0);
                     for (let i = 0; i < noiseBuffer.length; i++) {
                         noiseData[i] = Math.random() * 2 - 1;
                     }
                     noise.buffer = noiseBuffer;
-                    
-                    const noiseFilter = audioContext.createBiquadFilter();
-                    noiseFilter.type = 'highpass';
-                    noiseFilter.frequency.value = 1000;
-                    
+
+                    // Multi-band filtering for realistic snap
+                    const noiseHP = audioContext.createBiquadFilter();
+                    noiseHP.type = 'highpass';
+                    noiseHP.frequency.value = 800;
+
+                    const noisePeak = audioContext.createBiquadFilter();
+                    noisePeak.type = 'peaking';
+                    noisePeak.frequency.value = 2200;
+                    noisePeak.Q.value = 1.5;
+                    noisePeak.gain.value = 8;
+
                     const noiseGain = audioContext.createGain();
-                    noise.connect(noiseFilter);
-                    noiseFilter.connect(noiseGain);
+                    noise.connect(noiseHP);
+                    noiseHP.connect(noisePeak);
+                    noisePeak.connect(noiseGain);
                     noiseGain.connect(audioContext.destination);
-                    noiseGain.gain.setValueAtTime(0.4, now);
-                    noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-                    
+
+                    // Sharp attack, quick decay
+                    noiseGain.gain.setValueAtTime(0.7, now);
+                    noiseGain.gain.exponentialRampToValueAtTime(0.3, now + 0.01);
+                    noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+
+                    // Tonal body for depth
                     const snareOsc = audioContext.createOscillator();
+                    const snareOsc2 = audioContext.createOscillator();
                     const snareGain = audioContext.createGain();
-                    snareOsc.connect(snareGain);
+                    const snareFilter = audioContext.createBiquadFilter();
+
+                    snareFilter.type = 'bandpass';
+                    snareFilter.frequency.value = 220;
+                    snareFilter.Q.value = 2;
+
+                    snareOsc.connect(snareFilter);
+                    snareOsc2.connect(snareFilter);
+                    snareFilter.connect(snareGain);
                     snareGain.connect(audioContext.destination);
-                    snareOsc.frequency.setValueAtTime(200, now);
-                    snareOsc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
-                    snareGain.gain.setValueAtTime(0.3, now);
-                    snareGain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-                    
+
+                    snareOsc.frequency.setValueAtTime(220, now);
+                    snareOsc2.frequency.setValueAtTime(170, now);
+
+                    snareGain.gain.setValueAtTime(0.4, now);
+                    snareGain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+
                     snareOsc.start(now);
-                    snareOsc.stop(now + 0.2);
+                    snareOsc2.start(now);
+                    snareOsc.stop(now + 0.08);
+                    snareOsc2.stop(now + 0.08);
                     noise.start(now);
-                    noise.stop(now + 0.2);
+                    noise.stop(now + 0.15);
                     break;
                     
                 case 'hihat':
+                    // Crisp, short closed hi-hat
                     const hihatNoise = audioContext.createBufferSource();
-                    const hihatBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.05, audioContext.sampleRate);
+                    const hihatBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.04, audioContext.sampleRate);
                     const hihatData = hihatBuffer.getChannelData(0);
                     for (let i = 0; i < hihatBuffer.length; i++) {
                         hihatData[i] = Math.random() * 2 - 1;
                     }
                     hihatNoise.buffer = hihatBuffer;
-                    
-                    const hihatHighpass = audioContext.createBiquadFilter();
-                    hihatHighpass.type = 'highpass';
-                    hihatHighpass.frequency.value = 8000;
-                    
-                    const hihatBandpass = audioContext.createBiquadFilter();
-                    hihatBandpass.type = 'bandpass';
-                    hihatBandpass.frequency.value = 12000;
-                    hihatBandpass.Q.value = 2;
-                    
+
+                    // Metallic character with multiple peaks
+                    const hihatHP = audioContext.createBiquadFilter();
+                    hihatHP.type = 'highpass';
+                    hihatHP.frequency.value = 7000;
+
+                    const hihatPeak1 = audioContext.createBiquadFilter();
+                    hihatPeak1.type = 'peaking';
+                    hihatPeak1.frequency.value = 10000;
+                    hihatPeak1.Q.value = 2.5;
+                    hihatPeak1.gain.value = 5;
+
+                    const hihatPeak2 = audioContext.createBiquadFilter();
+                    hihatPeak2.type = 'peaking';
+                    hihatPeak2.frequency.value = 13500;
+                    hihatPeak2.Q.value = 1.8;
+                    hihatPeak2.gain.value = 3;
+
                     const hihatGain = audioContext.createGain();
-                    hihatNoise.connect(hihatHighpass);
-                    hihatHighpass.connect(hihatBandpass);
-                    hihatBandpass.connect(hihatGain);
+                    hihatNoise.connect(hihatHP);
+                    hihatHP.connect(hihatPeak1);
+                    hihatPeak1.connect(hihatPeak2);
+                    hihatPeak2.connect(hihatGain);
                     hihatGain.connect(audioContext.destination);
-                    
-                    hihatGain.gain.setValueAtTime(0.5, now);
-                    hihatGain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+
+                    // Tight envelope for closed sound
+                    hihatGain.gain.setValueAtTime(0.6, now);
+                    hihatGain.gain.exponentialRampToValueAtTime(0.01, now + 0.035);
+
                     hihatNoise.start(now);
-                    hihatNoise.stop(now + 0.05);
+                    hihatNoise.stop(now + 0.04);
                     break;
                     
                 case 'openhat':
+                    // Sustained open hi-hat with shimmer
                     const openNoise = audioContext.createBufferSource();
-                    const openBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.5, audioContext.sampleRate);
+                    const openBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.6, audioContext.sampleRate);
                     const openData = openBuffer.getChannelData(0);
                     for (let i = 0; i < openBuffer.length; i++) {
                         openData[i] = Math.random() * 2 - 1;
                     }
                     openNoise.buffer = openBuffer;
-                    
-                    const openHighpass = audioContext.createBiquadFilter();
-                    openHighpass.type = 'highpass';
-                    openHighpass.frequency.value = 5000;
-                    
+
+                    // Bright metallic ring with multiple resonances
+                    const openHP = audioContext.createBiquadFilter();
+                    openHP.type = 'highpass';
+                    openHP.frequency.value = 6000;
+
                     const openPeak1 = audioContext.createBiquadFilter();
                     openPeak1.type = 'peaking';
-                    openPeak1.frequency.value = 8000;
-                    openPeak1.Q.value = 3;
-                    openPeak1.gain.value = 6;
-                    
+                    openPeak1.frequency.value = 9000;
+                    openPeak1.Q.value = 3.5;
+                    openPeak1.gain.value = 7;
+
                     const openPeak2 = audioContext.createBiquadFilter();
                     openPeak2.type = 'peaking';
-                    openPeak2.frequency.value = 11000;
-                    openPeak2.Q.value = 2;
-                    openPeak2.gain.value = 4;
-                    
+                    openPeak2.frequency.value = 12000;
+                    openPeak2.Q.value = 2.8;
+                    openPeak2.gain.value = 5;
+
+                    const openPeak3 = audioContext.createBiquadFilter();
+                    openPeak3.type = 'peaking';
+                    openPeak3.frequency.value = 15000;
+                    openPeak3.Q.value = 2;
+                    openPeak3.gain.value = 3;
+
                     const openGain = audioContext.createGain();
-                    openNoise.connect(openHighpass);
-                    openHighpass.connect(openPeak1);
+                    openNoise.connect(openHP);
+                    openHP.connect(openPeak1);
                     openPeak1.connect(openPeak2);
-                    openPeak2.connect(openGain);
+                    openPeak2.connect(openPeak3);
+                    openPeak3.connect(openGain);
                     openGain.connect(audioContext.destination);
-                    
+
+                    // Slower decay for sustain
                     openGain.gain.setValueAtTime(0, now);
-                    openGain.gain.linearRampToValueAtTime(0.35, now + 0.01);
-                    openGain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                    openGain.gain.linearRampToValueAtTime(0.5, now + 0.005);
+                    openGain.gain.exponentialRampToValueAtTime(0.15, now + 0.1);
+                    openGain.gain.exponentialRampToValueAtTime(0.01, now + 0.55);
+
                     openNoise.start(now);
-                    openNoise.stop(now + 0.5);
+                    openNoise.stop(now + 0.6);
                     break;
             }
         }
