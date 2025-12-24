@@ -544,7 +544,7 @@
         }
 
         .sound-select-card.completed::after {
-            content: 'âœ“';
+            content: '✓';
             position: absolute;
             top: 8px;
             right: 8px;
@@ -890,6 +890,11 @@
             color: var(--success);
         }
 
+        .status-message.error {
+            border-color: var(--error);
+            color: var(--error);
+        }
+
         @keyframes slideIn {
             from {
                 opacity: 0;
@@ -1042,7 +1047,7 @@
                                 <div class="drill-instruction">
                                     <div class="drill-instruction-title">Technique</div>
                                     <div class="drill-instruction-text" id="drillInstruction">
-                                        Tongue tip contacts ridge behind upper front teeth. Short, sharp burst with teeth lightly closed. Remove all vocalizationâ€”consonant only.
+                                        Tongue tip contacts ridge behind upper front teeth. Short, sharp burst with teeth lightly closed. Remove all vocalization—consonant only.
                                     </div>
                                 </div>
                             </div>
@@ -1098,7 +1103,7 @@
 
                         <div style="text-align: center; margin-top: 24px;">
                             <button class="btn" id="advanceToPhase2" onclick="advanceToPhase2()" style="display: none;">
-                                Advance to Phase 2: Combinations â†’
+                                Advance to Phase 2: Combinations →
                             </button>
                         </div>
                     </div>
@@ -1125,7 +1130,7 @@
                                 <div class="combo-sound">
                                     <div class="combo-phonetic" id="comboSound1">B</div>
                                 </div>
-                                <div class="combo-arrow">â†’</div>
+                                <div class="combo-arrow">→</div>
                                 <div class="combo-sound">
                                     <div class="combo-phonetic" id="comboSound2">t</div>
                                 </div>
@@ -1185,9 +1190,9 @@
                         </div>
 
                         <div style="text-align: center; margin-top: 24px;">
-                            <button class="btn" onclick="backToPhase1()">â† Back to Phase 1</button>
+                            <button class="btn" onclick="backToPhase1()">← Back to Phase 1</button>
                             <button class="btn" id="advanceToPatterns" onclick="advanceToPatterns()" style="display: none; margin-left: 12px;">
-                                Ready for Patterns â†’
+                                Ready for Patterns →
                             </button>
                         </div>
                     </div>
@@ -1279,17 +1284,17 @@
             hihat: {
                 phonetic: '{ t }',
                 name: 'Hi-Hat (Closed)',
-                instruction: 'Tongue tip contacts ridge behind upper front teeth. Make the letter "t" sound from "hat" or "cat"â€”remove all vocalization, keeping only the consonant. Short, sharp burst with teeth lightly closed.'
+                instruction: 'Tongue tip contacts ridge behind upper front teeth. Make the letter "t" sound from "hat" or "cat"—remove all vocalization, keeping only the consonant. Short, sharp burst with teeth lightly closed.'
             },
             snare: {
                 phonetic: '{ K }',
                 name: 'K-Snare',
-                instruction: 'Make a hard "K" sound as in "kit" with strong accentâ€”the "cats" in "boots and cats". Back of tongue contacts soft palate. Short, percussive click. This is your foundational snare.'
+                instruction: 'Make a hard "K" sound as in "kit" with strong accent—the "cats" in "boots and cats". Back of tongue contacts soft palate. Short, percussive click. This is your foundational snare.'
             },
             kick: {
                 phonetic: '{ B }',
                 name: 'Kick Drum',
-                instruction: 'Say "boo" out loud, then whisper it (no vocal cord vibration). Isolate just the "B" consonant with heavy emphasis. Build pressure with lips tightly closed, release in one burstâ€”let lips vibrate briefly.'
+                instruction: 'Say "boo" out loud, then whisper it (no vocal cord vibration). Isolate just the "B" consonant with heavy emphasis. Build pressure with lips tightly closed, release in one burst—let lips vibrate briefly.'
             }
         };
 
@@ -1348,7 +1353,7 @@
                 name: "Boots and Cats",
                 genre: "Beginner",
                 tempo: 60,
-                description: "THE beginner pattern. Say 'Boots and Cats' repeatedly. Start at 60 BPM.",
+                description: "THE beginner pattern. Say 'Boots and Cats and Boots and Cats'. Classic 2-beat loop.",
                 phonetic: "B - t - K - t",
                 pattern: {
                     kick: [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
@@ -1374,7 +1379,7 @@
                 name: "Hi-Hat Fill",
                 genre: "Beginner",
                 tempo: 70,
-                description: "Kick â†’ 3 hi-hats â†’ Snare â†’ 3 hi-hats. Builds subdivision control.",
+                description: "Kick → 3 hi-hats → Snare → 3 hi-hats. Builds subdivision control.",
                 phonetic: "B t t t K t t t",
                 pattern: {
                     kick: [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
@@ -1387,10 +1392,10 @@
                 name: "Basic Rock",
                 genre: "Rock",
                 tempo: 90,
-                description: "Classic 4/4 rock beat. Kick on 1 & 3, snare on 2 & 4.",
+                description: "Classic 4/4 rock beat. Kick on 1 & 3, snare on 2 & 4, steady 8th note hi-hats.",
                 phonetic: "B-t-K-t-B-t-K-t",
                 pattern: {
-                    kick: [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],
+                    kick: [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
                     snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
                     hihat: [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],
                     openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
@@ -1447,6 +1452,84 @@
                     hihat: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
                     openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0]
                 }
+            },
+            {
+                name: "Double Kick",
+                genre: "Intermediate",
+                tempo: 80,
+                description: "Two kicks followed by snare. Essential for adding energy to your beats.",
+                phonetic: "B-B-K-t-B-B-K-t",
+                pattern: {
+                    kick: [1,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0],
+                    snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+                    hihat: [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                }
+            },
+            {
+                name: "Shuffle Groove",
+                genre: "Intermediate",
+                tempo: 85,
+                description: "Swung hi-hats create a bouncy, human feel. Foundation of groove.",
+                phonetic: "B-t-ts-K-t-t",
+                pattern: {
+                    kick: [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+                    snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+                    hihat: [1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,0],
+                    openhat: [0,0,1,0,0,1,0,0,0,0,1,0,0,1,0,0]
+                }
+            },
+            {
+                name: "Half-Time Hip-Hop",
+                genre: "Hip-Hop",
+                tempo: 75,
+                description: "Slower, heavier feel. Snare on 3 instead of 2 & 4. Creates space.",
+                phonetic: "B-t-t-B-K-t",
+                pattern: {
+                    kick: [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0],
+                    snare: [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+                    hihat: [0,0,1,0,1,0,0,0,0,0,1,0,1,0,0,0],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                }
+            },
+            {
+                name: "Fast Hands",
+                genre: "Advanced",
+                tempo: 95,
+                description: "Rapid 16th note hi-hats with sparse kick/snare. Practice hand speed.",
+                phonetic: "B-tttt-K-tttt",
+                pattern: {
+                    kick: [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+                    hihat: [0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                }
+            },
+            {
+                name: "Drum & Bass",
+                genre: "Electronic",
+                tempo: 160,
+                description: "Fast breakbeat pattern. Syncopated kicks, tight snares. Advanced.",
+                phonetic: "B-t-K-B-B-t-K-t",
+                pattern: {
+                    kick: [1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0],
+                    snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+                    hihat: [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                }
+            },
+            {
+                name: "Reggae One Drop",
+                genre: "Reggae",
+                tempo: 70,
+                description: "Kick and snare together on beat 3. Laid-back island groove.",
+                phonetic: "t-t-BK-t",
+                pattern: {
+                    kick: [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+                    snare: [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+                    hihat: [1,0,1,0,1,0,1,0,0,0,1,0,1,0,1,0],
+                    openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                }
             }
         ];
 
@@ -1467,7 +1550,18 @@
                     const mode = tab.dataset.mode;
                     document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
-                    
+
+                    // Stop any running drills or sequencer when switching modes
+                    if (drillState.isRunning) {
+                        stopDrill();
+                    }
+                    if (comboState.isRunning) {
+                        stopComboDrill();
+                    }
+                    if (isPlaying) {
+                        stop();
+                    }
+
                     if (mode === 'training') {
                         document.getElementById('trainingContainer').classList.add('active');
                         document.getElementById('sequencerContainer').classList.remove('active');
@@ -1480,14 +1574,24 @@
         }
 
         function setupEventListeners() {
-            // Drill tempo slider
+            // Drill tempo slider - prevent changes during active drill
             document.getElementById('drillTempoSlider').addEventListener('input', (e) => {
+                if (drillState.isRunning) {
+                    e.target.value = drillState.tempo; // Reset to current tempo
+                    showStatus('Stop the drill before changing tempo', 'error');
+                    return;
+                }
                 drillState.tempo = parseInt(e.target.value);
                 document.getElementById('drillTempoValue').textContent = `${drillState.tempo} BPM`;
             });
 
-            // Combo tempo slider
+            // Combo tempo slider - prevent changes during active drill
             document.getElementById('comboTempoSlider').addEventListener('input', (e) => {
+                if (comboState.isRunning) {
+                    e.target.value = comboState.tempo; // Reset to current tempo
+                    showStatus('Stop the drill before changing tempo', 'error');
+                    return;
+                }
                 comboState.tempo = parseInt(e.target.value);
                 document.getElementById('comboTempoValue').textContent = `${comboState.tempo} BPM`;
             });
@@ -1552,7 +1656,12 @@
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
-            
+
+            // Resume audio context (required for modern browsers)
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+
             drillState.isRunning = true;
             drillState.currentBeat = 0;
             
@@ -1631,7 +1740,7 @@
             // Update UI
             const card = document.querySelector(`[data-sound="${trainingState.currentSound}"]`);
             card.classList.add('completed');
-            document.getElementById(`${trainingState.currentSound}-status`).textContent = 'Completed âœ“';
+            document.getElementById(`${trainingState.currentSound}-status`).textContent = 'Completed ✓';
             
             // Calculate and show accuracy
             const expectedBeats = Math.floor(DRILL_DURATION * (drillState.tempo / 60));
@@ -1719,7 +1828,12 @@
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
-            
+
+            // Resume audio context (required for modern browsers)
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+
             comboState.isRunning = true;
             comboState.currentBeat = 0;
             
@@ -1920,10 +2034,10 @@
             });
             
             patternList.innerHTML = filtered.map((p, i) => `
-                <div class="pattern-item ${currentPattern && currentPattern.name === p.name ? 'active' : ''}" 
+                <div class="pattern-item ${currentPattern && currentPattern.name === p.name ? 'active' : ''}"
                      onclick="loadPatternByIndex(${patternLibrary.indexOf(p)})">
                     <div class="pattern-name">${p.name}</div>
-                    <div class="pattern-meta">${p.genre} â€¢ ${p.tempo} BPM</div>
+                    <div class="pattern-meta">${p.genre} • ${p.tempo} BPM</div>
                 </div>
             `).join('');
         }
@@ -1967,125 +2081,190 @@
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
-            
+
             const now = audioContext.currentTime;
-            
+
             switch(inst) {
                 case 'kick':
+                    // Punchy kick with attack click and bass body
                     const kickOsc = audioContext.createOscillator();
                     const kickGain = audioContext.createGain();
-                    kickOsc.connect(kickGain);
+                    const kickFilter = audioContext.createBiquadFilter();
+
+                    kickFilter.type = 'lowpass';
+                    kickFilter.frequency.value = 800;
+                    kickFilter.Q.value = 1;
+
+                    kickOsc.connect(kickFilter);
+                    kickFilter.connect(kickGain);
                     kickGain.connect(audioContext.destination);
-                    kickOsc.frequency.setValueAtTime(150, now);
-                    kickOsc.frequency.exponentialRampToValueAtTime(0.01, now + 0.5);
-                    kickGain.gain.setValueAtTime(1, now);
-                    kickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+
+                    // Frequency sweep for punch (starts high, drops fast)
+                    kickOsc.frequency.setValueAtTime(180, now);
+                    kickOsc.frequency.exponentialRampToValueAtTime(60, now + 0.05);
+                    kickOsc.frequency.exponentialRampToValueAtTime(45, now + 0.15);
+
+                    // Attack + decay envelope
+                    kickGain.gain.setValueAtTime(1.2, now);
+                    kickGain.gain.exponentialRampToValueAtTime(0.8, now + 0.01);
+                    kickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+
                     kickOsc.start(now);
-                    kickOsc.stop(now + 0.5);
+                    kickOsc.stop(now + 0.3);
                     break;
                     
                 case 'snare':
+                    // Crispy snare with body and snap
                     const noise = audioContext.createBufferSource();
-                    const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.2, audioContext.sampleRate);
+                    const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.15, audioContext.sampleRate);
                     const noiseData = noiseBuffer.getChannelData(0);
                     for (let i = 0; i < noiseBuffer.length; i++) {
                         noiseData[i] = Math.random() * 2 - 1;
                     }
                     noise.buffer = noiseBuffer;
-                    
-                    const noiseFilter = audioContext.createBiquadFilter();
-                    noiseFilter.type = 'highpass';
-                    noiseFilter.frequency.value = 1000;
-                    
+
+                    // Multi-band filtering for realistic snap
+                    const noiseHP = audioContext.createBiquadFilter();
+                    noiseHP.type = 'highpass';
+                    noiseHP.frequency.value = 800;
+
+                    const noisePeak = audioContext.createBiquadFilter();
+                    noisePeak.type = 'peaking';
+                    noisePeak.frequency.value = 2200;
+                    noisePeak.Q.value = 1.5;
+                    noisePeak.gain.value = 8;
+
                     const noiseGain = audioContext.createGain();
-                    noise.connect(noiseFilter);
-                    noiseFilter.connect(noiseGain);
+                    noise.connect(noiseHP);
+                    noiseHP.connect(noisePeak);
+                    noisePeak.connect(noiseGain);
                     noiseGain.connect(audioContext.destination);
-                    noiseGain.gain.setValueAtTime(0.4, now);
-                    noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-                    
+
+                    // Sharp attack, quick decay
+                    noiseGain.gain.setValueAtTime(0.7, now);
+                    noiseGain.gain.exponentialRampToValueAtTime(0.3, now + 0.01);
+                    noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+
+                    // Tonal body for depth
                     const snareOsc = audioContext.createOscillator();
+                    const snareOsc2 = audioContext.createOscillator();
                     const snareGain = audioContext.createGain();
-                    snareOsc.connect(snareGain);
+                    const snareFilter = audioContext.createBiquadFilter();
+
+                    snareFilter.type = 'bandpass';
+                    snareFilter.frequency.value = 220;
+                    snareFilter.Q.value = 2;
+
+                    snareOsc.connect(snareFilter);
+                    snareOsc2.connect(snareFilter);
+                    snareFilter.connect(snareGain);
                     snareGain.connect(audioContext.destination);
-                    snareOsc.frequency.setValueAtTime(200, now);
-                    snareOsc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
-                    snareGain.gain.setValueAtTime(0.3, now);
-                    snareGain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-                    
+
+                    snareOsc.frequency.setValueAtTime(220, now);
+                    snareOsc2.frequency.setValueAtTime(170, now);
+
+                    snareGain.gain.setValueAtTime(0.4, now);
+                    snareGain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+
                     snareOsc.start(now);
-                    snareOsc.stop(now + 0.2);
+                    snareOsc2.start(now);
+                    snareOsc.stop(now + 0.08);
+                    snareOsc2.stop(now + 0.08);
                     noise.start(now);
-                    noise.stop(now + 0.2);
+                    noise.stop(now + 0.15);
                     break;
                     
                 case 'hihat':
+                    // Crisp, short closed hi-hat
                     const hihatNoise = audioContext.createBufferSource();
-                    const hihatBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.05, audioContext.sampleRate);
+                    const hihatBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.04, audioContext.sampleRate);
                     const hihatData = hihatBuffer.getChannelData(0);
                     for (let i = 0; i < hihatBuffer.length; i++) {
                         hihatData[i] = Math.random() * 2 - 1;
                     }
                     hihatNoise.buffer = hihatBuffer;
-                    
-                    const hihatHighpass = audioContext.createBiquadFilter();
-                    hihatHighpass.type = 'highpass';
-                    hihatHighpass.frequency.value = 8000;
-                    
-                    const hihatBandpass = audioContext.createBiquadFilter();
-                    hihatBandpass.type = 'bandpass';
-                    hihatBandpass.frequency.value = 12000;
-                    hihatBandpass.Q.value = 2;
-                    
+
+                    // Metallic character with multiple peaks
+                    const hihatHP = audioContext.createBiquadFilter();
+                    hihatHP.type = 'highpass';
+                    hihatHP.frequency.value = 7000;
+
+                    const hihatPeak1 = audioContext.createBiquadFilter();
+                    hihatPeak1.type = 'peaking';
+                    hihatPeak1.frequency.value = 10000;
+                    hihatPeak1.Q.value = 2.5;
+                    hihatPeak1.gain.value = 5;
+
+                    const hihatPeak2 = audioContext.createBiquadFilter();
+                    hihatPeak2.type = 'peaking';
+                    hihatPeak2.frequency.value = 13500;
+                    hihatPeak2.Q.value = 1.8;
+                    hihatPeak2.gain.value = 3;
+
                     const hihatGain = audioContext.createGain();
-                    hihatNoise.connect(hihatHighpass);
-                    hihatHighpass.connect(hihatBandpass);
-                    hihatBandpass.connect(hihatGain);
+                    hihatNoise.connect(hihatHP);
+                    hihatHP.connect(hihatPeak1);
+                    hihatPeak1.connect(hihatPeak2);
+                    hihatPeak2.connect(hihatGain);
                     hihatGain.connect(audioContext.destination);
-                    
-                    hihatGain.gain.setValueAtTime(0.5, now);
-                    hihatGain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+
+                    // Tight envelope for closed sound
+                    hihatGain.gain.setValueAtTime(0.6, now);
+                    hihatGain.gain.exponentialRampToValueAtTime(0.01, now + 0.035);
+
                     hihatNoise.start(now);
-                    hihatNoise.stop(now + 0.05);
+                    hihatNoise.stop(now + 0.04);
                     break;
                     
                 case 'openhat':
+                    // Sustained open hi-hat with shimmer
                     const openNoise = audioContext.createBufferSource();
-                    const openBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.5, audioContext.sampleRate);
+                    const openBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.6, audioContext.sampleRate);
                     const openData = openBuffer.getChannelData(0);
                     for (let i = 0; i < openBuffer.length; i++) {
                         openData[i] = Math.random() * 2 - 1;
                     }
                     openNoise.buffer = openBuffer;
-                    
-                    const openHighpass = audioContext.createBiquadFilter();
-                    openHighpass.type = 'highpass';
-                    openHighpass.frequency.value = 5000;
-                    
+
+                    // Bright metallic ring with multiple resonances
+                    const openHP = audioContext.createBiquadFilter();
+                    openHP.type = 'highpass';
+                    openHP.frequency.value = 6000;
+
                     const openPeak1 = audioContext.createBiquadFilter();
                     openPeak1.type = 'peaking';
-                    openPeak1.frequency.value = 8000;
-                    openPeak1.Q.value = 3;
-                    openPeak1.gain.value = 6;
-                    
+                    openPeak1.frequency.value = 9000;
+                    openPeak1.Q.value = 3.5;
+                    openPeak1.gain.value = 7;
+
                     const openPeak2 = audioContext.createBiquadFilter();
                     openPeak2.type = 'peaking';
-                    openPeak2.frequency.value = 11000;
-                    openPeak2.Q.value = 2;
-                    openPeak2.gain.value = 4;
-                    
+                    openPeak2.frequency.value = 12000;
+                    openPeak2.Q.value = 2.8;
+                    openPeak2.gain.value = 5;
+
+                    const openPeak3 = audioContext.createBiquadFilter();
+                    openPeak3.type = 'peaking';
+                    openPeak3.frequency.value = 15000;
+                    openPeak3.Q.value = 2;
+                    openPeak3.gain.value = 3;
+
                     const openGain = audioContext.createGain();
-                    openNoise.connect(openHighpass);
-                    openHighpass.connect(openPeak1);
+                    openNoise.connect(openHP);
+                    openHP.connect(openPeak1);
                     openPeak1.connect(openPeak2);
-                    openPeak2.connect(openGain);
+                    openPeak2.connect(openPeak3);
+                    openPeak3.connect(openGain);
                     openGain.connect(audioContext.destination);
-                    
+
+                    // Slower decay for sustain
                     openGain.gain.setValueAtTime(0, now);
-                    openGain.gain.linearRampToValueAtTime(0.35, now + 0.01);
-                    openGain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                    openGain.gain.linearRampToValueAtTime(0.5, now + 0.005);
+                    openGain.gain.exponentialRampToValueAtTime(0.15, now + 0.1);
+                    openGain.gain.exponentialRampToValueAtTime(0.01, now + 0.55);
+
                     openNoise.start(now);
-                    openNoise.stop(now + 0.5);
+                    openNoise.stop(now + 0.6);
                     break;
             }
         }
@@ -2111,12 +2290,17 @@
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
-            
+
+            // Resume audio context (required for modern browsers)
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+
             if (!isPlaying) {
                 isPlaying = true;
                 const tempo = parseInt(document.getElementById('tempoSlider').value);
                 const interval = (60 / tempo / 4) * 1000;
-                
+
                 document.getElementById('statusIndicator').classList.add('active');
                 document.getElementById('playBtn').innerHTML = `
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -2125,7 +2309,7 @@
                     </svg>
                     Pause
                 `;
-                
+
                 advanceSequencer();
                 intervalId = setInterval(advanceSequencer, interval);
             } else {
