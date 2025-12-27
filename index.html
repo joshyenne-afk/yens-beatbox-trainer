@@ -1527,18 +1527,25 @@
         };
 
         const tripletData = {
-            // === CLASSIC "BOOTS AND CATS" (Start here!) ===
-            'boots-cats': { sounds: ['kick', 'hihat', 'snare'], display: ['B', 't', 'K'], name: 'Boots & Cats', desc: 'THE classic pattern. Say "Boots and Cats" fast!' },
-            // === ESSENTIAL VARIATIONS ===
-            'boots-cats-boots': { sounds: ['kick', 'hihat', 'snare', 'hihat'], display: ['B', 't', 'K', 't'], name: 'B-t-K-t (Full)', desc: '4-beat foundation. Most common beat structure.' },
-            'kick-hat-pf': { sounds: ['kick', 'hihat', 'pfsnare'], display: ['B', 't', 'Pf'], name: 'Kick-Hat-PF', desc: 'Punchier snare variation. Hip-hop feel.' },
-            'kick-snare-hat': { sounds: ['kick', 'snare', 'hihat'], display: ['B', 'K', 't'], name: 'Kick-Snare-Hat', desc: 'Snare on beat 2. Different groove feel.' },
-            'hat-kick-snare': { sounds: ['hihat', 'kick', 'snare'], display: ['t', 'B', 'K'], name: 'Hat-Kick-Snare', desc: 'Off-beat start. Syncopated feel.' },
-            // === DOUBLE PATTERNS ===
-            'double-kick-snare': { sounds: ['kick', 'kick', 'snare'], display: ['B', 'B', 'K'], name: 'Double Kick', desc: 'Two kicks before snare. Hip-hop staple.' },
-            'kick-double-hat': { sounds: ['kick', 'hihat', 'hihat'], display: ['B', 't', 't'], name: 'Kick-Double Hat', desc: 'Kick then two quick hats. Great for fills.' },
+            // === WORD COMBINATIONS - Say these phrases fast to learn the pattern! ===
+            'boots-cats': { sounds: ['kick', 'hihat', 'snare'], display: ['B', 't', 'K'], name: 'Boots & Cats', desc: 'Say "Boots and Cats" fast! THE classic starter pattern.' },
+            'boots-cats-full': { sounds: ['kick', 'hihat', 'snare', 'hihat'], display: ['B', 't', 'K', 't'], name: 'Boots Cats Boots Cats', desc: 'Full "Boots and Cats and Boots and Cats" loop.' },
+            'pots-pans': { sounds: ['pfsnare', 'hihat', 'snare', 'hihat'], display: ['Pf', 't', 'K', 't'], name: 'Pots & Pans', desc: 'Say "Pots and Pans" - PF snare variation!' },
+            'coffee': { sounds: ['snare', 'pfsnare'], display: ['K', 'Pf'], name: 'Coffee', desc: 'Say "Coffee" fast - K then Pf! Great snare combo.' },
+            'butter-cup': { sounds: ['kick', 'hihat', 'snare'], display: ['B', 't', 'K'], name: 'Buttercup', desc: 'Say "Butter-cup" - same as Boots & Cats, different feel.' },
+            'coconut': { sounds: ['snare', 'snare', 'hihat'], display: ['K', 'K', 't'], name: 'Coconut', desc: 'Say "Co-co-nut" - double snare into hat!' },
+            // === BEGINNER PATTERNS ===
+            'kick-snare-hat': { sounds: ['kick', 'snare', 'hihat'], display: ['B', 'K', 't'], name: 'Dog Dog Keys', desc: 'Say "Dog Dog Keys" - kick-snare-hat flow.' },
+            'double-kick-snare': { sounds: ['kick', 'kick', 'snare'], display: ['B', 'B', 'K'], name: 'Double Kick → Snare', desc: 'Two kicks before snare. Hip-hop staple.' },
             // === INTERMEDIATE PATTERNS ===
-            'boom-bap-core': { sounds: ['kick', 'hihat', 'hihat', 'snare'], display: ['B', 't', 't', 'K'], name: 'Boom Bap Core', desc: 'Classic hip-hop triplet. 90s golden era.' }
+            'boom-bap-core': { sounds: ['kick', 'hihat', 'hihat', 'snare'], display: ['B', 't', 't', 'K'], name: 'Boom Bap Core', desc: 'Classic 90s hip-hop. B-t-t-K rhythm.' },
+            'pizza-hut': { sounds: ['pfsnare', 'hihat', 'kick'], display: ['Pf', 't', 'B'], name: 'Pizza Hut', desc: 'Say "Piz-za Hut" - PF snare lead!' },
+            'pudding-cup': { sounds: ['pfsnare', 'hihat', 'snare'], display: ['Pf', 't', 'K'], name: 'Pudding Cup', desc: 'Say "Pud-ding Cup" - mixed snares!' },
+            // === SYNCOPATED ===
+            'hat-kick-snare': { sounds: ['hihat', 'kick', 'snare'], display: ['t', 'B', 'K'], name: 'Off-Beat Start', desc: 'Start on hat for syncopated feel.' },
+            'kick-double-hat': { sounds: ['kick', 'hihat', 'hihat'], display: ['B', 't', 't'], name: 'Kick-Hat-Hat', desc: 'Kick then two quick hats. Fill pattern.' },
+            // === ADVANCED COMBINATIONS ===
+            'jupiter': { sounds: ['kick', 'pfsnare', 'hihat'], display: ['B', 'Pf', 't'], name: 'Jupiter', desc: 'Say "Ju-pi-ter" - kick, PF, hat!' }
         };
 
         const patternLibrary = [
@@ -1983,6 +1990,8 @@
             });
             document.querySelectorAll('.phase-btn').forEach(btn => {
                 btn.onclick = () => {
+                    // STOP ALL SOUNDS when switching phases
+                    stopAllSounds();
                     document.querySelectorAll('.phase-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     document.querySelectorAll('.phase-content').forEach(p => p.style.display = 'none');
