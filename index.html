@@ -1510,8 +1510,11 @@
             // === INTERMEDIATE SOUNDS ===
             pfsnare: { id: 'pfsnare', phonetic: '{ Pf }', name: 'PF-Snare', difficulty: 'intermediate', order: 5, instruction: 'Heavy, punchy snare. Say "Poof" but remove the "oo"—P flows directly into F with no gap.', steps: ['Press lips together for "P"', 'Build up air pressure', 'Release P and immediately transition to F', 'Upper teeth touch lower lip for the F', 'Should feel like one explosive sound: "Pf!"'], youtubeUrl: 'https://www.youtube.com/watch?v=8lmYtzfN0q8', youtubeTitle: 'TylaDubya - PF Snare Tutorial (334K views)' },
             inwardk: { id: 'inwardk', phonetic: '{ ^K }', name: 'Inward K-Snare', difficulty: 'intermediate', order: 6, instruction: 'Game-changer! Make a K sound while INHALING. This lets you breathe while beatboxing!', steps: ['Tongue in same position as outward K', 'Seal tongue sides against palate', 'Try to inhale sharply', 'The suction creates the snap', 'This lets you breathe during long patterns!'], youtubeUrl: 'https://www.youtube.com/watch?v=kVm5kuZ7e2w', youtubeTitle: 'SkilleR - Inward K Snare Tutorial (209K views)' },
-            // === ADVANCED SOUNDS (Organic) ===
-            ride: { id: 'ride', phonetic: '{ ding }', name: 'Ride Cymbal', difficulty: 'advanced', order: 7, instruction: 'Sustained metallic "ding" with a washy tail. Like saying "ding" but as a breathy whisper.', steps: ['Start with a soft "d" with your tongue', 'Flow into a nasal "ing" sound', 'Let air escape through slightly parted lips', 'The sound should "wash" and sustain', 'Great for jazz and slower grooves'], youtubeUrl: 'https://www.youtube.com/watch?v=v5lqCrHQrxQ', youtubeTitle: 'Beatbox Cymbal Sounds' }
+            rimshot: { id: 'rimshot', phonetic: '{ KA! }', name: 'Rimshot', difficulty: 'intermediate', order: 7, instruction: 'Sharp, cutting crack! Combine K with a hard "A" attack. Like slapping the rim and head together.', steps: ['Start with tongue in K position', 'Add a sharp "AH" vocalization', 'Release both simultaneously', 'Should be LOUD and cutting', 'Great for accents and fills'], youtubeUrl: 'https://www.youtube.com/watch?v=kVm5kuZ7e2w', youtubeTitle: 'SkilleR - Rimshot Tutorial' },
+            crossstick: { id: 'crossstick', phonetic: '{ tk }', name: 'Cross Stick', difficulty: 'intermediate', order: 8, instruction: 'Dry, woody click. Quick "tk" with no air—just tongue against teeth. Think of tapping a stick on the rim.', steps: ['Tongue tip behind front teeth', 'Very quick double-tap: t-k', 'Keep it DRY with no breath', 'Softer than a full snare', 'Perfect for quiet grooves'], youtubeUrl: 'https://www.youtube.com/watch?v=v5lqCrHQrxQ', youtubeTitle: 'Beatbox Percussion Sounds' },
+            // === ADVANCED SOUNDS (Organic Cymbals) ===
+            ride: { id: 'ride', phonetic: '{ ding }', name: 'Ride Cymbal', difficulty: 'advanced', order: 9, instruction: 'Sustained metallic "ding" with a washy tail. Like saying "ding" but as a breathy whisper.', steps: ['Start with a soft "d" with your tongue', 'Flow into a nasal "ing" sound', 'Let air escape through slightly parted lips', 'The sound should "wash" and sustain', 'Great for jazz and slower grooves'], youtubeUrl: 'https://www.youtube.com/watch?v=v5lqCrHQrxQ', youtubeTitle: 'Beatbox Cymbal Sounds' },
+            crash: { id: 'crash', phonetic: '{ PSH! }', name: 'Crash Cymbal', difficulty: 'advanced', order: 10, instruction: 'Explosive "PSHH!" with lots of air. Like a breathy sneeze. Opens big and decays slowly.', steps: ['Start with lips together', 'Explode with "PSH" sound', 'Let lots of air escape', 'Should have a long, washy tail', 'Use for big accents and endings'], youtubeUrl: 'https://www.youtube.com/watch?v=v5lqCrHQrxQ', youtubeTitle: 'Beatbox Cymbal Sounds' }
         };
 
         const comboData = {
@@ -1743,6 +1746,115 @@
                 pingGain.connect(audioContext.destination);
                 ping.start(now);
                 ping.stop(now + 0.06);
+            }
+
+            // === RIMSHOT - Sharp, cutting crack ===
+            else if (inst === 'rimshot') {
+                // High-frequency crack (the "rim" part)
+                const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.08, audioContext.sampleRate);
+                const noiseData = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < noiseBuffer.length; i++) {
+                    noiseData[i] = Math.random() * 2 - 1;
+                }
+                const noise = audioContext.createBufferSource();
+                noise.buffer = noiseBuffer;
+
+                const hp = audioContext.createBiquadFilter();
+                hp.type = 'highpass';
+                hp.frequency.value = 4000;
+
+                const noiseGain = audioContext.createGain();
+                noiseGain.gain.setValueAtTime(0.6, now);
+                noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
+
+                noise.connect(hp);
+                hp.connect(noiseGain);
+                noiseGain.connect(audioContext.destination);
+                noise.start(now);
+                noise.stop(now + 0.08);
+
+                // Snare body underneath
+                const osc = audioContext.createOscillator();
+                const oscGain = audioContext.createGain();
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(180, now + 0.03);
+                oscGain.gain.setValueAtTime(0.5, now);
+                oscGain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                osc.connect(oscGain);
+                oscGain.connect(audioContext.destination);
+                osc.start(now);
+                osc.stop(now + 0.06);
+            }
+
+            // === CRASH CYMBAL - Explosive wash ===
+            else if (inst === 'crash') {
+                const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 1.2, audioContext.sampleRate);
+                const noiseData = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < noiseBuffer.length; i++) {
+                    noiseData[i] = Math.random() * 2 - 1;
+                }
+                const noise = audioContext.createBufferSource();
+                noise.buffer = noiseBuffer;
+
+                // Bright, washy character
+                const hp = audioContext.createBiquadFilter();
+                hp.type = 'highpass';
+                hp.frequency.value = 4000;
+
+                const bp = audioContext.createBiquadFilter();
+                bp.type = 'bandpass';
+                bp.frequency.value = 8000;
+                bp.Q.value = 0.3;
+
+                const gain = audioContext.createGain();
+                gain.gain.setValueAtTime(0.5, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
+
+                noise.connect(hp);
+                hp.connect(bp);
+                bp.connect(gain);
+                gain.connect(audioContext.destination);
+                noise.start(now);
+                noise.stop(now + 1.2);
+            }
+
+            // === CROSS STICK - Dry, woody click ===
+            else if (inst === 'crossstick') {
+                // Very short, dry click
+                const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.02, audioContext.sampleRate);
+                const noiseData = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < noiseBuffer.length; i++) {
+                    noiseData[i] = Math.random() * 2 - 1;
+                }
+                const noise = audioContext.createBufferSource();
+                noise.buffer = noiseBuffer;
+
+                // Bandpass for woody character (around 1-3kHz)
+                const bp = audioContext.createBiquadFilter();
+                bp.type = 'bandpass';
+                bp.frequency.value = 2000;
+                bp.Q.value = 2;
+
+                const gain = audioContext.createGain();
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.015);
+
+                noise.connect(bp);
+                bp.connect(gain);
+                gain.connect(audioContext.destination);
+                noise.start(now);
+                noise.stop(now + 0.02);
+
+                // Woody "thock" tone
+                const osc = audioContext.createOscillator();
+                const oscGain = audioContext.createGain();
+                osc.frequency.value = 400;
+                oscGain.gain.setValueAtTime(0.2, now);
+                oscGain.gain.exponentialRampToValueAtTime(0.01, now + 0.01);
+                osc.connect(oscGain);
+                oscGain.connect(audioContext.destination);
+                osc.start(now);
+                osc.stop(now + 0.015);
             }
 
             // === FALLBACK for any other sound ===
