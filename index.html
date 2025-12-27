@@ -1502,16 +1502,16 @@
         const tempos = { drill: 60, combo: 60, triplet: 50, seq: 90 };
 
         const soundData = {
-            // === BEGINNER SOUNDS (Master these first!) ===
+            // === BEGINNER SOUNDS (Master these first - organic drum kit!) ===
             kick: { id: 'kick', phonetic: '{ B }', name: 'Kick Drum', difficulty: 'beginner', order: 1, instruction: 'The foundation of every beat. Say "Buh" but remove the vowel—just a punchy "B" burst from your lips.', steps: ['Close lips tightly together', 'Build air pressure behind your lips', 'Release in one explosive burst', 'Lips should vibrate slightly (like a small explosion)', 'Practice: B...B...B...B (one per second)'], youtubeUrl: 'https://www.youtube.com/watch?v=GNXYI10Po6I', youtubeTitle: 'TylaDubya - Kick Drum Tutorial (145K views)' },
             hihat: { id: 'hihat', phonetic: '{ t }', name: 'Closed Hi-Hat', difficulty: 'beginner', order: 2, instruction: 'Quick, crisp "T" sound. Say "Tuh" and remove the vowel—just the consonant click.', steps: ['Place tongue tip behind upper front teeth', 'Build slight pressure', 'Quick, sharp "t" release', 'Keep it SHORT and crisp (not "tss")', 'Practice: t...t...t...t (quick and dry)'], youtubeUrl: 'https://www.youtube.com/watch?v=v5lqCrHQrxQ', youtubeTitle: 'TylaDubya - Basics Part 1 (313K views)' },
-            snare: { id: 'snare', phonetic: '{ K }', name: 'K-Snare (Outward)', difficulty: 'beginner', order: 3, instruction: 'Sharp crack from the back of your throat. Say "Kuh" and remove the vowel—just the "K" click.', steps: ['Back of tongue against soft palate', 'Build pressure behind the seal', 'Release sharply with a loud click', 'Should sound like a crack, not breathy', 'Practice: K...K...K...K (loud and sharp)'], youtubeUrl: 'https://www.youtube.com/watch?v=Yy7dVHlXoOY', youtubeTitle: '80Fitz - Outward K Snare Tutorial' },
-            openhat: { id: 'openhat', phonetic: '{ ts }', name: 'Open Hi-Hat', difficulty: 'beginner', order: 4, instruction: 'Start with closed hi-hat { t }, then extend into a "sss" sound. Think "TSS" like a cymbal sustain.', steps: ['Start with { t } tongue position', 'Immediately extend into sustained "sss"', 'Control the duration (short = tss, long = tsssss)', 'Add this after mastering closed hi-hat'], youtubeUrl: 'https://www.youtube.com/watch?v=v5lqCrHQrxQ', youtubeTitle: 'TylaDubya - Basics Part 1 (313K views)' },
-            // === INTERMEDIATE SOUNDS (After you can do B-t-K patterns) ===
-            pfsnare: { id: 'pfsnare', phonetic: '{ Pf }', name: 'PF-Snare', difficulty: 'intermediate', order: 5, instruction: 'Heavy, punchy snare. Say "Poof" but remove the "oo"—P flows directly into F with no gap.', steps: ['Press lips together for "P"', 'Build up air pressure', 'Release P and immediately transition to F', 'Upper teeth touch lower lip for the F', 'Should feel like one explosive sound: "Pf!"'], youtubeUrl: 'https://www.youtube.com/watch?v=8lmYtzfN0q8', youtubeTitle: 'TylaDubya - PF Snare Tutorial' },
-            inwardk: { id: 'inwardk', phonetic: '{ ^K }', name: 'Inward K-Snare', difficulty: 'intermediate', order: 6, instruction: 'Game-changer! Allows breathing WHILE beatboxing. Make a K sound while INHALING.', steps: ['Tongue in same position as outward K', 'Seal tongue sides against palate', 'Try to inhale sharply', 'The suction creates the snap', 'This lets you breathe during long patterns!'], youtubeUrl: 'https://www.youtube.com/watch?v=kVm5kuZ7e2w', youtubeTitle: 'SkilleR - Inward K Snare/Rimshot Tutorial' },
-            // === ADVANCED SOUNDS ===
-            kick808: { id: 'kick808', phonetic: '{ U }', name: '808 Kick / Throat Bass', difficulty: 'advanced', order: 7, instruction: 'Deep sub-bass from your throat. Close your epiglottis (like holding your breath) and hum.', steps: ['Close your epiglottis (hold breath feeling)', 'Keep it closed', 'Try to vocalize/hum while its shut', 'You\'ll feel vibration in your throat', 'Works best with a microphone on your neck'], youtubeUrl: 'https://www.youtube.com/watch?v=61P_Jp1rGyI', youtubeTitle: 'Throat Bass / 808 Tutorial' }
+            snare: { id: 'snare', phonetic: '{ K }', name: 'K-Snare', difficulty: 'beginner', order: 3, instruction: 'Sharp crack from the back of your throat. Say "Kuh" and remove the vowel—just the "K" click.', steps: ['Back of tongue against soft palate', 'Build pressure behind the seal', 'Release sharply with a loud click', 'Should sound like a crack, not breathy', 'Practice: K...K...K...K (loud and sharp)'], youtubeUrl: 'https://www.youtube.com/watch?v=Yy7dVHlXoOY', youtubeTitle: '80Fitz - Outward K Snare Tutorial' },
+            openhat: { id: 'openhat', phonetic: '{ ts }', name: 'Open Hi-Hat', difficulty: 'beginner', order: 4, instruction: 'Extend the closed hi-hat { t } into a sustained "sss" sound. Think "TSS" like a real cymbal sustain.', steps: ['Start with { t } tongue position', 'Immediately flow into sustained "sss"', 'Control the duration (short = tss, long = tsssss)', 'Master this after the closed hi-hat'], youtubeUrl: 'https://www.youtube.com/watch?v=v5lqCrHQrxQ', youtubeTitle: 'TylaDubya - Basics Part 1 (313K views)' },
+            // === INTERMEDIATE SOUNDS ===
+            pfsnare: { id: 'pfsnare', phonetic: '{ Pf }', name: 'PF-Snare', difficulty: 'intermediate', order: 5, instruction: 'Heavy, punchy snare. Say "Poof" but remove the "oo"—P flows directly into F with no gap.', steps: ['Press lips together for "P"', 'Build up air pressure', 'Release P and immediately transition to F', 'Upper teeth touch lower lip for the F', 'Should feel like one explosive sound: "Pf!"'], youtubeUrl: 'https://www.youtube.com/watch?v=8lmYtzfN0q8', youtubeTitle: 'TylaDubya - PF Snare Tutorial (334K views)' },
+            inwardk: { id: 'inwardk', phonetic: '{ ^K }', name: 'Inward K-Snare', difficulty: 'intermediate', order: 6, instruction: 'Game-changer! Make a K sound while INHALING. This lets you breathe while beatboxing!', steps: ['Tongue in same position as outward K', 'Seal tongue sides against palate', 'Try to inhale sharply', 'The suction creates the snap', 'This lets you breathe during long patterns!'], youtubeUrl: 'https://www.youtube.com/watch?v=kVm5kuZ7e2w', youtubeTitle: 'SkilleR - Inward K Snare Tutorial (209K views)' },
+            // === ADVANCED SOUNDS (Organic) ===
+            ride: { id: 'ride', phonetic: '{ ding }', name: 'Ride Cymbal', difficulty: 'advanced', order: 7, instruction: 'Sustained metallic "ding" with a washy tail. Like saying "ding" but as a breathy whisper.', steps: ['Start with a soft "d" with your tongue', 'Flow into a nasal "ing" sound', 'Let air escape through slightly parted lips', 'The sound should "wash" and sustain', 'Great for jazz and slower grooves'], youtubeUrl: 'https://www.youtube.com/watch?v=v5lqCrHQrxQ', youtubeTitle: 'Beatbox Cymbal Sounds' }
         };
 
         const comboData = {
@@ -1565,53 +1565,189 @@
             if (type === 'triplet' && tripletState.isRunning) { stopTripletDrill(); startTripletDrill(); }
         }
 
-        // ===== AUDIO =====
-        function initAudio() { if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)(); }
+        // ===== AUDIO (Optimized for iPhone speakers - organic drum kit sounds) =====
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
 
         function playSound(inst) {
             initAudio();
             const now = audioContext.currentTime;
+
+            // === KICK DRUM (B) - Optimized for phone speakers ===
+            // Uses mid-frequency punch (200-400Hz) instead of sub-bass that phones can't reproduce
             if (inst === 'kick') {
-                const osc = audioContext.createOscillator(), gain = audioContext.createGain();
-                osc.connect(gain); gain.connect(audioContext.destination);
-                osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(0.01, now + 0.5);
-                gain.gain.setValueAtTime(1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-                osc.start(now); osc.stop(now + 0.5);
-            } else if (inst === 'snare' || inst === 'pfsnare') {
-                const noise = audioContext.createBufferSource(), buf = audioContext.createBuffer(1, audioContext.sampleRate * 0.2, audioContext.sampleRate);
-                const data = buf.getChannelData(0); for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
-                noise.buffer = buf;
-                const filter = audioContext.createBiquadFilter(); filter.type = 'highpass'; filter.frequency.value = 1000;
+                const osc = audioContext.createOscillator();
                 const gain = audioContext.createGain();
-                noise.connect(filter); filter.connect(gain); gain.connect(audioContext.destination);
-                gain.gain.setValueAtTime(0.4, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-                const osc = audioContext.createOscillator(), oscGain = audioContext.createGain();
-                osc.connect(oscGain); oscGain.connect(audioContext.destination);
-                osc.frequency.setValueAtTime(200, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
-                oscGain.gain.setValueAtTime(0.3, now); oscGain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-                osc.start(now); osc.stop(now + 0.2); noise.start(now); noise.stop(now + 0.2);
-            } else if (inst === 'hihat') {
-                const noise = audioContext.createBufferSource(), buf = audioContext.createBuffer(1, audioContext.sampleRate * 0.05, audioContext.sampleRate);
-                const data = buf.getChannelData(0); for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
-                noise.buffer = buf;
-                const hp = audioContext.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 8000;
-                const bp = audioContext.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 12000; bp.Q.value = 2;
+
+                // Start at 200Hz (audible on phones) and sweep down
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.exponentialRampToValueAtTime(60, now + 0.1);
+
+                // Punchy envelope - quick attack, medium decay
+                gain.gain.setValueAtTime(0.8, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                osc.start(now);
+                osc.stop(now + 0.15);
+
+                // Add a click transient for definition on small speakers
+                const click = audioContext.createOscillator();
+                const clickGain = audioContext.createGain();
+                click.frequency.setValueAtTime(400, now);
+                click.frequency.exponentialRampToValueAtTime(100, now + 0.02);
+                clickGain.gain.setValueAtTime(0.4, now);
+                clickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.02);
+                click.connect(clickGain);
+                clickGain.connect(audioContext.destination);
+                click.start(now);
+                click.stop(now + 0.03);
+            }
+
+            // === SNARE DRUM (K, Pf) - Crisp crack with body ===
+            else if (inst === 'snare' || inst === 'pfsnare' || inst === 'inwardk') {
+                // White noise for the "sizzle"
+                const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.15, audioContext.sampleRate);
+                const noiseData = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < noiseBuffer.length; i++) {
+                    noiseData[i] = Math.random() * 2 - 1;
+                }
+                const noise = audioContext.createBufferSource();
+                noise.buffer = noiseBuffer;
+
+                // Bandpass filter for snare character (2-5kHz is the "crack")
+                const filter = audioContext.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.value = 3000;
+                filter.Q.value = 0.5;
+
+                const noiseGain = audioContext.createGain();
+                noiseGain.gain.setValueAtTime(0.5, now);
+                noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+
+                noise.connect(filter);
+                filter.connect(noiseGain);
+                noiseGain.connect(audioContext.destination);
+                noise.start(now);
+                noise.stop(now + 0.15);
+
+                // Tonal body (the "thwack")
+                const osc = audioContext.createOscillator();
+                const oscGain = audioContext.createGain();
+                osc.frequency.setValueAtTime(250, now);
+                osc.frequency.exponentialRampToValueAtTime(150, now + 0.05);
+                oscGain.gain.setValueAtTime(0.4, now);
+                oscGain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                osc.connect(oscGain);
+                oscGain.connect(audioContext.destination);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            }
+
+            // === CLOSED HI-HAT (t) - Tight, crisp tick ===
+            else if (inst === 'hihat') {
+                const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.04, audioContext.sampleRate);
+                const noiseData = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < noiseBuffer.length; i++) {
+                    noiseData[i] = Math.random() * 2 - 1;
+                }
+                const noise = audioContext.createBufferSource();
+                noise.buffer = noiseBuffer;
+
+                // High-pass to keep it bright
+                const hp = audioContext.createBiquadFilter();
+                hp.type = 'highpass';
+                hp.frequency.value = 7000;
+
+                // Bandpass for that metallic character
+                const bp = audioContext.createBiquadFilter();
+                bp.type = 'bandpass';
+                bp.frequency.value = 10000;
+                bp.Q.value = 1;
+
                 const gain = audioContext.createGain();
-                noise.connect(hp); hp.connect(bp); bp.connect(gain); gain.connect(audioContext.destination);
-                gain.gain.setValueAtTime(0.5, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-                noise.start(now); noise.stop(now + 0.05);
-            } else if (inst === 'openhat') {
-                const noise = audioContext.createBufferSource(), buf = audioContext.createBuffer(1, audioContext.sampleRate * 0.5, audioContext.sampleRate);
-                const data = buf.getChannelData(0); for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
-                noise.buffer = buf;
-                const hp = audioContext.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 5000;
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
+
+                noise.connect(hp);
+                hp.connect(bp);
+                bp.connect(gain);
+                gain.connect(audioContext.destination);
+                noise.start(now);
+                noise.stop(now + 0.04);
+            }
+
+            // === OPEN HI-HAT (ts) - Sustained shimmer ===
+            else if (inst === 'openhat') {
+                const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.4, audioContext.sampleRate);
+                const noiseData = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < noiseBuffer.length; i++) {
+                    noiseData[i] = Math.random() * 2 - 1;
+                }
+                const noise = audioContext.createBufferSource();
+                noise.buffer = noiseBuffer;
+
+                const hp = audioContext.createBiquadFilter();
+                hp.type = 'highpass';
+                hp.frequency.value = 6000;
+
                 const gain = audioContext.createGain();
-                noise.connect(hp); hp.connect(gain); gain.connect(audioContext.destination);
-                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.35, now + 0.01);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-                noise.start(now); noise.stop(now + 0.5);
-            } else if (inst === 'inwardk' || inst === 'kick808') {
-                playSound('snare'); // fallback
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.35, now + 0.01);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+
+                noise.connect(hp);
+                hp.connect(gain);
+                gain.connect(audioContext.destination);
+                noise.start(now);
+                noise.stop(now + 0.4);
+            }
+
+            // === RIDE CYMBAL - Long, washy sustain ===
+            else if (inst === 'ride') {
+                const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.8, audioContext.sampleRate);
+                const noiseData = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < noiseBuffer.length; i++) {
+                    noiseData[i] = Math.random() * 2 - 1;
+                }
+                const noise = audioContext.createBufferSource();
+                noise.buffer = noiseBuffer;
+
+                // Bandpass for metallic "ping"
+                const bp = audioContext.createBiquadFilter();
+                bp.type = 'bandpass';
+                bp.frequency.value = 5000;
+                bp.Q.value = 0.8;
+
+                const gain = audioContext.createGain();
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.7);
+
+                noise.connect(bp);
+                bp.connect(gain);
+                gain.connect(audioContext.destination);
+                noise.start(now);
+                noise.stop(now + 0.8);
+
+                // Add a "ping" attack
+                const ping = audioContext.createOscillator();
+                const pingGain = audioContext.createGain();
+                ping.frequency.value = 800;
+                pingGain.gain.setValueAtTime(0.15, now);
+                pingGain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                ping.connect(pingGain);
+                pingGain.connect(audioContext.destination);
+                ping.start(now);
+                ping.stop(now + 0.06);
+            }
+
+            // === FALLBACK for any other sound ===
+            else if (inst === 'kick808') {
+                playSound('kick'); // 808 falls back to organic kick
             }
         }
 
