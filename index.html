@@ -1180,7 +1180,7 @@
 <body>
     <div class="header">
         <div>
-                        <div class="logo">YEN's <span>Beatbox</span></div>
+            <div class="logo">YEN's <span>Beatbox</span></div>
             <div class="subtitle">Learn to Beatbox</div>
         </div>
         <div style="display: flex; align-items: center;">
@@ -1464,10 +1464,9 @@
             <!-- AI GURU SECTION -->
             <div class="content-section" id="guruSection">
                 <div class="guru-header">
-                    <div class="guru-title">Beatbox Guru</div>
-                    <div class="guru-desc">AI instructor powered by Gemini</div>
+                    <div class="guru-title">YEN's Beatbox Guru</div>
+                    <div class="guru-desc">AI instructor powered by Gemini — ask anything about beatboxing!</div>
                 </div>
-                <input type="password" class="api-key-input" id="geminiApiKey" placeholder="Paste Gemini API key" />
                 <div class="guru-suggestions">
                     <button class="guru-suggestion" onclick="sendGuruMessage('How do I do a lip roll?')">Lip
                         roll?</button>
@@ -1477,6 +1476,8 @@
                         breathing?</button>
                     <button class="guru-suggestion" onclick="sendGuruMessage('5-minute practice routine')">5-min
                         routine</button>
+                    <button class="guru-suggestion" onclick="sendGuruMessage('How do I get faster at hi-hats?')">Fast
+                        hi-hats?</button>
                 </div>
                 <div class="chat-container">
                     <div class="chat-messages" id="chatMessages">
@@ -1624,14 +1625,6 @@
             buildSequencer();
             setupEventListeners();
             loadPattern(patternLibrary[0]);
-            loadApiKey(); // Load saved API key from localStorage
-        }
-
-        function loadApiKey() {
-            const savedKey = localStorage.getItem('beatbox_gemini_api_key');
-            if (savedKey) {
-                document.getElementById('geminiApiKey').value = savedKey;
-            }
         }
 
         function buildSidebar() {
@@ -2067,41 +2060,30 @@
             const input = document.getElementById('chatInput');
             const message = msg || input.value.trim();
             if (!message) return;
-            const apiKeyInput = document.getElementById('geminiApiKey');
-            let apiKey = apiKeyInput.value.trim();
-
-            // Try to load from localStorage if not entered
-            if (!apiKey) {
-                apiKey = localStorage.getItem('beatbox_gemini_api_key') || '';
-                if (apiKey) apiKeyInput.value = apiKey;
-            }
-
-            if (!apiKey) {
-                showStatus('Enter Gemini API key first', '');
-                return;
-            }
-
-            // Save API key to localStorage for persistence
-            localStorage.setItem('beatbox_gemini_api_key', apiKey);
 
             input.value = '';
             const chat = document.getElementById('chatMessages');
             chat.innerHTML += `<div class="chat-message user">${message}</div>`;
             chat.innerHTML += `<div class="chat-message assistant" id="typing">Thinking...</div>`;
             chat.scrollTop = chat.scrollHeight;
+
             try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+                // Call our secure serverless function (API key is server-side)
+                const res = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: `You are an expert beatbox instructor. Be concise and practical. User asks: ${message}` }] }]
-                    })
+                    body: JSON.stringify({ message })
                 });
+
                 const data = await res.json();
-                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, no response.';
-                document.getElementById('typing').textContent = reply;
+
+                if (data.error) {
+                    document.getElementById('typing').textContent = 'Error: ' + data.error;
+                } else {
+                    document.getElementById('typing').textContent = data.reply;
+                }
             } catch (e) {
-                document.getElementById('typing').textContent = 'Error: ' + e.message;
+                document.getElementById('typing').textContent = 'Error: Could not connect to AI. Please try again.';
             }
             chat.scrollTop = chat.scrollHeight;
         }
