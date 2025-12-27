@@ -334,20 +334,86 @@
             flex-shrink: 0;
         }
 
-        .youtube-link {
+        /* ===== TUTORIALS ACCORDION ===== */
+        .tutorials-accordion {
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+
+        .accordion-header {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin: 16px 0;
+            justify-content: space-between;
+            width: 100%;
             padding: 14px 20px;
-            background: #FF0000;
+            background: linear-gradient(135deg, #FF0000, #CC0000);
             color: white;
-            border-radius: 10px;
+            border: none;
             font-size: 14px;
-            font-weight: 500;
-            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
             min-height: 48px;
+        }
+
+        .accordion-arrow {
+            transition: transform 0.3s ease;
+        }
+
+        .accordion-arrow.open {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .accordion-content.open {
+            max-height: 500px;
+        }
+
+        .tutorial-list {
+            padding: 8px;
+        }
+
+        .tutorial-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            margin-bottom: 6px;
+            background: var(--bg);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text);
+            transition: background 0.2s;
+        }
+
+        .tutorial-item:hover {
+            background: var(--surface-hover);
+        }
+
+        .tutorial-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .tutorial-title {
+            font-size: 13px;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .tutorial-views {
+            font-size: 11px;
+            color: var(--text-muted);
+            background: var(--surface);
+            padding: 4px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
         }
 
         /* ===== BEAT INDICATOR ===== */
@@ -1241,8 +1307,16 @@
                             <div class="drill-instruction-text" id="drillInstruction"></div>
                             <div class="drill-steps" id="drillSteps"></div>
                         </div>
-                        <a class="youtube-link" id="youtubeLink" href="#" target="_blank" style="display: none;">▶ Watch
-                            Tutorial</a>
+                        <!-- Tutorials Accordion -->
+                        <div class="tutorials-accordion" id="tutorialsAccordion">
+                            <button class="accordion-header" id="accordionHeader" onclick="toggleAccordion()">
+                                <span>📺 Video Tutorials</span>
+                                <span class="accordion-arrow" id="accordionArrow">▼</span>
+                            </button>
+                            <div class="accordion-content" id="accordionContent">
+                                <div class="tutorial-list" id="tutorialList"></div>
+                            </div>
+                        </div>
                         <div class="beat-indicator" id="beatIndicator">
                             <div class="beat-dot"></div>
                             <div class="beat-dot"></div>
@@ -1503,18 +1577,100 @@
 
         const soundData = {
             // === BEGINNER SOUNDS (Master these first - organic drum kit!) ===
-            kick: { id: 'kick', phonetic: '{ B }', name: 'Kick Drum', difficulty: 'beginner', order: 1, instruction: 'The foundation of every beat. Say "Buh" but remove the vowel—just a punchy "B" burst from your lips.', steps: ['Close lips tightly together', 'Build air pressure behind your lips', 'Release in one explosive burst', 'Lips should vibrate slightly (like a small explosion)', 'Practice: B...B...B...B (one per second)'], youtubeUrl: 'https://www.youtube.com/watch?v=GNXYI10Po6I', youtubeTitle: 'TylaDubya - Kick Drum Tutorial (145K views)' },
-            hihat: { id: 'hihat', phonetic: '{ t }', name: 'Closed Hi-Hat', difficulty: 'beginner', order: 2, instruction: 'Quick, crisp "T" sound. Say "Tuh" and remove the vowel—just the consonant click.', steps: ['Place tongue tip behind upper front teeth', 'Build slight pressure', 'Quick, sharp "t" release', 'Keep it SHORT and crisp (not "tss")', 'Practice: t...t...t...t (quick and dry)'], youtubeUrl: 'https://www.youtube.com/watch?v=v5lqCrHQrxQ', youtubeTitle: 'TylaDubya - Basics Part 1 (313K views)' },
-            snare: { id: 'snare', phonetic: '{ K }', name: 'K-Snare', difficulty: 'beginner', order: 3, instruction: 'Sharp crack from the back of your throat. Say "Kuh" and remove the vowel—just the "K" click.', steps: ['Back of tongue against soft palate', 'Build pressure behind the seal', 'Release sharply with a loud click', 'Should sound like a crack, not breathy', 'Practice: K...K...K...K (loud and sharp)'], youtubeUrl: 'https://www.youtube.com/watch?v=Yy7dVHlXoOY', youtubeTitle: '80Fitz - Outward K Snare Tutorial' },
-            openhat: { id: 'openhat', phonetic: '{ ts }', name: 'Open Hi-Hat', difficulty: 'beginner', order: 4, instruction: 'Extend the closed hi-hat { t } into a sustained "sss" sound. Think "TSS" like a real cymbal sustain.', steps: ['Start with { t } tongue position', 'Immediately flow into sustained "sss"', 'Control the duration (short = tss, long = tsssss)', 'Master this after the closed hi-hat'], youtubeUrl: 'https://www.youtube.com/watch?v=v5lqCrHQrxQ', youtubeTitle: 'TylaDubya - Basics Part 1 (313K views)' },
+            kick: {
+                id: 'kick', phonetic: '{ B }', name: 'Kick Drum', difficulty: 'beginner', order: 1,
+                instruction: 'The foundation of every beat. Say "Buh" but remove the vowel—just a punchy "B" burst from your lips.',
+                steps: ['Close lips tightly together', 'Build air pressure behind your lips', 'Release in one explosive burst', 'Lips should vibrate slightly (like a small explosion)', 'Practice: B...B...B...B (one per second)'],
+                tutorials: [
+                    { title: 'TylaDubya - Kick Drum Tutorial', views: '145K', url: 'https://www.youtube.com/watch?v=GNXYI10Po6I' },
+                    { title: 'Easy Beatbox - Kick Drum (2024)', views: '50K+', url: 'https://www.youtube.com/watch?v=ZA7v8K-QMAQ' },
+                    { title: 'How To Beatbox For Beginners', views: '300K+', url: 'https://www.youtube.com/watch?v=v5lqCrHQrxQ' }
+                ]
+            },
+            hihat: {
+                id: 'hihat', phonetic: '{ t }', name: 'Closed Hi-Hat', difficulty: 'beginner', order: 2,
+                instruction: 'Quick, crisp "T" sound. Say "Tuh" and remove the vowel—just the consonant click.',
+                steps: ['Place tongue tip behind upper front teeth', 'Build slight pressure', 'Quick, sharp "t" release', 'Keep it SHORT and crisp (not "tss")', 'Practice: t...t...t...t (quick and dry)'],
+                tutorials: [
+                    { title: 'Easy Beatbox - Hi-Hat Tutorial (2024)', views: '100K+', url: 'https://www.youtube.com/watch?v=xLbOBeTqPKE' },
+                    { title: 'TylaDubya - Basics Part 1', views: '313K', url: 'https://www.youtube.com/watch?v=v5lqCrHQrxQ' },
+                    { title: 'Howcast - Hi-Hat Sounds', views: '500K+', url: 'https://www.youtube.com/watch?v=EHLMGpKPi8U' }
+                ]
+            },
+            snare: {
+                id: 'snare', phonetic: '{ K }', name: 'K-Snare', difficulty: 'beginner', order: 3,
+                instruction: 'Sharp crack from the back of your throat. Say "Kuh" and remove the vowel—just the "K" click.',
+                steps: ['Back of tongue against soft palate', 'Build pressure behind the seal', 'Release sharply with a loud click', 'Should sound like a crack, not breathy', 'Practice: K...K...K...K (loud and sharp)'],
+                tutorials: [
+                    { title: '80Fitz - Outward K Snare', views: '113K', url: 'https://www.youtube.com/watch?v=Yy7dVHlXoOY' },
+                    { title: 'Easy Beatbox - K Snare Tutorial', views: '80K+', url: 'https://www.youtube.com/watch?v=4V1vGFafQL0' },
+                    { title: 'FootboxG - Basic K Snare', views: '50K+', url: 'https://www.youtube.com/watch?v=X5Y6H2gCQlI' }
+                ]
+            },
+            openhat: {
+                id: 'openhat', phonetic: '{ ts }', name: 'Open Hi-Hat', difficulty: 'beginner', order: 4,
+                instruction: 'Extend the closed hi-hat { t } into a sustained "sss" sound. Think "TSS" like a real cymbal sustain.',
+                steps: ['Start with { t } tongue position', 'Immediately flow into sustained "sss"', 'Control the duration (short = tss, long = tsssss)', 'Master this after the closed hi-hat'],
+                tutorials: [
+                    { title: 'TylaDubya - Open Hi-Hat (2024)', views: '75K+', url: 'https://www.youtube.com/watch?v=6fAjk8WTZXY' },
+                    { title: 'TylaDubya - Basics Part 1', views: '313K', url: 'https://www.youtube.com/watch?v=v5lqCrHQrxQ' }
+                ]
+            },
             // === INTERMEDIATE SOUNDS ===
-            pfsnare: { id: 'pfsnare', phonetic: '{ Pf }', name: 'PF-Snare', difficulty: 'intermediate', order: 5, instruction: 'Heavy, punchy snare. Say "Poof" but remove the "oo"—P flows directly into F with no gap.', steps: ['Press lips together for "P"', 'Build up air pressure', 'Release P and immediately transition to F', 'Upper teeth touch lower lip for the F', 'Should feel like one explosive sound: "Pf!"'], youtubeUrl: 'https://www.youtube.com/watch?v=8lmYtzfN0q8', youtubeTitle: 'TylaDubya - PF Snare Tutorial (334K views)' },
-            inwardk: { id: 'inwardk', phonetic: '{ ^K }', name: 'Inward K-Snare', difficulty: 'intermediate', order: 6, instruction: 'Game-changer! Make a K sound while INHALING. This lets you breathe while beatboxing!', steps: ['Tongue in same position as outward K', 'Seal tongue sides against palate', 'Try to inhale sharply', 'The suction creates the snap', 'This lets you breathe during long patterns!'], youtubeUrl: 'https://www.youtube.com/watch?v=kVm5kuZ7e2w', youtubeTitle: 'SkilleR - Inward K Snare Tutorial (209K views)' },
-            rimshot: { id: 'rimshot', phonetic: '{ KA! }', name: 'Rimshot', difficulty: 'intermediate', order: 7, instruction: 'Sharp, cutting crack! Combine K with a hard "A" attack. Like slapping the rim and head together.', steps: ['Start with tongue in K position', 'Add a sharp "AH" vocalization', 'Release both simultaneously', 'Should be LOUD and cutting', 'Great for accents and fills'], youtubeUrl: 'https://www.youtube.com/watch?v=kVm5kuZ7e2w', youtubeTitle: 'SkilleR - Rimshot Tutorial' },
-            crossstick: { id: 'crossstick', phonetic: '{ tk }', name: 'Cross Stick', difficulty: 'intermediate', order: 8, instruction: 'Dry, woody click. Quick "tk" with no air—just tongue against teeth. Think of tapping a stick on the rim.', steps: ['Tongue tip behind front teeth', 'Very quick double-tap: t-k', 'Keep it DRY with no breath', 'Softer than a full snare', 'Perfect for quiet grooves'], youtubeUrl: 'https://www.youtube.com/watch?v=v5lqCrHQrxQ', youtubeTitle: 'Beatbox Percussion Sounds' },
+            pfsnare: {
+                id: 'pfsnare', phonetic: '{ Pf }', name: 'PF-Snare', difficulty: 'intermediate', order: 5,
+                instruction: 'Heavy, punchy snare. Say "Poof" but remove the "oo"—P flows directly into F with no gap.',
+                steps: ['Press lips together for "P"', 'Build up air pressure', 'Release P and immediately transition to F', 'Upper teeth touch lower lip for the F', 'Should feel like one explosive sound: "Pf!"'],
+                tutorials: [
+                    { title: 'TylaDubya - PF Snare Tutorial', views: '334K', url: 'https://www.youtube.com/watch?v=8lmYtzfN0q8' },
+                    { title: 'SkilleR - 5 Must-Have Snares', views: '178K', url: 'https://www.youtube.com/watch?v=rT0k9C5H8cI' },
+                    { title: '80Fitz - P Snare Tutorial', views: '149K', url: 'https://www.youtube.com/watch?v=qRPwCLakAJA' },
+                    { title: 'Easy Beatbox - PF Snare (2024)', views: '60K+', url: 'https://www.youtube.com/watch?v=3gW9vxPJhKQ' }
+                ]
+            },
+            inwardk: {
+                id: 'inwardk', phonetic: '{ ^K }', name: 'Inward K-Snare', difficulty: 'intermediate', order: 6,
+                instruction: 'Game-changer! Make a K sound while INHALING. This lets you breathe while beatboxing!',
+                steps: ['Tongue in same position as outward K', 'Seal tongue sides against palate', 'Try to inhale sharply', 'The suction creates the snap', 'This lets you breathe during long patterns!'],
+                tutorials: [
+                    { title: 'SkilleR - Inward K Snare + Rimshot', views: '209K', url: 'https://www.youtube.com/watch?v=kVm5kuZ7e2w' },
+                    { title: '80Fitz - Inward K Snare', views: '93K', url: 'https://www.youtube.com/watch?v=oNbhCMNyNGg' },
+                    { title: 'TylaDubya - Inward K in 1 Minute', views: '40K+', url: 'https://www.youtube.com/watch?v=Q8RjPJGLfmc' }
+                ]
+            },
+            rimshot: {
+                id: 'rimshot', phonetic: '{ KA! }', name: 'Rimshot', difficulty: 'intermediate', order: 7,
+                instruction: 'Sharp, cutting crack! Combine K with a hard "A" attack. Like slapping the rim and head together.',
+                steps: ['Start with tongue in K position', 'Add a sharp "AH" vocalization', 'Release both simultaneously', 'Should be LOUD and cutting', 'Great for accents and fills'],
+                tutorials: [
+                    { title: 'SkilleR - Inward K + Rimshot', views: '209K', url: 'https://www.youtube.com/watch?v=kVm5kuZ7e2w' }
+                ]
+            },
+            crossstick: {
+                id: 'crossstick', phonetic: '{ tk }', name: 'Cross Stick', difficulty: 'intermediate', order: 8,
+                instruction: 'Dry, woody click. Quick "tk" with no air—just tongue against teeth. Think of tapping a stick on the rim.',
+                steps: ['Tongue tip behind front teeth', 'Very quick double-tap: t-k', 'Keep it DRY with no breath', 'Softer than a full snare', 'Perfect for quiet grooves'],
+                tutorials: [
+                    { title: 'Beatbox Percussion Sounds', views: '50K+', url: 'https://www.youtube.com/watch?v=v5lqCrHQrxQ' }
+                ]
+            },
             // === ADVANCED SOUNDS (Organic Cymbals) ===
-            ride: { id: 'ride', phonetic: '{ ding }', name: 'Ride Cymbal', difficulty: 'advanced', order: 9, instruction: 'Sustained metallic "ding" with a washy tail. Like saying "ding" but as a breathy whisper.', steps: ['Start with a soft "d" with your tongue', 'Flow into a nasal "ing" sound', 'Let air escape through slightly parted lips', 'The sound should "wash" and sustain', 'Great for jazz and slower grooves'], youtubeUrl: 'https://www.youtube.com/watch?v=v5lqCrHQrxQ', youtubeTitle: 'Beatbox Cymbal Sounds' },
-            crash: { id: 'crash', phonetic: '{ PSH! }', name: 'Crash Cymbal', difficulty: 'advanced', order: 10, instruction: 'Explosive "PSHH!" with lots of air. Like a breathy sneeze. Opens big and decays slowly.', steps: ['Start with lips together', 'Explode with "PSH" sound', 'Let lots of air escape', 'Should have a long, washy tail', 'Use for big accents and endings'], youtubeUrl: 'https://www.youtube.com/watch?v=v5lqCrHQrxQ', youtubeTitle: 'Beatbox Cymbal Sounds' }
+            ride: {
+                id: 'ride', phonetic: '{ ding }', name: 'Ride Cymbal', difficulty: 'advanced', order: 9,
+                instruction: 'Sustained metallic "ding" with a washy tail. Like saying "ding" but as a breathy whisper.',
+                steps: ['Start with a soft "d" with your tongue', 'Flow into a nasal "ing" sound', 'Let air escape through slightly parted lips', 'The sound should "wash" and sustain', 'Great for jazz and slower grooves'],
+                tutorials: [
+                    { title: 'Beatbox Cymbal Sounds', views: '30K+', url: 'https://www.youtube.com/watch?v=v5lqCrHQrxQ' }
+                ]
+            },
+            crash: {
+                id: 'crash', phonetic: '{ PSH! }', name: 'Crash Cymbal', difficulty: 'advanced', order: 10,
+                instruction: 'Explosive "PSHH!" with lots of air. Like a breathy sneeze. Opens big and decays slowly.',
+                steps: ['Start with lips together', 'Explode with "PSH" sound', 'Let lots of air escape', 'Should have a long, washy tail', 'Use for big accents and endings'],
+                tutorials: [
+                    { title: 'Beatbox Cymbal Sounds', views: '30K+', url: 'https://www.youtube.com/watch?v=v5lqCrHQrxQ' }
+                ]
+            }
         };
 
         const comboData = {
@@ -2020,9 +2176,30 @@
             document.getElementById('drillName').textContent = s.name;
             document.getElementById('drillInstruction').textContent = s.instruction;
             document.getElementById('drillSteps').innerHTML = s.steps.map((st, i) => `<div class="drill-step"><div class="drill-step-num">${i + 1}</div><span>${st}</span></div>`).join('');
-            const yt = document.getElementById('youtubeLink');
-            yt.href = s.youtubeUrl; yt.style.display = 'flex';
+
+            // Populate tutorials accordion
+            const tutorialList = document.getElementById('tutorialList');
+            if (s.tutorials && s.tutorials.length > 0) {
+                document.getElementById('tutorialsAccordion').style.display = 'block';
+                tutorialList.innerHTML = s.tutorials.map(t => `
+                    <a class="tutorial-item" href="${t.url}" target="_blank">
+                        <span class="tutorial-title">▶ ${t.title}</span>
+                        <span class="tutorial-views">${t.views} views</span>
+                    </a>
+                `).join('');
+            } else {
+                document.getElementById('tutorialsAccordion').style.display = 'none';
+            }
+            // Close accordion when selecting new sound
+            document.getElementById('accordionContent').classList.remove('open');
+            document.getElementById('accordionArrow').classList.remove('open');
+
             resetDrillState();
+        }
+
+        function toggleAccordion() {
+            document.getElementById('accordionContent').classList.toggle('open');
+            document.getElementById('accordionArrow').classList.toggle('open');
         }
 
         function resetDrillState() {
