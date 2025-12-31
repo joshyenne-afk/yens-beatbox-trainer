@@ -126,10 +126,10 @@
             border-color: var(--accent);
             box-shadow: 0 0 24px var(--accent-glow);
         }
-        .sound-card-header {
+        .sound-card-top {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
+            align-items: center;
             margin-bottom: 8px;
         }
         .sound-card-phonetic {
@@ -138,7 +138,7 @@
             font-weight: 500;
             color: var(--accent);
         }
-        .sound-card-name { font-size: 16px; font-weight: 600; }
+        .sound-card-name { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
         .sound-card-word { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; }
         .sound-card-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
         .sound-card-link {
@@ -150,19 +150,17 @@
             text-decoration: none;
         }
         .sound-card-status {
-            position: absolute;
-            top: 16px;
-            right: 16px;
+            display: none;
             font-size: 11px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: var(--text-muted);
-            background: var(--bg-elevated);
+            color: var(--accent);
+            background: var(--accent-soft);
             padding: 4px 10px;
             border-radius: 6px;
         }
-        .sound-card.playing .sound-card-status { color: var(--accent); background: var(--accent-soft); }
+        .sound-card.playing .sound-card-status { display: inline-block; }
 
         /* Inline BPM control */
         .inline-bpm {
@@ -232,12 +230,13 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: var(--text-muted);
-            background: var(--bg-elevated);
+            color: var(--accent);
+            background: var(--accent-soft);
             padding: 3px 8px;
             border-radius: 4px;
+            display: none;
         }
-        .tap-card.playing .tap-card-status { color: var(--accent); background: var(--accent-soft); }
+        .tap-card.playing .tap-card-status { display: block; }
 
         /* Full-width card for drill display */
         .drill-display-card {
@@ -301,12 +300,13 @@
             font-size: 10px;
             font-weight: 600;
             text-transform: uppercase;
-            color: var(--text-muted);
-            background: var(--bg-elevated);
+            color: var(--accent);
+            background: var(--accent-soft);
             padding: 3px 8px;
             border-radius: 4px;
+            display: none;
         }
-        .pattern-card.playing .pattern-card-status { color: var(--accent); background: var(--accent-soft); }
+        .pattern-card.playing .pattern-card-status { display: inline-block; }
 
         /* Mini pattern grid */
         .mini-grid {
@@ -607,11 +607,11 @@
     function initSounds() {
         $('soundCards').innerHTML = coreSounds.map(s => `
             <div class="sound-card" data-id="${s.id}">
-                <div class="sound-card-status">READY</div>
-                <div class="sound-card-header">
+                <div class="sound-card-top">
                     <div class="sound-card-phonetic">${s.phonetic}</div>
-                    <div class="sound-card-name">${s.name}</div>
+                    <div class="sound-card-status">PLAYING</div>
                 </div>
+                <div class="sound-card-name">${s.name}</div>
                 <div class="sound-card-word">${s.word}</div>
                 <div class="sound-card-desc">${s.description}</div>
                 <a href="${s.link}" target="_blank" class="sound-card-link" onclick="event.stopPropagation()">▶ Watch Tutorials</a>
@@ -637,7 +637,6 @@
         state.activeType = 'sound';
         state.activeId = id;
         document.querySelector(`.sound-card[data-id="${id}"]`).classList.add('playing');
-        document.querySelector(`.sound-card[data-id="${id}"] .sound-card-status`).textContent = 'PLAYING';
         $('pulseDot').classList.add('active');
         startInterval();
     }
@@ -646,7 +645,7 @@
     function initPhrases() {
         $('phraseGrid').innerHTML = phrases.map(p => `
             <div class="tap-card" data-id="${p.id}">
-                <div class="tap-card-status">READY</div>
+                <div class="tap-card-status">PLAYING</div>
                 <div class="tap-card-pattern">${p.pattern}</div>
                 <div class="tap-card-name">${p.phrase}</div>
             </div>
@@ -691,7 +690,7 @@
     function initCombos() {
         $('comboGrid').innerHTML = combos.map(c => `
             <div class="tap-card" data-id="${c.id}">
-                <div class="tap-card-status">READY</div>
+                <div class="tap-card-status">PLAYING</div>
                 <div class="tap-card-pattern">${c.display[0]} - ${c.display[1]}</div>
                 <div class="tap-card-name">${c.name}</div>
             </div>
@@ -736,7 +735,7 @@
     function initTriplets() {
         $('tripletGrid').innerHTML = triplets.map(t => `
             <div class="tap-card" data-id="${t.id}">
-                <div class="tap-card-status">READY</div>
+                <div class="tap-card-status">PLAYING</div>
                 <div class="tap-card-pattern">${t.display.join(' - ')}</div>
                 <div class="tap-card-name">${t.name}</div>
             </div>
@@ -790,7 +789,7 @@
                             <div class="pattern-card-name">${p.name}</div>
                             <div class="pattern-card-meta">${p.genre} • ${p.tempo} BPM</div>
                         </div>
-                        <div class="pattern-card-status">READY</div>
+                        <div class="pattern-card-status">PLAYING</div>
                     </div>
                     <div class="pattern-card-phonetic">${p.phonetic}</div>
                     <div class="mini-grid">${miniGrid}</div>
