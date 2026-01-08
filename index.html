@@ -4,852 +4,850 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0A0A0B">
     <title>YEN's Beatbox Trainer</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
         
         :root {
-            --bg-primary: #0A0A0B;
-            --bg-secondary: #111113;
-            --bg-card: #161618;
-            --bg-elevated: #1C1C1F;
-            --text-primary: #FAFAFA;
-            --text-secondary: #A1A1AA;
-            --text-muted: #71717A;
+            --bg: #0A0A0B;
+            --bg-card: #141416;
+            --bg-elevated: #1a1a1d;
+            --text: #FAFAFA;
+            --text-dim: #888;
             --accent: #FF6B35;
             --accent-soft: rgba(255, 107, 53, 0.15);
-            --accent-glow: rgba(255, 107, 53, 0.4);
-            --success: #10B981;
-            --border: #27272A;
-            --border-light: #3F3F46;
-            --touch-min: 48px;
-            --safe-top: env(safe-area-inset-top, 0px);
-            --safe-bottom: env(safe-area-inset-bottom, 0px);
-            --safe-left: env(safe-area-inset-left, 0px);
-            --safe-right: env(safe-area-inset-right, 0px);
+            --accent-glow: rgba(255, 107, 53, 0.5);
+            --border: #2a2a2d;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         html, body { height: 100%; overflow: hidden; }
         
         body {
-            font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
+            font-family: 'Space Grotesk', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             font-size: 16px;
-            line-height: 1.5;
-            padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
-            touch-action: manipulation;
+            line-height: 1.4;
         }
 
-        .app { display: flex; flex-direction: column; height: 100%; max-width: 600px; margin: 0 auto; }
+        .app {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
 
-        /* Header */
-        .header {
-            flex-shrink: 0;
+        header {
             padding: 16px 20px;
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
             border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
         }
-        .brand { display: flex; align-items: baseline; gap: 8px; }
-        .brand-name { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
-        .brand-name span { color: var(--accent); }
-        .brand-tag { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
-        .pulse-dot {
-            width: 10px; height: 10px; border-radius: 50%;
-            background: var(--border); transition: all 0.3s;
+        .logo { font-size: 18px; font-weight: 700; }
+        .logo span { color: var(--accent); }
+
+        .beat-flash {
+            height: 6px;
+            background: var(--border);
+            flex-shrink: 0;
+            transition: background 0.05s;
         }
-        .pulse-dot.active {
+        .beat-flash.on {
             background: var(--accent);
-            box-shadow: 0 0 16px var(--accent-glow);
-            animation: pulse-glow 1s ease-in-out infinite;
-        }
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 16px var(--accent-glow); }
-            50% { box-shadow: 0 0 24px var(--accent-glow), 0 0 32px var(--accent-glow); }
+            box-shadow: 0 0 20px var(--accent-glow);
         }
 
-        /* Navigation */
-        .nav-tabs {
-            flex-shrink: 0;
+        nav {
             display: flex;
             padding: 12px 16px;
             gap: 8px;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-        .nav-tabs::-webkit-scrollbar { display: none; }
-        .nav-tab {
             flex-shrink: 0;
-            padding: 12px 20px;
-            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-btn {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
             border: 1px solid var(--border);
-            border-radius: 12px;
-            color: var(--text-secondary);
+            border-radius: 10px;
+            color: var(--text-dim);
             font-family: inherit;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
-            min-height: var(--touch-min);
         }
-        .nav-tab:active { transform: scale(0.96); }
-        .nav-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
-
-        /* Main content */
-        main { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: calc(20px + var(--safe-bottom)); }
-        .view { display: none; }
-        .view.active { display: block; }
-
-        /* Section headers */
-        .section-header { margin-bottom: 16px; }
-        .section-title { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
-        .section-desc { font-size: 14px; color: var(--text-secondary); }
-
-        /* =========== SOUND CARDS - TAP TO PLAY =========== */
-        .sound-card {
-            background: var(--bg-card);
-            border: 2px solid var(--border);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-        }
-        .sound-card:active { transform: scale(0.98); }
-        .sound-card.playing {
+        .nav-btn.active {
+            background: var(--accent);
             border-color: var(--accent);
-            box-shadow: 0 0 24px var(--accent-glow);
+            color: white;
         }
-        .sound-card-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
+
+        main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            padding-bottom: 100px;
         }
-        .sound-card-phonetic {
-            font-family: 'DM Mono', monospace;
-            font-size: 32px;
-            font-weight: 500;
-            color: var(--accent);
-        }
-        .sound-card-name { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
-        .sound-card-word { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; }
-        .sound-card-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
-        .sound-card-link {
-            display: inline-block;
-            margin-top: 12px;
-            color: var(--accent);
-            font-size: 14px;
-            font-weight: 600;
-            text-decoration: none;
-        }
-        .sound-card-status {
-            display: none;
+
+        .section { margin-bottom: 32px; }
+        .section-label {
             font-size: 11px;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--accent);
-            background: var(--accent-soft);
-            padding: 4px 10px;
-            border-radius: 6px;
+            letter-spacing: 0.1em;
+            color: var(--text-dim);
+            margin-bottom: 12px;
+            padding-left: 4px;
         }
-        .sound-card.playing .sound-card-status { display: inline-block; }
 
-        /* Inline BPM control */
-        .inline-bpm {
-            display: none;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid var(--border);
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
         }
-        .sound-card.playing .inline-bpm { display: flex; }
-        .bpm-btn {
-            width: 48px; height: 48px;
-            background: var(--bg-elevated);
+
+        .card {
+            background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 12px;
-            color: var(--text-primary);
-            font-size: 24px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .bpm-btn:active { transform: scale(0.9); background: var(--accent); }
-        .bpm-display {
-            text-align: center;
-            min-width: 80px;
-        }
-        .bpm-value { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 600; }
-        .bpm-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
-
-        /* =========== PHRASE/COMBO/TRIPLET CARDS =========== */
-        .grid-2col {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-        .tap-card {
-            background: var(--bg-card);
-            border: 2px solid var(--border);
-            border-radius: 16px;
             padding: 16px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.15s ease;
+            -webkit-user-select: none;
+            user-select: none;
+            min-height: 72px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             position: relative;
-            min-height: 120px;
         }
-        .tap-card:active { transform: scale(0.97); }
-        .tap-card.playing {
+        .card:active {
+            transform: scale(0.96);
+            background: var(--bg-elevated);
+        }
+        .card.playing {
             border-color: var(--accent);
             box-shadow: 0 0 20px var(--accent-glow);
         }
-        .tap-card-pattern {
+
+        .card-phonetic {
             font-family: 'DM Mono', monospace;
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 500;
             color: var(--accent);
-            margin-bottom: 8px;
-            line-height: 1.3;
+            margin-bottom: 4px;
         }
-        .tap-card-name { font-size: 14px; color: var(--text-secondary); }
-        .tap-card-status {
+        .card-name {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: lowercase;
+        }
+
+        .card-status {
             position: absolute;
-            top: 12px;
-            right: 12px;
-            font-size: 10px;
+            top: 8px;
+            right: 8px;
+            font-size: 9px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: var(--accent);
-            background: var(--accent-soft);
-            padding: 3px 8px;
+            padding: 2px 6px;
             border-radius: 4px;
+            background: var(--accent);
+            color: white;
             display: none;
         }
-        .tap-card.playing .tap-card-status { display: block; }
+        .card.playing .card-status {
+            display: block;
+        }
 
-        /* Full-width card for drill display */
-        .drill-display-card {
+        .drill-display {
             background: var(--bg-card);
-            border: 2px solid var(--accent);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 16px;
-            text-align: center;
-            box-shadow: 0 0 30px var(--accent-glow);
-        }
-        .drill-display-pattern {
-            font-family: 'DM Mono', monospace;
-            font-size: 36px;
-            font-weight: 500;
-            color: var(--accent);
-            margin-bottom: 8px;
-            letter-spacing: 4px;
-        }
-        .drill-display-pattern .syl { opacity: 0.4; transition: all 0.1s; }
-        .drill-display-pattern .syl.current { opacity: 1; transform: scale(1.1); }
-        .drill-display-name { font-size: 16px; color: var(--text-secondary); margin-bottom: 16px; }
-        .drill-bpm-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-        }
-        .drill-tap-hint { font-size: 12px; color: var(--text-muted); margin-top: 12px; }
-
-        /* =========== PATTERN CARDS =========== */
-        .pattern-card {
-            background: var(--bg-card);
-            border: 2px solid var(--border);
-            border-radius: 16px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
             padding: 16px;
             margin-bottom: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 56px;
         }
-        .pattern-card:active { transform: scale(0.98); }
+        .drill-phonetic {
+            font-family: 'DM Mono', monospace;
+            font-size: 24px;
+            font-weight: 500;
+            color: var(--accent);
+            letter-spacing: 2px;
+        }
+        .drill-phonetic .current {
+            background: var(--accent);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .bpm-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .bpm-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-elevated);
+            color: var(--text);
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .bpm-btn:active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        .bpm-value {
+            font-family: 'DM Mono', monospace;
+            font-size: 13px;
+            color: var(--text-dim);
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .pattern-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            position: relative;
+        }
+        .pattern-card:active {
+            transform: scale(0.98);
+        }
         .pattern-card.playing {
             border-color: var(--accent);
-            box-shadow: 0 0 24px var(--accent-glow);
+            box-shadow: 0 0 20px var(--accent-glow);
         }
-        .pattern-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
+        .pattern-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .pattern-meta {
+            font-size: 12px;
+            color: var(--text-dim);
             margin-bottom: 8px;
         }
-        .pattern-card-name { font-size: 16px; font-weight: 600; }
-        .pattern-card-meta { font-size: 12px; color: var(--text-muted); }
-        .pattern-card-phonetic {
+        .pattern-phonetic {
             font-family: 'DM Mono', monospace;
             font-size: 14px;
             color: var(--accent);
-            margin-bottom: 12px;
         }
-        .pattern-card-status {
-            font-size: 10px;
+
+        .pattern-status {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 9px;
             font-weight: 600;
             text-transform: uppercase;
-            color: var(--accent);
-            background: var(--accent-soft);
+            letter-spacing: 0.05em;
             padding: 3px 8px;
             border-radius: 4px;
+            background: var(--accent);
+            color: white;
             display: none;
         }
-        .pattern-card.playing .pattern-card-status { display: inline-block; }
-
-        /* Mini pattern grid */
-        .mini-grid {
-            display: grid;
-            grid-template-columns: repeat(16, 1fr);
-            gap: 2px;
-            margin-bottom: 12px;
+        .pattern-card.playing .pattern-status {
+            display: block;
         }
-        .mini-grid-row { display: contents; }
-        .mini-step {
-            aspect-ratio: 1;
-            background: var(--bg-elevated);
-            border-radius: 2px;
-        }
-        .mini-step.on { background: var(--accent); }
-        .mini-step.beat { box-shadow: 0 0 6px var(--accent-glow); }
 
-        /* Pattern inline BPM */
-        .pattern-bpm {
-            display: none;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding-top: 12px;
-            border-top: 1px solid var(--border);
-        }
-        .pattern-card.playing .pattern-bpm { display: flex; }
-
-        /* Toast */
-        .toast {
-            position: fixed;
-            bottom: calc(20px + var(--safe-bottom));
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: var(--bg-elevated);
+        .ref-card {
+            background: var(--bg-card);
             border: 1px solid var(--border);
-            padding: 12px 20px;
             border-radius: 12px;
-            font-size: 14px;
-            font-weight: 500;
-            opacity: 0;
-            transition: all 0.3s;
-            z-index: 1000;
+            padding: 16px;
+            margin-bottom: 10px;
         }
-        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-        .toast.success { border-color: var(--success); color: var(--success); }
+        .ref-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        .ref-phonetic {
+            font-family: 'DM Mono', monospace;
+            font-size: 28px;
+            font-weight: 500;
+            color: var(--accent);
+        }
+        .ref-name {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .ref-text {
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        .ref-link {
+            font-size: 12px;
+            color: var(--accent);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .view { display: none; }
+        .view.active { display: block; }
     </style>
 </head>
 <body>
     <div class="app">
-        <div class="header">
-            <div class="brand">
-                <div class="brand-name">YEN's <span>Beatbox</span></div>
-                <div class="brand-tag">Trainer</div>
-            </div>
-            <div class="pulse-dot" id="pulseDot"></div>
-        </div>
-
-        <div class="nav-tabs">
-            <button class="nav-tab active" data-view="sounds">Sounds</button>
-            <button class="nav-tab" data-view="phrases">Phrases</button>
-            <button class="nav-tab" data-view="combos">Combos</button>
-            <button class="nav-tab" data-view="triplets">Triplets</button>
-            <button class="nav-tab" data-view="patterns">Patterns</button>
-        </div>
-
+        <header>
+            <div class="logo">YEN's <span>Beatbox</span></div>
+        </header>
+        <div class="beat-flash" id="beatFlash"></div>
+        <nav>
+            <button class="nav-btn active" data-view="train">Train</button>
+            <button class="nav-btn" data-view="patterns">Patterns</button>
+            <button class="nav-btn" data-view="reference">Reference</button>
+        </nav>
         <main>
-            <!-- SOUNDS VIEW -->
-            <div class="view active" id="soundsView">
-                <div class="section-header">
-                    <div class="section-title">Core Sounds</div>
-                    <div class="section-desc">Tap card to practice. Tap again to stop.</div>
+            <div class="view active" id="trainView">
+                <div class="section">
+                    <div class="section-label">1. Core Sounds</div>
+                    <div id="soundCards"></div>
                 </div>
-                <div id="soundCards"></div>
-            </div>
-
-            <!-- PHRASES VIEW -->
-            <div class="view" id="phrasesView">
-                <div class="section-header">
-                    <div class="section-title">Beatrhyming</div>
-                    <div class="section-desc">Tap to start the phrase loop.</div>
+                <div class="section">
+                    <div class="section-label">2. Two-Sound Transitions</div>
+                    <div class="drill-display" id="comboDisplay"></div>
+                    <div class="grid" id="comboGrid"></div>
                 </div>
-                <div id="phraseDisplay" style="display: none;"></div>
-                <div class="grid-2col" id="phraseGrid"></div>
-            </div>
-
-            <!-- COMBOS VIEW -->
-            <div class="view" id="combosView">
-                <div class="section-header">
-                    <div class="section-title">Transitions</div>
-                    <div class="section-desc">Two-sound switches. Tap to drill.</div>
+                <div class="section">
+                    <div class="section-label">3. Three-Sound Triplets</div>
+                    <div class="drill-display" id="tripletDisplay"></div>
+                    <div class="grid" id="tripletGrid"></div>
                 </div>
-                <div id="comboDisplay" style="display: none;"></div>
-                <div class="grid-2col" id="comboGrid"></div>
-            </div>
-
-            <!-- TRIPLETS VIEW -->
-            <div class="view" id="tripletsView">
-                <div class="section-header">
-                    <div class="section-title">Triplets</div>
-                    <div class="section-desc">Three sounds, continuous flow.</div>
+                <div class="section">
+                    <div class="section-label">4. Beatrhyming Phrases</div>
+                    <div class="drill-display" id="phraseDisplay"></div>
+                    <div class="grid" id="phraseGrid"></div>
                 </div>
-                <div id="tripletDisplay" style="display: none;"></div>
-                <div class="grid-2col" id="tripletGrid"></div>
             </div>
-
-            <!-- PATTERNS VIEW -->
             <div class="view" id="patternsView">
-                <div class="section-header">
-                    <div class="section-title">Pattern Library</div>
-                    <div class="section-desc">Full beats. Tap to play.</div>
+                <div class="section">
+                    <div class="section-label">Pattern Library</div>
+                    <div id="patternCards"></div>
                 </div>
-                <div id="patternCards"></div>
+            </div>
+            <div class="view" id="referenceView">
+                <div class="section">
+                    <div class="section-label">How To Make The Sounds</div>
+                    <div id="refCards"></div>
+                </div>
             </div>
         </main>
     </div>
-    <div class="toast" id="toast"></div>
 
-    <script>
-    // ===== DATA =====
-    const coreSounds = [
-        { id: 'hihat', phonetic: '{ t }', name: 'Hi-Hat (Closed)', word: '"ts" as in "cats"',
-          description: 'Tongue tip contacts ridge behind upper front teeth. Quick release. Teeth lightly closed. Unvoiced—consonant only.',
-          link: 'https://www.youtube.com/results?search_query=beatbox+hi+hat+tutorial+beginner', soundType: 'hihat' },
-        { id: 'kick', phonetic: '{ B }', name: 'Kick Drum', word: '"B" as in "boots"',
-          description: 'Bilabial plosive. Whispered "B" with lip pressure. No voice. Deep punch from diaphragm support.',
-          link: 'https://www.youtube.com/results?search_query=beatbox+kick+drum+tutorial+beginner', soundType: 'kick' },
-        { id: 'snare', phonetic: '{ K }', name: 'K-Snare', word: '"K" as in "cats"',
-          description: 'Velar plosive. Hard "K" sound. Back of tongue hits soft palate. Short, percussive click.',
-          link: 'https://www.youtube.com/results?search_query=beatbox+k+snare+tutorial+beginner', soundType: 'snare' }
-    ];
+<script>
+const sounds = [
+    { id: 'kick', phonetic: 'B', name: 'Kick Drum', hint: '"Boots" — lips closed, whispered B, no voice',
+      tutorial: 'https://www.youtube.com/results?search_query=beatbox+kick+drum+tutorial',
+      ref: 'Bilabial plosive. Close lips tight, build pressure from diaphragm, release in one punch. Whisper "boo" then drop the vowel. No vocal cord vibration.' },
+    { id: 'hihat', phonetic: 't', name: 'Hi-Hat (Closed)', hint: '"ts" — tongue behind teeth, quick snap',
+      tutorial: 'https://www.youtube.com/results?search_query=beatbox+hi+hat+tutorial',
+      ref: 'Dental plosive. Tongue tip touches ridge behind upper front teeth. Quick release with teeth lightly closed. The "t" from "cat" — unvoiced consonant only.' },
+    { id: 'snare', phonetic: 'K', name: 'K-Snare', hint: '"Cats" — hard K, back of tongue',
+      tutorial: 'https://www.youtube.com/results?search_query=beatbox+k+snare+tutorial',
+      ref: 'Velar plosive. Back of tongue hits soft palate. Hard "K" as in "kit" with strong accent. Short, percussive click. The foundation snare sound.' }
+];
 
-    const phrases = [
-        { id: 'boots-cats', phrase: 'boots and cats', syllables: ['boots', 'and', 'cats', 'and'], sounds: ['kick', 'hihat', 'snare', 'hihat'], pattern: 'B - t - K - t' },
-        { id: 'boots-n-cats', phrase: 'boots n cats n', syllables: ['boots', 'n', 'cats', 'n'], sounds: ['kick', 'hihat', 'snare', 'hihat'], pattern: 'B - t - K - t' },
-        { id: 'bubba-cup', phrase: 'bubba cup', syllables: ['bub', 'ba', 'cup'], sounds: ['kick', 'kick', 'snare'], pattern: 'B - B - K' },
-        { id: 'puh-tuh-kuh', phrase: 'puh tuh kuh', syllables: ['puh', 'tuh', 'kuh'], sounds: ['kick', 'hihat', 'snare'], pattern: 'B - t - K' },
-        { id: 'kick-it', phrase: 'kick it kick snare', syllables: ['kick', 'it', 'kick', 'snare'], sounds: ['kick', 'hihat', 'kick', 'snare'], pattern: 'B - t - B - K' },
-        { id: 'biggie-style', phrase: 'big puh big kah', syllables: ['big', 'puh', 'big', 'kah'], sounds: ['kick', 'hihat', 'kick', 'snare'], pattern: 'B - t - B - K' }
-    ];
+const combos = [
+    { id: 'b-t', sounds: ['kick','hihat'], display: ['B','t'], name: 'Kick → Hat' },
+    { id: 't-k', sounds: ['hihat','snare'], display: ['t','K'], name: 'Hat → Snare' },
+    { id: 'b-k', sounds: ['kick','snare'], display: ['B','K'], name: 'Kick → Snare' },
+    { id: 'k-b', sounds: ['snare','kick'], display: ['K','B'], name: 'Snare → Kick' },
+    { id: 'k-t', sounds: ['snare','hihat'], display: ['K','t'], name: 'Snare → Hat' },
+    { id: 't-b', sounds: ['hihat','kick'], display: ['t','B'], name: 'Hat → Kick' }
+];
 
-    const combos = [
-        { id: 'kick-hihat', name: 'Kick → Hi-Hat', sounds: ['kick', 'hihat'], display: ['B', 't'] },
-        { id: 'hihat-snare', name: 'Hi-Hat → Snare', sounds: ['hihat', 'snare'], display: ['t', 'K'] },
-        { id: 'kick-snare', name: 'Kick → Snare', sounds: ['kick', 'snare'], display: ['B', 'K'] },
-        { id: 'snare-kick', name: 'Snare → Kick', sounds: ['snare', 'kick'], display: ['K', 'B'] },
-        { id: 'snare-hihat', name: 'Snare → Hi-Hat', sounds: ['snare', 'hihat'], display: ['K', 't'] },
-        { id: 'hihat-kick', name: 'Hi-Hat → Kick', sounds: ['hihat', 'kick'], display: ['t', 'B'] }
-    ];
+const triplets = [
+    // Basic patterns
+    { id: 'b-t-k', sounds: ['kick','hihat','snare'], display: ['B','t','K'], name: 'boots and cats' },
+    { id: 'k-t-b', sounds: ['snare','hihat','kick'], display: ['K','t','B'], name: 'cats and boots' },
+    { id: 'b-k-t', sounds: ['kick','snare','hihat'], display: ['B','K','t'], name: 'boom kat' },
+    { id: 't-b-k', sounds: ['hihat','kick','snare'], display: ['t','B','K'], name: 'and boom kat' },
+    { id: 't-k-b', sounds: ['hihat','snare','kick'], display: ['t','K','B'], name: 'and kat boom' },
+    { id: 'k-b-t', sounds: ['snare','kick','hihat'], display: ['K','B','t'], name: 'kat boom and' },
+    
+    // Double sounds (funk emphasis)
+    { id: 'b-b-k', sounds: ['kick','kick','snare'], display: ['B','B','K'], name: 'double kick snap' },
+    { id: 'b-b-t', sounds: ['kick','kick','hihat'], display: ['B','B','t'], name: 'double kick hat' },
+    { id: 'k-k-b', sounds: ['snare','snare','kick'], display: ['K','K','B'], name: 'double snap kick' },
+    { id: 'k-k-t', sounds: ['snare','snare','hihat'], display: ['K','K','t'], name: 'double snap hat' },
+    { id: 't-t-k', sounds: ['hihat','hihat','snare'], display: ['t','t','K'], name: 'tika snare' },
+    { id: 't-t-b', sounds: ['hihat','hihat','kick'], display: ['t','t','B'], name: 'tika kick' },
+    
+    // Offbeat feels
+    { id: 't-k-t', sounds: ['hihat','snare','hihat'], display: ['t','K','t'], name: 'offbeat snare' },
+    { id: 't-b-t', sounds: ['hihat','kick','hihat'], display: ['t','B','t'], name: 'offbeat kick' },
+    { id: 'k-t-k', sounds: ['snare','hihat','snare'], display: ['K','t','K'], name: 'snare sandwich' },
+    { id: 'b-t-b', sounds: ['kick','hihat','kick'], display: ['B','t','B'], name: 'kick sandwich' }
+];
 
-    const triplets = [
-        { id: 'b-t-k', name: 'boots and cats', sounds: ['kick', 'hihat', 'snare'], display: ['B', 't', 'K'] },
-        { id: 'k-t-b', name: 'cats and boots', sounds: ['snare', 'hihat', 'kick'], display: ['K', 't', 'B'] },
-        { id: 'b-b-k', name: 'bubba cup', sounds: ['kick', 'kick', 'snare'], display: ['B', 'B', 'K'] },
-        { id: 'b-k-t', name: 'boom kat ts', sounds: ['kick', 'snare', 'hihat'], display: ['B', 'K', 't'] },
-        { id: 't-t-k', name: 'tika snare', sounds: ['hihat', 'hihat', 'snare'], display: ['t', 't', 'K'] },
-        { id: 'b-t-t', name: 'boots tika', sounds: ['kick', 'hihat', 'hihat'], display: ['B', 't', 't'] }
-    ];
+const phrases = [
+    // FOUNDATION - The Classics
+    { id: 'boots-cats', syllables: ['boots','and','cats','and'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'boots and cats' },
+    { id: 'boots-n-cats', syllables: ['boots','n','cats','n'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'boots n cats' },
+    { id: 'boots-cats-2', syllables: ['boots','cats','boots','cats'], sounds: ['kick','snare','kick','snare'], display: 'B K B K', name: 'boots cats (no hat)' },
+    
+    // FUNKY PHRASES - Syncopation focus
+    { id: 'funky-town', syllables: ['fun','ky','town','uh'], sounds: ['kick','snare','kick','hihat'], display: 'B K B t', name: 'funky town' },
+    { id: 'get-funky', syllables: ['get','fun','ky','now'], sounds: ['hihat','kick','snare','kick'], display: 't B K B', name: 'get funky now' },
+    { id: 'bump-ditty', syllables: ['bump','dit','ty','bump'], sounds: ['kick','hihat','hihat','kick'], display: 'B t t B', name: 'bump ditty' },
+    { id: 'do-the-funk', syllables: ['do','the','funk','y'], sounds: ['kick','hihat','kick','snare'], display: 'B t B K', name: 'do the funk' },
+    { id: 'funk-machine', syllables: ['funk','ma','chine','uh'], sounds: ['kick','snare','kick','hihat'], display: 'B K B t', name: 'funk machine' },
+    { id: 'slap-it', syllables: ['slap','it','down','now'], sounds: ['snare','hihat','kick','kick'], display: 'K t B B', name: 'slap it down' },
+    
+    // POCKET GROOVES - Feel the pocket
+    { id: 'in-the-pocket', syllables: ['in','the','pock','et'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'in the pocket' },
+    { id: 'hit-it', syllables: ['hit','it','hit','it'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'hit it' },
+    { id: 'push-pull', syllables: ['push','uh','pull','uh'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'push pull' },
+    { id: 'boom-bap', syllables: ['boom','bap','boom','bap'], sounds: ['kick','snare','kick','snare'], display: 'B K B K', name: 'boom bap' },
+    { id: 'boom-clap', syllables: ['boom','clap','boom','clap'], sounds: ['kick','snare','kick','snare'], display: 'B K B K', name: 'boom clap' },
+    
+    // DOUBLE KICK PHRASES
+    { id: 'bubba-cup', syllables: ['bub','ba','cup','uh'], sounds: ['kick','kick','snare','hihat'], display: 'B B K t', name: 'bubba cup' },
+    { id: 'coffee-cup', syllables: ['cof','fee','cup','uh'], sounds: ['kick','kick','snare','hihat'], display: 'B B K t', name: 'coffee cup' },
+    { id: 'butter-cup', syllables: ['but','ter','cup','uh'], sounds: ['kick','kick','snare','hihat'], display: 'B B K t', name: 'butter cup' },
+    { id: 'double-up', syllables: ['dou','ble','up','now'], sounds: ['kick','kick','hihat','snare'], display: 'B B t K', name: 'double up' },
+    
+    // SNARE LEAD PHRASES
+    { id: 'cats-boots', syllables: ['cats','and','boots','and'], sounds: ['snare','hihat','kick','hihat'], display: 'K t B t', name: 'cats and boots' },
+    { id: 'clap-stomp', syllables: ['clap','uh','stomp','uh'], sounds: ['snare','hihat','kick','hihat'], display: 'K t B t', name: 'clap stomp' },
+    { id: 'snare-first', syllables: ['snare','first','kick','last'], sounds: ['snare','hihat','kick','hihat'], display: 'K t B t', name: 'snare first' },
+    
+    // OFFBEAT/SYNCOPATION
+    { id: 'pick-it-up', syllables: ['pick','it','up','now'], sounds: ['hihat','kick','hihat','snare'], display: 't B t K', name: 'pick it up' },
+    { id: 'and-one', syllables: ['and','one','and','two'], sounds: ['hihat','kick','hihat','snare'], display: 't B t K', name: 'and one and two' },
+    { id: 'upbeat', syllables: ['up','beat','down','beat'], sounds: ['hihat','kick','hihat','snare'], display: 't B t K', name: 'upbeat downbeat' },
+    
+    // EXTENDED PHRASES (6-8 syllables)
+    { id: 'boots-cats-boots-cats', syllables: ['boots','and','cats','and','boots','and','cats','and'], sounds: ['kick','hihat','snare','hihat','kick','hihat','snare','hihat'], display: 'B t K t B t K t', name: 'boots and cats x2' },
+    { id: 'funky-drummer', syllables: ['fun','ky','drum','mer','hit','it','now','uh'], sounds: ['kick','snare','kick','hihat','snare','hihat','kick','hihat'], display: 'B K B t K t B t', name: 'funky drummer' },
+    { id: 'give-drummer-some', syllables: ['give','the','drum','mer','some','uh','now','uh'], sounds: ['kick','hihat','kick','snare','kick','hihat','snare','hihat'], display: 'B t B K B t K t', name: 'give drummer some' },
+    { id: 'shake-your-body', syllables: ['shake','your','bo','dy','down','to','ground','uh'], sounds: ['kick','hihat','kick','snare','kick','hihat','snare','hihat'], display: 'B t B K B t K t', name: 'shake your body' },
+    
+    // FOOD/NONSENSE (Classic teaching method)
+    { id: 'pizza-hut', syllables: ['piz','za','hut','uh'], sounds: ['kick','snare','kick','hihat'], display: 'B K B t', name: 'pizza hut' },
+    { id: 'kit-kat', syllables: ['kit','kat','kit','kat'], sounds: ['snare','snare','snare','snare'], display: 'K K K K', name: 'kit kat' },
+    { id: 'ice-cream', syllables: ['ice','cream','sun','dae'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'ice cream sundae' },
+    { id: 'peanut-butter', syllables: ['pea','nut','but','ter'], sounds: ['kick','hihat','kick','hihat'], display: 'B t B t', name: 'peanut butter' },
+    { id: 'coca-cola', syllables: ['co','ca','co','la'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'coca cola' },
+    
+    // HIP-HOP PHRASES  
+    { id: 'drop-beat', syllables: ['drop','the','beat','now'], sounds: ['kick','hihat','snare','kick'], display: 'B t K B', name: 'drop the beat' },
+    { id: 'check-it', syllables: ['check','it','out','yo'], sounds: ['snare','hihat','kick','hihat'], display: 'K t B t', name: 'check it out' },
+    { id: 'rock-it', syllables: ['rock','it','dont','stop'], sounds: ['kick','hihat','snare','kick'], display: 'B t K B', name: 'rock it dont stop' },
+    { id: 'break-it-down', syllables: ['break','it','down','now'], sounds: ['kick','hihat','kick','snare'], display: 'B t B K', name: 'break it down' }
+];
 
-    const patterns = [
-        { name: 'Boots and Cats', genre: 'Foundation', tempo: 60, phonetic: 'B - t - K - t', pattern: { kick: [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat: [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0], openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] } },
-        { name: 'Simple Backbeat', genre: 'Foundation', tempo: 70, phonetic: 'B - - - K - - -', pattern: { kick: [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] } },
-        { name: '8th Note Hi-Hat', genre: 'Foundation', tempo: 75, phonetic: 'B t t t K t t t', pattern: { kick: [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat: [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0], openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] } },
-        { name: 'Basic Rock', genre: 'Rock', tempo: 90, phonetic: 'B-t-K-t-B-t-K-t', pattern: { kick: [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0], snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat: [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0], openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] } },
-        { name: 'Boom Bap', genre: 'Hip-Hop', tempo: 90, phonetic: 'B-t-t-K-B-B-t-K', pattern: { kick: [1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0], snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat: [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0], openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] } },
-        { name: 'Four on Floor', genre: 'House', tempo: 120, phonetic: 'B-t-B-t-B-t-B-tss', pattern: { kick: [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0], snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat: [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0], openhat: [0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1] } },
-        { name: 'Trap', genre: 'Hip-Hop', tempo: 140, phonetic: 'B-tttt-K-tttt', pattern: { kick: [1,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0], snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0] } },
-        { name: 'Funk Pocket', genre: 'Funk', tempo: 100, phonetic: 'B-t-K-t-B-t-K-tt', pattern: { kick: [1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0], snare: [0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0], hihat: [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0], openhat: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] } }
-    ];
+const patterns = [
+    // FOUNDATION
+    { name: 'Boots & Cats', genre: 'Foundation', tempo: 80, phonetic: 'B t K t', grid: { kick:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0] }},
+    { name: 'Simple Backbeat', genre: 'Foundation', tempo: 85, phonetic: 'B K B K', grid: { kick:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] }},
+    
+    // FUNK - The Main Event
+    { name: 'Funky Drummer', genre: 'Funk', tempo: 98, phonetic: 'B t K t B tK t', grid: { kick:[1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
+    { name: 'Clyde Stubblefield', genre: 'Funk', tempo: 100, phonetic: 'B t t K t B t K', grid: { kick:[1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
+    { name: 'James Brown 1', genre: 'Funk', tempo: 105, phonetic: 'B t K t t B K t', grid: { kick:[1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
+    { name: 'P-Funk', genre: 'Funk', tempo: 96, phonetic: 'B tB t K t B K', grid: { kick:[1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
+    { name: 'Cissy Strut', genre: 'Funk', tempo: 92, phonetic: 'B t K t B t K B', grid: { kick:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
+    { name: 'Meters Groove', genre: 'Funk', tempo: 94, phonetic: 'B t t K B t K t', grid: { kick:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
+    { name: 'Chicken Grease', genre: 'Funk', tempo: 88, phonetic: 'B t K tK t B t', grid: { kick:[1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0], snare:[0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
+    { name: 'Sly Stone', genre: 'Funk', tempo: 102, phonetic: 'B t K t B t tK', grid: { kick:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
+    { name: 'Tower of Power', genre: 'Funk', tempo: 100, phonetic: 'B t K tB t K t', grid: { kick:[1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
+    { name: 'Superstition', genre: 'Funk', tempo: 98, phonetic: 'B B t K t B t K', grid: { kick:[1,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
+    { name: 'Brick House', genre: 'Funk', tempo: 104, phonetic: 'B t t K B t t K', grid: { kick:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
+    { name: 'Get Up Offa', genre: 'Funk', tempo: 108, phonetic: 'B t K t B B K t', grid: { kick:[1,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
+    
+    // HIP-HOP
+    { name: 'Boom Bap', genre: 'Hip-Hop', tempo: 92, phonetic: 'B t t K B B t K', grid: { kick:[1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0] }},
+    { name: 'East Coast', genre: 'Hip-Hop', tempo: 90, phonetic: 'B t K t B t K t', grid: { kick:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
+    { name: 'West Coast', genre: 'Hip-Hop', tempo: 88, phonetic: 'B t t K t B t K', grid: { kick:[1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
+    { name: 'Half-Time', genre: 'Hip-Hop', tempo: 80, phonetic: 'B t t t t t K t', grid: { kick:[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], snare:[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
+    
+    // ROCK
+    { name: 'Basic Rock', genre: 'Rock', tempo: 100, phonetic: 'B t t t K t t t', grid: { kick:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
+    { name: 'Hard Rock', genre: 'Rock', tempo: 120, phonetic: 'B t B K B t B K', grid: { kick:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
+    
+    // HOUSE/ELECTRONIC
+    { name: 'Four on Floor', genre: 'House', tempo: 124, phonetic: 'B t B t B t B t', grid: { kick:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0] }},
+    
+    // TRAP
+    { name: 'Trap', genre: 'Trap', tempo: 140, phonetic: 'B tttt K tttt', grid: { kick:[1,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1] }}
+];
 
-    // ===== STATE =====
-    let audioCtx = null;
-    const state = {
-        activeType: null, // 'sound', 'phrase', 'combo', 'triplet', 'pattern'
-        activeId: null,
-        interval: null,
-        bpm: 60,
-        currentBeat: 0,
-        currentStep: 0
-    };
+// State
+const S = { type: null, id: null, bpm: 80, beat: 0, step: 0, timer: null };
+let audioCtx;
 
-    // ===== HELPERS =====
-    const $ = id => document.getElementById(id);
-    const $$ = sel => document.querySelectorAll(sel);
-    function showToast(msg, type = '') { const t = $('toast'); t.textContent = msg; t.className = 'toast show ' + type; setTimeout(() => t.classList.remove('show'), 2500); }
-    function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+// Audio
+function getAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+}
 
-    function playSound(type) {
-        const ctx = initAudio(), now = ctx.currentTime;
-        if (type === 'kick') {
-            const o = ctx.createOscillator(), g = ctx.createGain();
-            o.connect(g); g.connect(ctx.destination);
-            o.frequency.setValueAtTime(150, now); o.frequency.exponentialRampToValueAtTime(0.01, now + 0.4);
-            g.gain.setValueAtTime(0.8, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-            o.start(now); o.stop(now + 0.4);
-        } else if (type === 'snare') {
-            const n = ctx.createBufferSource(), b = ctx.createBuffer(1, ctx.sampleRate * 0.15, ctx.sampleRate), d = b.getChannelData(0);
-            for (let i = 0; i < b.length; i++) d[i] = Math.random() * 2 - 1;
-            n.buffer = b;
-            const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 1200;
-            const g = ctx.createGain(); n.connect(f); f.connect(g); g.connect(ctx.destination);
-            g.gain.setValueAtTime(0.4, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-            const o = ctx.createOscillator(), og = ctx.createGain();
-            o.connect(og); og.connect(ctx.destination);
-            o.frequency.setValueAtTime(180, now); o.frequency.exponentialRampToValueAtTime(100, now + 0.08);
-            og.gain.setValueAtTime(0.25, now); og.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-            o.start(now); o.stop(now + 0.15); n.start(now); n.stop(now + 0.15);
-        } else if (type === 'hihat') {
-            const n = ctx.createBufferSource(), b = ctx.createBuffer(1, ctx.sampleRate * 0.04, ctx.sampleRate), d = b.getChannelData(0);
-            for (let i = 0; i < b.length; i++) d[i] = Math.random() * 2 - 1;
-            n.buffer = b;
-            const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 7000;
-            const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 10000; bp.Q.value = 1;
-            const g = ctx.createGain(); n.connect(hp); hp.connect(bp); bp.connect(g); g.connect(ctx.destination);
-            g.gain.setValueAtTime(0.4, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
-            n.start(now); n.stop(now + 0.04);
-        } else if (type === 'openhat') {
-            const n = ctx.createBufferSource(), b = ctx.createBuffer(1, ctx.sampleRate * 0.4, ctx.sampleRate), d = b.getChannelData(0);
-            for (let i = 0; i < b.length; i++) d[i] = Math.random() * 2 - 1;
-            n.buffer = b;
-            const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 5000;
-            const g = ctx.createGain(); n.connect(hp); hp.connect(g); g.connect(ctx.destination);
-            g.gain.setValueAtTime(0.3, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-            n.start(now); n.stop(now + 0.4);
-        }
+function playSound(id) {
+    const ctx = getAudio();
+    const now = ctx.currentTime;
+    
+    if (id === 'kick') {
+        // Click transient
+        const clickOsc = ctx.createOscillator();
+        const clickGain = ctx.createGain();
+        clickOsc.type = 'square';
+        clickOsc.frequency.setValueAtTime(1200, now);
+        clickOsc.frequency.exponentialRampToValueAtTime(200, now + 0.01);
+        clickGain.gain.setValueAtTime(0.3, now);
+        clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
+        clickOsc.connect(clickGain).connect(ctx.destination);
+        clickOsc.start(now);
+        clickOsc.stop(now + 0.02);
+        
+        // Sub body
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(120, now);
+        osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
+        gain.gain.setValueAtTime(0.9, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.3);
     }
-
-    function stopAll() {
-        if (state.interval) clearInterval(state.interval);
-        state.interval = null;
-        state.activeType = null;
-        state.activeId = null;
-        state.currentBeat = 0;
-        state.currentStep = 0;
-        $('pulseDot').classList.remove('active');
-        $$('.sound-card, .tap-card, .pattern-card').forEach(c => c.classList.remove('playing'));
-        $$('.syl').forEach(s => s.classList.remove('current'));
-        $$('.mini-step').forEach(s => s.classList.remove('beat'));
+    else if (id === 'snare') {
+        // Body
+        const bodyOsc = ctx.createOscillator();
+        const bodyGain = ctx.createGain();
+        bodyOsc.type = 'triangle';
+        bodyOsc.frequency.setValueAtTime(200, now);
+        bodyOsc.frequency.exponentialRampToValueAtTime(120, now + 0.05);
+        bodyGain.gain.setValueAtTime(0.4, now);
+        bodyGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        bodyOsc.connect(bodyGain).connect(ctx.destination);
+        bodyOsc.start(now);
+        bodyOsc.stop(now + 0.12);
+        
+        // Noise
+        const buf = ctx.createBuffer(1, ctx.sampleRate * 0.15, ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
+        const noise = ctx.createBufferSource();
+        noise.buffer = buf;
+        const nfilt = ctx.createBiquadFilter();
+        nfilt.type = 'highpass';
+        nfilt.frequency.value = 2000;
+        const ngain = ctx.createGain();
+        ngain.gain.setValueAtTime(0.5, now);
+        ngain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+        noise.connect(nfilt).connect(ngain).connect(ctx.destination);
+        noise.start(now);
+        noise.stop(now + 0.15);
     }
-
-    function adjustBPM(delta, e) {
-        if (e) e.stopPropagation();
-        state.bpm = Math.max(40, Math.min(180, state.bpm + delta));
-        $$('.bpm-value').forEach(v => v.textContent = state.bpm);
-        if (state.interval) {
-            clearInterval(state.interval);
-            startInterval();
-        }
+    else if (id === 'hihat') {
+        const buf = ctx.createBuffer(1, ctx.sampleRate * 0.05, ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
+        const noise = ctx.createBufferSource();
+        noise.buffer = buf;
+        const hp = ctx.createBiquadFilter();
+        hp.type = 'highpass';
+        hp.frequency.value = 7000;
+        const bp = ctx.createBiquadFilter();
+        bp.type = 'bandpass';
+        bp.frequency.value = 10000;
+        bp.Q.value = 1;
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        noise.connect(hp).connect(bp).connect(gain).connect(ctx.destination);
+        noise.start(now);
+        noise.stop(now + 0.05);
     }
+}
 
-    function startInterval() {
-        const interval = (60 / state.bpm) * 1000;
-        state.interval = setInterval(tick, interval);
-        tick();
+// Rendering
+function renderSounds() {
+    const el = document.getElementById('soundCards');
+    el.innerHTML = '<div class="grid">' + sounds.map(s => `
+        <div class="card" data-type="sound" data-id="${s.id}">
+            <div class="card-phonetic">${s.phonetic}</div>
+            <div class="card-name">${s.name}</div>
+            <div class="card-status">PLAYING</div>
+        </div>
+    `).join('') + '</div>';
+}
+
+function renderCombos() {
+    document.getElementById('comboGrid').innerHTML = combos.map(c => `
+        <div class="card" data-type="combo" data-id="${c.id}">
+            <div class="card-phonetic">${c.display.join(' ')}</div>
+            <div class="card-name">${c.name}</div>
+            <div class="card-status">PLAYING</div>
+        </div>
+    `).join('');
+}
+
+function renderTriplets() {
+    document.getElementById('tripletGrid').innerHTML = triplets.map(t => `
+        <div class="card" data-type="triplet" data-id="${t.id}">
+            <div class="card-phonetic">${t.display.join(' ')}</div>
+            <div class="card-name">${t.name}</div>
+            <div class="card-status">PLAYING</div>
+        </div>
+    `).join('');
+}
+
+function renderPhrases() {
+    document.getElementById('phraseGrid').innerHTML = phrases.map(p => `
+        <div class="card" data-type="phrase" data-id="${p.id}">
+            <div class="card-phonetic">${p.display}</div>
+            <div class="card-name">${p.name}</div>
+            <div class="card-status">PLAYING</div>
+        </div>
+    `).join('');
+}
+
+function renderPatterns() {
+    document.getElementById('patternCards').innerHTML = patterns.map((p, i) => `
+        <div class="pattern-card" data-type="pattern" data-id="${i}">
+            <div class="pattern-name">${p.name}</div>
+            <div class="pattern-meta">${p.genre} • ${p.tempo} BPM</div>
+            <div class="pattern-phonetic">${p.phonetic}</div>
+            <div class="pattern-status">PLAYING</div>
+        </div>
+    `).join('');
+}
+
+function renderReference() {
+    document.getElementById('refCards').innerHTML = sounds.map(s => `
+        <div class="ref-card">
+            <div class="ref-header">
+                <div class="ref-phonetic">${s.phonetic}</div>
+                <div class="ref-name">${s.name}</div>
+            </div>
+            <div class="ref-text">${s.ref}</div>
+            <a class="ref-link" href="${s.tutorial}" target="_blank">Watch Tutorials →</a>
+        </div>
+    `).join('');
+}
+
+function updateDisplay(type, current, items) {
+    const displayId = type === 'combo' ? 'comboDisplay' : type === 'triplet' ? 'tripletDisplay' : 'phraseDisplay';
+    const display = document.getElementById(displayId);
+    
+    if (!S.timer) {
+        display.innerHTML = `<div class="drill-phonetic">${items.map(x => x).join(' ')}</div>
+            <div class="bpm-control">
+                <button class="bpm-btn" data-delta="-5">−</button>
+                <div class="bpm-value">${S.bpm} BPM</div>
+                <button class="bpm-btn" data-delta="5">+</button>
+            </div>`;
+    } else {
+        const highlighted = items.map((x, i) => i === current ? `<span class="current">${x}</span>` : x).join(' ');
+        display.innerHTML = `<div class="drill-phonetic">${highlighted}</div>
+            <div class="bpm-control">
+                <button class="bpm-btn" data-delta="-5">−</button>
+                <div class="bpm-value">${S.bpm} BPM</div>
+                <button class="bpm-btn" data-delta="5">+</button>
+            </div>`;
     }
+}
 
+// Playback control
+function stopAll() {
+    if (S.timer) {
+        clearInterval(S.timer);
+        S.timer = null;
+    }
+    document.querySelectorAll('.card, .pattern-card').forEach(c => c.classList.remove('playing'));
+    document.getElementById('beatFlash').classList.remove('on');
+    S.type = null;
+    S.id = null;
+    S.beat = 0;
+    S.step = 0;
+}
+
+function flashBeat() {
+    const flash = document.getElementById('beatFlash');
+    flash.classList.add('on');
+    setTimeout(() => flash.classList.remove('on'), 80);
+}
+
+function startLoop(type, id) {
+    stopAll();
+    S.type = type;
+    S.id = id;
+    S.beat = 0;
+    S.step = 0;
+    
+    const card = document.querySelector(`[data-type="${type}"][data-id="${id}"]`);
+    if (card) card.classList.add('playing');
+    
     function tick() {
-        if (state.activeType === 'sound') {
-            const s = coreSounds.find(x => x.id === state.activeId);
-            if (s) playSound(s.soundType);
-        } else if (state.activeType === 'phrase') {
-            const p = phrases.find(x => x.id === state.activeId);
-            if (p) {
-                playSound(p.sounds[state.currentBeat]);
-                $$(`#phraseDisplay .syl`).forEach((s, i) => s.classList.toggle('current', i === state.currentBeat));
-                state.currentBeat = (state.currentBeat + 1) % p.sounds.length;
-            }
-        } else if (state.activeType === 'combo') {
-            const c = combos.find(x => x.id === state.activeId);
-            if (c) {
-                playSound(c.sounds[state.currentBeat]);
-                $$(`#comboDisplay .syl`).forEach((s, i) => s.classList.toggle('current', i === state.currentBeat));
-                state.currentBeat = (state.currentBeat + 1) % c.sounds.length;
-            }
-        } else if (state.activeType === 'triplet') {
-            const t = triplets.find(x => x.id === state.activeId);
-            if (t) {
-                playSound(t.sounds[state.currentBeat]);
-                $$(`#tripletDisplay .syl`).forEach((s, i) => s.classList.toggle('current', i === state.currentBeat));
-                state.currentBeat = (state.currentBeat + 1) % t.sounds.length;
-            }
-        } else if (state.activeType === 'pattern') {
-            const p = patterns.find(x => x.name === state.activeId);
-            if (p) {
-                ['kick', 'snare', 'hihat', 'openhat'].forEach(inst => {
-                    if (p.pattern[inst][state.currentStep]) playSound(inst);
-                });
-                const card = document.querySelector(`.pattern-card[data-name="${state.activeId}"]`);
-                if (card) {
-                    card.querySelectorAll('.mini-step').forEach((s, i) => s.classList.toggle('beat', i % 16 === state.currentStep));
-                }
-                state.currentStep = (state.currentStep + 1) % 16;
-            }
-        }
-    }
-
-    // ===== INIT SOUNDS =====
-    function initSounds() {
-        $('soundCards').innerHTML = coreSounds.map(s => `
-            <div class="sound-card" data-id="${s.id}">
-                <div class="sound-card-top">
-                    <div class="sound-card-phonetic">${s.phonetic}</div>
-                    <div class="sound-card-status">PLAYING</div>
-                </div>
-                <div class="sound-card-name">${s.name}</div>
-                <div class="sound-card-word">${s.word}</div>
-                <div class="sound-card-desc">${s.description}</div>
-                <a href="${s.link}" target="_blank" class="sound-card-link" onclick="event.stopPropagation()">▶ Watch Tutorials</a>
-                <div class="inline-bpm">
-                    <button class="bpm-btn" onclick="adjustBPM(-5, event)">−</button>
-                    <div class="bpm-display"><div class="bpm-value">${state.bpm}</div><div class="bpm-label">BPM</div></div>
-                    <button class="bpm-btn" onclick="adjustBPM(5, event)">+</button>
-                </div>
-            </div>
-        `).join('');
-        $$('.sound-card').forEach(c => {
-            c.addEventListener('click', () => toggleSound(c.dataset.id));
-        });
-    }
-
-    function toggleSound(id) {
-        initAudio();
-        if (state.activeType === 'sound' && state.activeId === id) {
-            stopAll();
-            return;
-        }
-        stopAll();
-        state.activeType = 'sound';
-        state.activeId = id;
-        document.querySelector(`.sound-card[data-id="${id}"]`).classList.add('playing');
-        $('pulseDot').classList.add('active');
-        startInterval();
-    }
-
-    // ===== INIT PHRASES =====
-    function initPhrases() {
-        $('phraseGrid').innerHTML = phrases.map(p => `
-            <div class="tap-card" data-id="${p.id}">
-                <div class="tap-card-status">PLAYING</div>
-                <div class="tap-card-pattern">${p.pattern}</div>
-                <div class="tap-card-name">${p.phrase}</div>
-            </div>
-        `).join('');
-        $$('#phraseGrid .tap-card').forEach(c => {
-            c.addEventListener('click', () => togglePhrase(c.dataset.id));
-        });
-    }
-
-    function togglePhrase(id) {
-        initAudio();
-        if (state.activeType === 'phrase' && state.activeId === id) {
-            stopAll();
-            $('phraseDisplay').style.display = 'none';
-            return;
-        }
-        stopAll();
-        const p = phrases.find(x => x.id === id);
-        state.activeType = 'phrase';
-        state.activeId = id;
-        state.currentBeat = 0;
-        document.querySelector(`#phraseGrid .tap-card[data-id="${id}"]`).classList.add('playing');
+        flashBeat();
         
-        $('phraseDisplay').style.display = 'block';
-        $('phraseDisplay').innerHTML = `
-            <div class="drill-display-card">
-                <div class="drill-display-pattern">${p.syllables.map(s => `<span class="syl">${s}</span>`).join(' ')}</div>
-                <div class="drill-display-name">${p.pattern}</div>
-                <div class="drill-bpm-row">
-                    <button class="bpm-btn" onclick="adjustBPM(-5, event)">−</button>
-                    <div class="bpm-display"><div class="bpm-value">${state.bpm}</div><div class="bpm-label">BPM</div></div>
-                    <button class="bpm-btn" onclick="adjustBPM(5, event)">+</button>
-                </div>
-                <div class="drill-tap-hint">Tap card again to stop</div>
-            </div>
-        `;
-        $('pulseDot').classList.add('active');
-        startInterval();
-    }
-
-    // ===== INIT COMBOS =====
-    function initCombos() {
-        $('comboGrid').innerHTML = combos.map(c => `
-            <div class="tap-card" data-id="${c.id}">
-                <div class="tap-card-status">PLAYING</div>
-                <div class="tap-card-pattern">${c.display[0]} - ${c.display[1]}</div>
-                <div class="tap-card-name">${c.name}</div>
-            </div>
-        `).join('');
-        $$('#comboGrid .tap-card').forEach(c => {
-            c.addEventListener('click', () => toggleCombo(c.dataset.id));
-        });
-    }
-
-    function toggleCombo(id) {
-        initAudio();
-        if (state.activeType === 'combo' && state.activeId === id) {
-            stopAll();
-            $('comboDisplay').style.display = 'none';
-            return;
+        if (type === 'sound') {
+            playSound(id);
         }
-        stopAll();
-        const c = combos.find(x => x.id === id);
-        state.activeType = 'combo';
-        state.activeId = id;
-        state.currentBeat = 0;
-        document.querySelector(`#comboGrid .tap-card[data-id="${id}"]`).classList.add('playing');
+        else if (type === 'combo') {
+            const combo = combos.find(c => c.id === id);
+            playSound(combo.sounds[S.beat % combo.sounds.length]);
+            updateDisplay('combo', S.beat % combo.sounds.length, combo.display);
+            S.beat++;
+        }
+        else if (type === 'triplet') {
+            const triplet = triplets.find(t => t.id === id);
+            playSound(triplet.sounds[S.beat % triplet.sounds.length]);
+            updateDisplay('triplet', S.beat % triplet.sounds.length, triplet.display);
+            S.beat++;
+        }
+        else if (type === 'phrase') {
+            const phrase = phrases.find(p => p.id === id);
+            playSound(phrase.sounds[S.beat % phrase.sounds.length]);
+            updateDisplay('phrase', S.beat % phrase.sounds.length, phrase.display.split(' '));
+            S.beat++;
+        }
+        else if (type === 'pattern') {
+            const pattern = patterns[parseInt(id)];
+            if (pattern.grid.kick[S.step]) playSound('kick');
+            if (pattern.grid.snare[S.step]) playSound('snare');
+            if (pattern.grid.hihat[S.step]) playSound('hihat');
+            S.step = (S.step + 1) % 16;
+        }
+    }
+    
+    tick();
+    const interval = type === 'pattern' ? 60000 / S.bpm / 4 : 60000 / S.bpm;
+    S.timer = setInterval(tick, interval);
+}
+
+function setBPM(newBpm) {
+    S.bpm = Math.max(40, Math.min(200, newBpm));
+    if (S.timer && S.type && S.id) {
+        clearInterval(S.timer);
+        const interval = S.type === 'pattern' ? 60000 / S.bpm / 4 : 60000 / S.bpm;
+        S.timer = setInterval(() => {
+            flashBeat();
+            if (S.type === 'sound') {
+                playSound(S.id);
+            } else if (S.type === 'combo') {
+                const combo = combos.find(c => c.id === S.id);
+                playSound(combo.sounds[S.beat % combo.sounds.length]);
+                updateDisplay('combo', S.beat % combo.sounds.length, combo.display);
+                S.beat++;
+            } else if (S.type === 'triplet') {
+                const triplet = triplets.find(t => t.id === S.id);
+                playSound(triplet.sounds[S.beat % triplet.sounds.length]);
+                updateDisplay('triplet', S.beat % triplet.sounds.length, triplet.display);
+                S.beat++;
+            } else if (S.type === 'phrase') {
+                const phrase = phrases.find(p => p.id === S.id);
+                playSound(phrase.sounds[S.beat % phrase.sounds.length]);
+                updateDisplay('phrase', S.beat % phrase.sounds.length, phrase.display.split(' '));
+                S.beat++;
+            } else if (S.type === 'pattern') {
+                const pattern = patterns[parseInt(S.id)];
+                if (pattern.grid.kick[S.step]) playSound('kick');
+                if (pattern.grid.snare[S.step]) playSound('snare');
+                if (pattern.grid.hihat[S.step]) playSound('hihat');
+                S.step = (S.step + 1) % 16;
+            }
+        }, interval);
+    }
+    document.querySelectorAll('.bpm-value').forEach(el => el.textContent = `${S.bpm} BPM`);
+}
+
+function adjustBPM(delta) {
+    setBPM(S.bpm + delta);
+}
+
+// Event handlers
+document.addEventListener('click', e => {
+    const card = e.target.closest('[data-type]');
+    if (card) {
+        const type = card.dataset.type;
+        const id = card.dataset.id;
         
-        $('comboDisplay').style.display = 'block';
-        $('comboDisplay').innerHTML = `
-            <div class="drill-display-card">
-                <div class="drill-display-pattern">${c.display.map(s => `<span class="syl">${s}</span>`).join(' → ')}</div>
-                <div class="drill-display-name">${c.name}</div>
-                <div class="drill-bpm-row">
-                    <button class="bpm-btn" onclick="adjustBPM(-5, event)">−</button>
-                    <div class="bpm-display"><div class="bpm-value">${state.bpm}</div><div class="bpm-label">BPM</div></div>
-                    <button class="bpm-btn" onclick="adjustBPM(5, event)">+</button>
-                </div>
-                <div class="drill-tap-hint">Tap card again to stop</div>
-            </div>
-        `;
-        $('pulseDot').classList.add('active');
-        startInterval();
-    }
-
-    // ===== INIT TRIPLETS =====
-    function initTriplets() {
-        $('tripletGrid').innerHTML = triplets.map(t => `
-            <div class="tap-card" data-id="${t.id}">
-                <div class="tap-card-status">PLAYING</div>
-                <div class="tap-card-pattern">${t.display.join(' - ')}</div>
-                <div class="tap-card-name">${t.name}</div>
-            </div>
-        `).join('');
-        $$('#tripletGrid .tap-card').forEach(c => {
-            c.addEventListener('click', () => toggleTriplet(c.dataset.id));
-        });
-    }
-
-    function toggleTriplet(id) {
-        initAudio();
-        if (state.activeType === 'triplet' && state.activeId === id) {
-            stopAll();
-            $('tripletDisplay').style.display = 'none';
-            return;
-        }
-        stopAll();
-        const t = triplets.find(x => x.id === id);
-        state.activeType = 'triplet';
-        state.activeId = id;
-        state.currentBeat = 0;
-        document.querySelector(`#tripletGrid .tap-card[data-id="${id}"]`).classList.add('playing');
-        
-        $('tripletDisplay').style.display = 'block';
-        $('tripletDisplay').innerHTML = `
-            <div class="drill-display-card">
-                <div class="drill-display-pattern">${t.display.map(s => `<span class="syl">${s}</span>`).join(' - ')}</div>
-                <div class="drill-display-name">${t.name}</div>
-                <div class="drill-bpm-row">
-                    <button class="bpm-btn" onclick="adjustBPM(-5, event)">−</button>
-                    <div class="bpm-display"><div class="bpm-value">${state.bpm}</div><div class="bpm-label">BPM</div></div>
-                    <button class="bpm-btn" onclick="adjustBPM(5, event)">+</button>
-                </div>
-                <div class="drill-tap-hint">Tap card again to stop</div>
-            </div>
-        `;
-        $('pulseDot').classList.add('active');
-        startInterval();
-    }
-
-    // ===== INIT PATTERNS =====
-    function initPatterns() {
-        $('patternCards').innerHTML = patterns.map(p => {
-            const miniGrid = ['kick', 'snare', 'hihat', 'openhat'].map(inst => 
-                `<div class="mini-grid-row">${p.pattern[inst].map((v, i) => `<div class="mini-step ${v ? 'on' : ''}"></div>`).join('')}</div>`
-            ).join('');
-            return `
-                <div class="pattern-card" data-name="${p.name}" data-tempo="${p.tempo}">
-                    <div class="pattern-card-header">
-                        <div>
-                            <div class="pattern-card-name">${p.name}</div>
-                            <div class="pattern-card-meta">${p.genre} • ${p.tempo} BPM</div>
-                        </div>
-                        <div class="pattern-card-status">PLAYING</div>
-                    </div>
-                    <div class="pattern-card-phonetic">${p.phonetic}</div>
-                    <div class="mini-grid">${miniGrid}</div>
-                    <div class="pattern-bpm">
-                        <button class="bpm-btn" onclick="adjustBPM(-5, event)">−</button>
-                        <div class="bpm-display"><div class="bpm-value">${p.tempo}</div><div class="bpm-label">BPM</div></div>
-                        <button class="bpm-btn" onclick="adjustBPM(5, event)">+</button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-        $$('.pattern-card').forEach(c => {
-            c.addEventListener('click', () => togglePattern(c.dataset.name, parseInt(c.dataset.tempo)));
-        });
-    }
-
-    function togglePattern(name, tempo) {
-        initAudio();
-        if (state.activeType === 'pattern' && state.activeId === name) {
-            stopAll();
-            return;
-        }
-        stopAll();
-        state.activeType = 'pattern';
-        state.activeId = name;
-        state.currentStep = 0;
-        state.bpm = tempo;
-        $$('.bpm-value').forEach(v => v.textContent = state.bpm);
-        document.querySelector(`.pattern-card[data-name="${name}"]`).classList.add('playing');
-        $('pulseDot').classList.add('active');
-        startInterval();
-    }
-
-    // ===== NAVIGATION =====
-    function initNav() {
-        $$('.nav-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
+        if (type === 'sound') {
+            if (S.type === 'sound' && S.id === id) {
                 stopAll();
-                $('phraseDisplay').style.display = 'none';
-                $('comboDisplay').style.display = 'none';
-                $('tripletDisplay').style.display = 'none';
-                $$('.nav-tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                $$('.view').forEach(v => v.classList.remove('active'));
-                $(tab.dataset.view + 'View').classList.add('active');
-            });
-        });
+            } else {
+                stopAll();
+                playSound(id);
+                card.classList.add('playing');
+                S.type = 'sound';
+                S.id = id;
+                S.timer = setInterval(() => {
+                    playSound(id);
+                    flashBeat();
+                }, 60000 / S.bpm);
+            }
+        } else {
+            if (S.type === type && S.id === id) {
+                stopAll();
+                if (type === 'combo') updateDisplay('combo', -1, combos.find(c => c.id === id).display);
+                if (type === 'triplet') updateDisplay('triplet', -1, triplets.find(t => t.id === id).display);
+                if (type === 'phrase') updateDisplay('phrase', -1, phrases.find(p => p.id === id).display.split(' '));
+            } else {
+                if (type === 'pattern') {
+                    S.bpm = patterns[parseInt(id)].tempo;
+                }
+                startLoop(type, id);
+            }
+        }
+        return;
     }
-
-    // ===== INIT =====
-    function init() {
-        initNav();
-        initSounds();
-        initPhrases();
-        initCombos();
-        initTriplets();
-        initPatterns();
+    
+    const bpmBtn = e.target.closest('.bpm-btn');
+    if (bpmBtn) {
+        adjustBPM(parseInt(bpmBtn.dataset.delta));
+        return;
     }
+    
+    const navBtn = e.target.closest('.nav-btn');
+    if (navBtn) {
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        navBtn.classList.add('active');
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(navBtn.dataset.view + 'View').classList.add('active');
+    }
+});
 
-    document.addEventListener('DOMContentLoaded', init);
-    </script>
+// Init
+renderSounds();
+renderCombos();
+renderTriplets();
+renderPhrases();
+renderPatterns();
+renderReference();
+updateDisplay('combo', -1, ['B','t']);
+updateDisplay('triplet', -1, ['B','t','K']);
+updateDisplay('phrase', -1, ['B','t','K','t']);
+</script>
 </body>
 </html>
