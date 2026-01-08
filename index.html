@@ -51,16 +51,7 @@
         .logo { font-size: 18px; font-weight: 700; }
         .logo span { color: var(--accent); }
 
-        .beat-flash {
-            height: 6px;
-            background: var(--border);
-            flex-shrink: 0;
-            transition: background 0.05s;
-        }
-        .beat-flash.on {
-            background: var(--accent);
-            box-shadow: 0 0 20px var(--accent-glow);
-        }
+
 
         nav {
             display: flex;
@@ -318,7 +309,7 @@
         <header>
             <div class="logo">YEN's <span>Beatbox</span></div>
         </header>
-        <div class="beat-flash" id="beatFlash"></div>
+
         <nav>
             <button class="nav-btn active" data-view="train">Train</button>
             <button class="nav-btn" data-view="patterns">Patterns</button>
@@ -692,11 +683,7 @@ function stopAll() {
     S.step = 0;
 }
 
-function flashBeat() {
-    const flash = document.getElementById('beatFlash');
-    flash.classList.add('on');
-    setTimeout(() => flash.classList.remove('on'), 80);
-}
+function flashBeat() {}
 
 function startLoop(type, id) {
     stopAll();
