@@ -51,8 +51,6 @@
         .logo { font-size: 18px; font-weight: 700; }
         .logo span { color: var(--accent); }
 
-
-
         nav {
             display: flex;
             padding: 12px 16px;
@@ -138,6 +136,13 @@
             color: var(--text-dim);
             text-transform: lowercase;
         }
+        .card-hint {
+            font-size: 9px;
+            color: var(--text-dim);
+            opacity: 0.7;
+            margin-top: 4px;
+            line-height: 1.3;
+        }
 
         .card-status {
             position: absolute;
@@ -167,6 +172,7 @@
             align-items: center;
             justify-content: space-between;
             min-height: 56px;
+            gap: 12px;
         }
         .drill-phonetic {
             font-family: 'DM Mono', monospace;
@@ -185,7 +191,8 @@
         .bpm-control {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            flex-shrink: 0;
         }
         .bpm-btn {
             width: 32px;
@@ -205,11 +212,32 @@
             background: var(--accent);
             border-color: var(--accent);
         }
+        .stop-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-elevated);
+            color: var(--text);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .stop-btn:active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        .stop-btn.playing {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
         .bpm-value {
             font-family: 'DM Mono', monospace;
             font-size: 13px;
             color: var(--text-dim);
-            min-width: 60px;
+            min-width: 50px;
             text-align: center;
         }
 
@@ -244,7 +272,25 @@
             font-family: 'DM Mono', monospace;
             font-size: 14px;
             color: var(--accent);
+            margin-bottom: 8px;
         }
+        .pattern-visualizer {
+            display: flex;
+            gap: 2px;
+            height: 24px;
+            align-items: flex-end;
+        }
+        .pattern-step {
+            flex: 1;
+            background: var(--border);
+            border-radius: 2px;
+            transition: all 0.05s;
+        }
+        .pattern-step.kick { height: 100%; background: var(--accent); opacity: 0.4; }
+        .pattern-step.snare { height: 70%; background: #888; opacity: 0.4; }
+        .pattern-step.hihat { height: 40%; background: #666; opacity: 0.4; }
+        .pattern-step.active { opacity: 1; }
+        .pattern-step.current { box-shadow: 0 0 8px var(--accent-glow); }
 
         .pattern-status {
             position: absolute;
@@ -283,9 +329,18 @@
             font-weight: 500;
             color: var(--accent);
         }
+        .ref-title {
+            flex: 1;
+        }
         .ref-name {
             font-size: 16px;
             font-weight: 600;
+        }
+        .ref-category {
+            font-size: 10px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
         .ref-text {
             font-size: 13px;
@@ -339,6 +394,7 @@
             </div>
             <div class="view" id="patternsView">
                 <div class="section">
+                    <div class="drill-display" id="patternDisplay"></div>
                     <div class="section-label">Pattern Library</div>
                     <div id="patternCards"></div>
                 </div>
@@ -353,16 +409,49 @@
     </div>
 
 <script>
+// Extended sounds with variations
 const sounds = [
-    { id: 'kick', phonetic: 'B', name: 'Kick Drum', hint: '"Boots" — lips closed, whispered B, no voice',
+    // KICKS
+    { id: 'kick', phonetic: 'B', name: 'Classic Kick', category: 'Kick',
+      hint: '"Boots" — lips closed, whispered B',
       tutorial: 'https://www.youtube.com/results?search_query=beatbox+kick+drum+tutorial',
       ref: 'Bilabial plosive. Close lips tight, build pressure from diaphragm, release in one punch. Whisper "boo" then drop the vowel. No vocal cord vibration.' },
-    { id: 'hihat', phonetic: 't', name: 'Hi-Hat (Closed)', hint: '"ts" — tongue behind teeth, quick snap',
+    { id: 'kick808', phonetic: 'U', name: '808/Throat Kick', category: 'Kick',
+      hint: 'Close airway, vocalize with throat',
+      tutorial: 'https://www.youtube.com/results?search_query=beatbox+808+kick+tutorial',
+      ref: 'Glottalic. Close epiglottis (like holding breath), vocalize while keeping it closed. Sound comes from vocal cords but stays trapped. Put mic on throat for huge sub.' },
+    { id: 'kickchest', phonetic: 'Bnn', name: 'Chest Bass Kick', category: 'Kick',
+      hint: 'Deep resonance from chest cavity',
+      tutorial: 'https://www.youtube.com/results?search_query=beatbox+chest+bass+tutorial',
+      ref: 'Create large space in back of throat. Big airy breath outward. Feel chest cavity resonate. Very low, bassy "boom" — adds sub-bass depth.' },
+    
+    // HI-HATS
+    { id: 'hihat', phonetic: 't', name: 'Closed Hi-Hat', category: 'Hi-Hat',
+      hint: '"ts" — tongue behind teeth, quick snap',
       tutorial: 'https://www.youtube.com/results?search_query=beatbox+hi+hat+tutorial',
       ref: 'Dental plosive. Tongue tip touches ridge behind upper front teeth. Quick release with teeth lightly closed. The "t" from "cat" — unvoiced consonant only.' },
-    { id: 'snare', phonetic: 'K', name: 'K-Snare', hint: '"Cats" — hard K, back of tongue',
+    { id: 'hihatopen', phonetic: 'ts', name: 'Open Hi-Hat', category: 'Hi-Hat',
+      hint: '"tssss" — extend the s sound',
+      tutorial: 'https://www.youtube.com/results?search_query=beatbox+open+hi+hat+tutorial',
+      ref: 'Start with closed { t }, extend with sustained "sss" sound. Open lips slightly for more air. Duration of "s" controls openness. Cut off abruptly for half-open.' },
+    { id: 'hihatinward', phonetic: '^ts', name: 'Inward Hi-Hat', category: 'Hi-Hat',
+      hint: 'Breathe IN while making the sound',
+      tutorial: 'https://www.youtube.com/results?search_query=beatbox+inward+hi+hat+tutorial',
+      ref: 'Tongue on alveolar ridge, draw tongue down and back while breathing IN. Different tonal quality. Key technique for circular breathing patterns.' },
+    
+    // SNARES
+    { id: 'snare', phonetic: 'K', name: 'K-Snare', category: 'Snare',
+      hint: '"Cats" — hard K, back of tongue',
       tutorial: 'https://www.youtube.com/results?search_query=beatbox+k+snare+tutorial',
-      ref: 'Velar plosive. Back of tongue hits soft palate. Hard "K" as in "kit" with strong accent. Short, percussive click. The foundation snare sound.' }
+      ref: 'Velar plosive. Back of tongue hits soft palate. Hard "K" as in "kit" with strong accent. Short, percussive click. The foundation snare sound.' },
+    { id: 'snarepf', phonetic: 'Pf', name: 'PF-Snare (Classic)', category: 'Snare',
+      hint: '"poof" without the "oo"',
+      tutorial: 'https://www.youtube.com/results?search_query=beatbox+pf+snare+tutorial',
+      ref: 'Say "poof" without the "oo" — zero gap between consonants. Pressure on "p", let "ff" resonate using only mouth air. Heavy attack-and-decay, DJ-style backbone.' },
+    { id: 'snareinward', phonetic: '^K', name: 'Inward K-Snare', category: 'Snare',
+      hint: 'Kenny Muhammad technique — breathe while playing',
+      tutorial: 'https://www.youtube.com/results?search_query=beatbox+inward+k+snare+tutorial',
+      ref: 'Touch tongue tip to roof behind "t" position. Seal sides creating cavity. Inhale while dropping middle tongue. Continue inhale for "shh" tail. Allows breathing during beats!' }
 ];
 
 const combos = [
@@ -375,92 +464,77 @@ const combos = [
 ];
 
 const triplets = [
-    // Basic patterns
     { id: 'b-t-k', sounds: ['kick','hihat','snare'], display: ['B','t','K'], name: 'boots and cats' },
     { id: 'k-t-b', sounds: ['snare','hihat','kick'], display: ['K','t','B'], name: 'cats and boots' },
     { id: 'b-k-t', sounds: ['kick','snare','hihat'], display: ['B','K','t'], name: 'boom kat' },
     { id: 't-b-k', sounds: ['hihat','kick','snare'], display: ['t','B','K'], name: 'and boom kat' },
     { id: 't-k-b', sounds: ['hihat','snare','kick'], display: ['t','K','B'], name: 'and kat boom' },
     { id: 'k-b-t', sounds: ['snare','kick','hihat'], display: ['K','B','t'], name: 'kat boom and' },
-    
-    // Double sounds (funk emphasis)
     { id: 'b-b-k', sounds: ['kick','kick','snare'], display: ['B','B','K'], name: 'double kick snap' },
     { id: 'b-b-t', sounds: ['kick','kick','hihat'], display: ['B','B','t'], name: 'double kick hat' },
     { id: 'k-k-b', sounds: ['snare','snare','kick'], display: ['K','K','B'], name: 'double snap kick' },
     { id: 'k-k-t', sounds: ['snare','snare','hihat'], display: ['K','K','t'], name: 'double snap hat' },
     { id: 't-t-k', sounds: ['hihat','hihat','snare'], display: ['t','t','K'], name: 'tika snare' },
     { id: 't-t-b', sounds: ['hihat','hihat','kick'], display: ['t','t','B'], name: 'tika kick' },
-    
-    // Offbeat feels
     { id: 't-k-t', sounds: ['hihat','snare','hihat'], display: ['t','K','t'], name: 'offbeat snare' },
     { id: 't-b-t', sounds: ['hihat','kick','hihat'], display: ['t','B','t'], name: 'offbeat kick' },
     { id: 'k-t-k', sounds: ['snare','hihat','snare'], display: ['K','t','K'], name: 'snare sandwich' },
     { id: 'b-t-b', sounds: ['kick','hihat','kick'], display: ['B','t','B'], name: 'kick sandwich' }
 ];
 
+// Phrases with word-to-sound mapping
 const phrases = [
-    // FOUNDATION - The Classics
-    { id: 'boots-cats', syllables: ['boots','and','cats','and'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'boots and cats' },
-    { id: 'boots-n-cats', syllables: ['boots','n','cats','n'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'boots n cats' },
-    { id: 'boots-cats-2', syllables: ['boots','cats','boots','cats'], sounds: ['kick','snare','kick','snare'], display: 'B K B K', name: 'boots cats (no hat)' },
+    // Each phrase shows: syllables (words you say) → sounds (what they become)
+    { id: 'boots-cats', syllables: ['boots','and','cats','and'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'boots and cats', hint: 'boots=B and=t cats=K and=t' },
+    { id: 'boots-n-cats', syllables: ['boots','n','cats','n'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'boots n cats', hint: 'boots=B n=t cats=K n=t' },
+    { id: 'boots-cats-2', syllables: ['boots','cats','boots','cats'], sounds: ['kick','snare','kick','snare'], display: 'B K B K', name: 'boots cats (no hat)', hint: 'boots=B cats=K (skip the ands)' },
     
-    // FUNKY PHRASES - Syncopation focus
-    { id: 'funky-town', syllables: ['fun','ky','town','uh'], sounds: ['kick','snare','kick','hihat'], display: 'B K B t', name: 'funky town' },
-    { id: 'get-funky', syllables: ['get','fun','ky','now'], sounds: ['hihat','kick','snare','kick'], display: 't B K B', name: 'get funky now' },
-    { id: 'bump-ditty', syllables: ['bump','dit','ty','bump'], sounds: ['kick','hihat','hihat','kick'], display: 'B t t B', name: 'bump ditty' },
-    { id: 'do-the-funk', syllables: ['do','the','funk','y'], sounds: ['kick','hihat','kick','snare'], display: 'B t B K', name: 'do the funk' },
-    { id: 'funk-machine', syllables: ['funk','ma','chine','uh'], sounds: ['kick','snare','kick','hihat'], display: 'B K B t', name: 'funk machine' },
-    { id: 'slap-it', syllables: ['slap','it','down','now'], sounds: ['snare','hihat','kick','kick'], display: 'K t B B', name: 'slap it down' },
+    { id: 'funky-town', syllables: ['fun','ky','town','uh'], sounds: ['kick','snare','kick','hihat'], display: 'B K B t', name: 'funky town', hint: 'fun=B ky=K town=B uh=t' },
+    { id: 'get-funky', syllables: ['get','fun','ky','now'], sounds: ['hihat','kick','snare','kick'], display: 't B K B', name: 'get funky now', hint: 'get=t fun=B ky=K now=B' },
+    { id: 'bump-ditty', syllables: ['bump','dit','ty','bump'], sounds: ['kick','hihat','hihat','kick'], display: 'B t t B', name: 'bump ditty', hint: 'bump=B dit=t ty=t bump=B' },
+    { id: 'do-the-funk', syllables: ['do','the','funk','y'], sounds: ['kick','hihat','kick','snare'], display: 'B t B K', name: 'do the funk', hint: 'do=B the=t funk=B y=K' },
+    { id: 'funk-machine', syllables: ['funk','ma','chine','uh'], sounds: ['kick','snare','kick','hihat'], display: 'B K B t', name: 'funk machine', hint: 'funk=B ma=K chine=B uh=t' },
+    { id: 'slap-it', syllables: ['slap','it','down','now'], sounds: ['snare','hihat','kick','kick'], display: 'K t B B', name: 'slap it down', hint: 'slap=K it=t down=B now=B' },
     
-    // POCKET GROOVES - Feel the pocket
-    { id: 'in-the-pocket', syllables: ['in','the','pock','et'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'in the pocket' },
-    { id: 'hit-it', syllables: ['hit','it','hit','it'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'hit it' },
-    { id: 'push-pull', syllables: ['push','uh','pull','uh'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'push pull' },
-    { id: 'boom-bap', syllables: ['boom','bap','boom','bap'], sounds: ['kick','snare','kick','snare'], display: 'B K B K', name: 'boom bap' },
-    { id: 'boom-clap', syllables: ['boom','clap','boom','clap'], sounds: ['kick','snare','kick','snare'], display: 'B K B K', name: 'boom clap' },
+    { id: 'in-the-pocket', syllables: ['in','the','pock','et'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'in the pocket', hint: 'in=B the=t pock=K et=t' },
+    { id: 'hit-it', syllables: ['hit','it','hit','it'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'hit it', hint: 'hit=B it=t hit=K it=t' },
+    { id: 'push-pull', syllables: ['push','uh','pull','uh'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'push pull', hint: 'push=B uh=t pull=K uh=t' },
+    { id: 'boom-bap', syllables: ['boom','bap','boom','bap'], sounds: ['kick','snare','kick','snare'], display: 'B K B K', name: 'boom bap', hint: 'boom=B bap=K' },
+    { id: 'boom-clap', syllables: ['boom','clap','boom','clap'], sounds: ['kick','snare','kick','snare'], display: 'B K B K', name: 'boom clap', hint: 'boom=B clap=K' },
     
-    // DOUBLE KICK PHRASES
-    { id: 'bubba-cup', syllables: ['bub','ba','cup','uh'], sounds: ['kick','kick','snare','hihat'], display: 'B B K t', name: 'bubba cup' },
-    { id: 'coffee-cup', syllables: ['cof','fee','cup','uh'], sounds: ['kick','kick','snare','hihat'], display: 'B B K t', name: 'coffee cup' },
-    { id: 'butter-cup', syllables: ['but','ter','cup','uh'], sounds: ['kick','kick','snare','hihat'], display: 'B B K t', name: 'butter cup' },
-    { id: 'double-up', syllables: ['dou','ble','up','now'], sounds: ['kick','kick','hihat','snare'], display: 'B B t K', name: 'double up' },
+    { id: 'bubba-cup', syllables: ['bub','ba','cup','uh'], sounds: ['kick','kick','snare','hihat'], display: 'B B K t', name: 'bubba cup', hint: 'bub=B ba=B cup=K uh=t' },
+    { id: 'coffee-cup', syllables: ['cof','fee','cup','uh'], sounds: ['kick','kick','snare','hihat'], display: 'B B K t', name: 'coffee cup', hint: 'cof=B fee=B cup=K uh=t' },
+    { id: 'butter-cup', syllables: ['but','ter','cup','uh'], sounds: ['kick','kick','snare','hihat'], display: 'B B K t', name: 'butter cup', hint: 'but=B ter=B cup=K uh=t' },
+    { id: 'double-up', syllables: ['dou','ble','up','now'], sounds: ['kick','kick','hihat','snare'], display: 'B B t K', name: 'double up', hint: 'dou=B ble=B up=t now=K' },
     
-    // SNARE LEAD PHRASES
-    { id: 'cats-boots', syllables: ['cats','and','boots','and'], sounds: ['snare','hihat','kick','hihat'], display: 'K t B t', name: 'cats and boots' },
-    { id: 'clap-stomp', syllables: ['clap','uh','stomp','uh'], sounds: ['snare','hihat','kick','hihat'], display: 'K t B t', name: 'clap stomp' },
-    { id: 'snare-first', syllables: ['snare','first','kick','last'], sounds: ['snare','hihat','kick','hihat'], display: 'K t B t', name: 'snare first' },
+    { id: 'cats-boots', syllables: ['cats','and','boots','and'], sounds: ['snare','hihat','kick','hihat'], display: 'K t B t', name: 'cats and boots', hint: 'cats=K and=t boots=B and=t' },
+    { id: 'clap-stomp', syllables: ['clap','uh','stomp','uh'], sounds: ['snare','hihat','kick','hihat'], display: 'K t B t', name: 'clap stomp', hint: 'clap=K uh=t stomp=B uh=t' },
+    { id: 'snare-first', syllables: ['snare','first','kick','last'], sounds: ['snare','hihat','kick','hihat'], display: 'K t B t', name: 'snare first', hint: 'snare=K first=t kick=B last=t' },
     
-    // OFFBEAT/SYNCOPATION
-    { id: 'pick-it-up', syllables: ['pick','it','up','now'], sounds: ['hihat','kick','hihat','snare'], display: 't B t K', name: 'pick it up' },
-    { id: 'and-one', syllables: ['and','one','and','two'], sounds: ['hihat','kick','hihat','snare'], display: 't B t K', name: 'and one and two' },
-    { id: 'upbeat', syllables: ['up','beat','down','beat'], sounds: ['hihat','kick','hihat','snare'], display: 't B t K', name: 'upbeat downbeat' },
+    { id: 'pick-it-up', syllables: ['pick','it','up','now'], sounds: ['hihat','kick','hihat','snare'], display: 't B t K', name: 'pick it up', hint: 'pick=t it=B up=t now=K' },
+    { id: 'and-one', syllables: ['and','one','and','two'], sounds: ['hihat','kick','hihat','snare'], display: 't B t K', name: 'and one and two', hint: 'and=t one=B and=t two=K' },
+    { id: 'upbeat', syllables: ['up','beat','down','beat'], sounds: ['hihat','kick','hihat','snare'], display: 't B t K', name: 'upbeat downbeat', hint: 'up=t beat=B down=t beat=K' },
     
-    // EXTENDED PHRASES (6-8 syllables)
-    { id: 'boots-cats-boots-cats', syllables: ['boots','and','cats','and','boots','and','cats','and'], sounds: ['kick','hihat','snare','hihat','kick','hihat','snare','hihat'], display: 'B t K t B t K t', name: 'boots and cats x2' },
-    { id: 'funky-drummer', syllables: ['fun','ky','drum','mer','hit','it','now','uh'], sounds: ['kick','snare','kick','hihat','snare','hihat','kick','hihat'], display: 'B K B t K t B t', name: 'funky drummer' },
-    { id: 'give-drummer-some', syllables: ['give','the','drum','mer','some','uh','now','uh'], sounds: ['kick','hihat','kick','snare','kick','hihat','snare','hihat'], display: 'B t B K B t K t', name: 'give drummer some' },
-    { id: 'shake-your-body', syllables: ['shake','your','bo','dy','down','to','ground','uh'], sounds: ['kick','hihat','kick','snare','kick','hihat','snare','hihat'], display: 'B t B K B t K t', name: 'shake your body' },
+    { id: 'boots-cats-boots-cats', syllables: ['boots','and','cats','and','boots','and','cats','and'], sounds: ['kick','hihat','snare','hihat','kick','hihat','snare','hihat'], display: 'B t K t B t K t', name: 'boots and cats x2', hint: 'Full bar: boots=B and=t cats=K and=t (repeat)' },
+    { id: 'funky-drummer', syllables: ['fun','ky','drum','mer','hit','it','now','uh'], sounds: ['kick','snare','kick','hihat','snare','hihat','kick','hihat'], display: 'B K B t K t B t', name: 'funky drummer', hint: 'fun=B ky=K drum=B mer=t hit=K it=t now=B uh=t' },
+    { id: 'give-drummer-some', syllables: ['give','the','drum','mer','some','uh','now','uh'], sounds: ['kick','hihat','kick','snare','kick','hihat','snare','hihat'], display: 'B t B K B t K t', name: 'give drummer some', hint: 'give=B the=t drum=B mer=K some=B uh=t now=K uh=t' },
+    { id: 'shake-your-body', syllables: ['shake','your','bo','dy','down','to','ground','uh'], sounds: ['kick','hihat','kick','snare','kick','hihat','snare','hihat'], display: 'B t B K B t K t', name: 'shake your body', hint: 'shake=B your=t bo=B dy=K down=B to=t ground=K uh=t' },
     
-    // FOOD/NONSENSE (Classic teaching method)
-    { id: 'pizza-hut', syllables: ['piz','za','hut','uh'], sounds: ['kick','snare','kick','hihat'], display: 'B K B t', name: 'pizza hut' },
-    { id: 'kit-kat', syllables: ['kit','kat','kit','kat'], sounds: ['snare','snare','snare','snare'], display: 'K K K K', name: 'kit kat' },
-    { id: 'ice-cream', syllables: ['ice','cream','sun','dae'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'ice cream sundae' },
-    { id: 'peanut-butter', syllables: ['pea','nut','but','ter'], sounds: ['kick','hihat','kick','hihat'], display: 'B t B t', name: 'peanut butter' },
-    { id: 'coca-cola', syllables: ['co','ca','co','la'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'coca cola' },
+    { id: 'pizza-hut', syllables: ['piz','za','hut','uh'], sounds: ['kick','snare','kick','hihat'], display: 'B K B t', name: 'pizza hut', hint: 'piz=B za=K hut=B uh=t' },
+    { id: 'kit-kat', syllables: ['kit','kat','kit','kat'], sounds: ['snare','snare','snare','snare'], display: 'K K K K', name: 'kit kat', hint: 'kit=K kat=K (all snares!)' },
+    { id: 'ice-cream', syllables: ['ice','cream','sun','dae'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'ice cream sundae', hint: 'ice=B cream=t sun=K dae=t' },
+    { id: 'peanut-butter', syllables: ['pea','nut','but','ter'], sounds: ['kick','hihat','kick','hihat'], display: 'B t B t', name: 'peanut butter', hint: 'pea=B nut=t but=B ter=t (no snare!)' },
+    { id: 'coca-cola', syllables: ['co','ca','co','la'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'coca cola', hint: 'co=B ca=t co=K la=t' },
     
-    // HIP-HOP PHRASES  
-    { id: 'drop-beat', syllables: ['drop','the','beat','now'], sounds: ['kick','hihat','snare','kick'], display: 'B t K B', name: 'drop the beat' },
-    { id: 'check-it', syllables: ['check','it','out','yo'], sounds: ['snare','hihat','kick','hihat'], display: 'K t B t', name: 'check it out' },
-    { id: 'rock-it', syllables: ['rock','it','dont','stop'], sounds: ['kick','hihat','snare','kick'], display: 'B t K B', name: 'rock it dont stop' },
-    { id: 'break-it-down', syllables: ['break','it','down','now'], sounds: ['kick','hihat','kick','snare'], display: 'B t B K', name: 'break it down' }
+    { id: 'drop-beat', syllables: ['drop','the','beat','now'], sounds: ['kick','hihat','snare','kick'], display: 'B t K B', name: 'drop the beat', hint: 'drop=B the=t beat=K now=B' },
+    { id: 'check-it', syllables: ['check','it','out','yo'], sounds: ['snare','hihat','kick','hihat'], display: 'K t B t', name: 'check it out', hint: 'check=K it=t out=B yo=t' },
+    { id: 'rock-it', syllables: ['rock','it','dont','stop'], sounds: ['kick','hihat','snare','kick'], display: 'B t K B', name: 'rock it dont stop', hint: 'rock=B it=t dont=K stop=B' },
+    { id: 'break-it-down', syllables: ['break','it','down','now'], sounds: ['kick','hihat','kick','snare'], display: 'B t B K', name: 'break it down', hint: 'break=B it=t down=B now=K' }
 ];
 
 const patterns = [
-    // FOUNDATION
     { name: 'Boots & Cats', genre: 'Foundation', tempo: 80, phonetic: 'B t K t', grid: { kick:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0] }},
     { name: 'Simple Backbeat', genre: 'Foundation', tempo: 85, phonetic: 'B K B K', grid: { kick:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] }},
-    
-    // FUNK - The Main Event
     { name: 'Funky Drummer', genre: 'Funk', tempo: 98, phonetic: 'B t K t B tK t', grid: { kick:[1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
     { name: 'Clyde Stubblefield', genre: 'Funk', tempo: 100, phonetic: 'B t t K t B t K', grid: { kick:[1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
     { name: 'James Brown 1', genre: 'Funk', tempo: 105, phonetic: 'B t K t t B K t', grid: { kick:[1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
@@ -473,21 +547,13 @@ const patterns = [
     { name: 'Superstition', genre: 'Funk', tempo: 98, phonetic: 'B B t K t B t K', grid: { kick:[1,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
     { name: 'Brick House', genre: 'Funk', tempo: 104, phonetic: 'B t t K B t t K', grid: { kick:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
     { name: 'Get Up Offa', genre: 'Funk', tempo: 108, phonetic: 'B t K t B B K t', grid: { kick:[1,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
-    
-    // HIP-HOP
     { name: 'Boom Bap', genre: 'Hip-Hop', tempo: 92, phonetic: 'B t t K B B t K', grid: { kick:[1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0] }},
     { name: 'East Coast', genre: 'Hip-Hop', tempo: 90, phonetic: 'B t K t B t K t', grid: { kick:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
     { name: 'West Coast', genre: 'Hip-Hop', tempo: 88, phonetic: 'B t t K t B t K', grid: { kick:[1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
     { name: 'Half-Time', genre: 'Hip-Hop', tempo: 80, phonetic: 'B t t t t t K t', grid: { kick:[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], snare:[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
-    
-    // ROCK
     { name: 'Basic Rock', genre: 'Rock', tempo: 100, phonetic: 'B t t t K t t t', grid: { kick:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
     { name: 'Hard Rock', genre: 'Rock', tempo: 120, phonetic: 'B t B K B t B K', grid: { kick:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }},
-    
-    // HOUSE/ELECTRONIC
     { name: 'Four on Floor', genre: 'House', tempo: 124, phonetic: 'B t B t B t B t', grid: { kick:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0] }},
-    
-    // TRAP
     { name: 'Trap', genre: 'Trap', tempo: 140, phonetic: 'B tttt K tttt', grid: { kick:[1,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1] }}
 ];
 
@@ -495,7 +561,7 @@ const patterns = [
 const S = { type: null, id: null, bpm: 80, beat: 0, step: 0, timer: null };
 let audioCtx;
 
-// Audio
+// Audio - unified playSound function
 function getAudio() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     return audioCtx;
@@ -505,14 +571,17 @@ function playSound(id) {
     const ctx = getAudio();
     const now = ctx.currentTime;
     
-    if (id === 'kick') {
+    // Map variations to base sounds for now
+    const baseId = id.replace('808','').replace('chest','').replace('open','').replace('inward','').replace('pf','');
+    
+    if (id === 'kick' || id === 'kick808' || id === 'kickchest') {
         // Click transient
         const clickOsc = ctx.createOscillator();
         const clickGain = ctx.createGain();
         clickOsc.type = 'square';
         clickOsc.frequency.setValueAtTime(1200, now);
         clickOsc.frequency.exponentialRampToValueAtTime(200, now + 0.01);
-        clickGain.gain.setValueAtTime(0.3, now);
+        clickGain.gain.setValueAtTime(0.15, now); // Reduced from 0.3
         clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
         clickOsc.connect(clickGain).connect(ctx.destination);
         clickOsc.start(now);
@@ -522,22 +591,22 @@ function playSound(id) {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(120, now);
+        osc.frequency.setValueAtTime(id === 'kick808' ? 60 : id === 'kickchest' ? 50 : 120, now);
         osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
-        gain.gain.setValueAtTime(0.9, now);
+        gain.gain.setValueAtTime(0.5, now); // Reduced from 0.9
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
         osc.connect(gain).connect(ctx.destination);
         osc.start(now);
         osc.stop(now + 0.3);
     }
-    else if (id === 'snare') {
+    else if (id === 'snare' || id === 'snarepf' || id === 'snareinward') {
         // Body
         const bodyOsc = ctx.createOscillator();
         const bodyGain = ctx.createGain();
         bodyOsc.type = 'triangle';
-        bodyOsc.frequency.setValueAtTime(200, now);
+        bodyOsc.frequency.setValueAtTime(id === 'snarepf' ? 180 : 200, now);
         bodyOsc.frequency.exponentialRampToValueAtTime(120, now + 0.05);
-        bodyGain.gain.setValueAtTime(0.4, now);
+        bodyGain.gain.setValueAtTime(0.35, now);
         bodyGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
         bodyOsc.connect(bodyGain).connect(ctx.destination);
         bodyOsc.start(now);
@@ -551,16 +620,17 @@ function playSound(id) {
         noise.buffer = buf;
         const nfilt = ctx.createBiquadFilter();
         nfilt.type = 'highpass';
-        nfilt.frequency.value = 2000;
+        nfilt.frequency.value = id === 'snarepf' ? 1500 : 2000;
         const ngain = ctx.createGain();
-        ngain.gain.setValueAtTime(0.5, now);
+        ngain.gain.setValueAtTime(0.45, now);
         ngain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
         noise.connect(nfilt).connect(ngain).connect(ctx.destination);
         noise.start(now);
         noise.stop(now + 0.15);
     }
-    else if (id === 'hihat') {
-        const buf = ctx.createBuffer(1, ctx.sampleRate * 0.05, ctx.sampleRate);
+    else if (id === 'hihat' || id === 'hihatopen' || id === 'hihatinward') {
+        const duration = id === 'hihatopen' ? 0.15 : 0.05;
+        const buf = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate);
         const data = buf.getChannelData(0);
         for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
         const noise = ctx.createBufferSource();
@@ -573,24 +643,47 @@ function playSound(id) {
         bp.frequency.value = 10000;
         bp.Q.value = 1;
         const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.4, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        gain.gain.setValueAtTime(0.5, now); // Increased from 0.4
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
         noise.connect(hp).connect(bp).connect(gain).connect(ctx.destination);
         noise.start(now);
-        noise.stop(now + 0.05);
+        noise.stop(now + duration);
     }
 }
 
 // Rendering
 function renderSounds() {
+    // Group by category
+    const kicks = sounds.filter(s => s.category === 'Kick');
+    const hihats = sounds.filter(s => s.category === 'Hi-Hat');
+    const snares = sounds.filter(s => s.category === 'Snare');
+    
     const el = document.getElementById('soundCards');
-    el.innerHTML = '<div class="grid">' + sounds.map(s => `
-        <div class="card" data-type="sound" data-id="${s.id}">
-            <div class="card-phonetic">${s.phonetic}</div>
-            <div class="card-name">${s.name}</div>
-            <div class="card-status">PLAYING</div>
-        </div>
-    `).join('') + '</div>';
+    el.innerHTML = `
+        <div class="grid">${kicks.map(s => `
+            <div class="card" data-type="sound" data-id="${s.id}">
+                <div class="card-phonetic">${s.phonetic}</div>
+                <div class="card-name">${s.name}</div>
+                <div class="card-status">▶</div>
+            </div>
+        `).join('')}</div>
+        <div style="height:10px"></div>
+        <div class="grid">${hihats.map(s => `
+            <div class="card" data-type="sound" data-id="${s.id}">
+                <div class="card-phonetic">${s.phonetic}</div>
+                <div class="card-name">${s.name}</div>
+                <div class="card-status">▶</div>
+            </div>
+        `).join('')}</div>
+        <div style="height:10px"></div>
+        <div class="grid">${snares.map(s => `
+            <div class="card" data-type="sound" data-id="${s.id}">
+                <div class="card-phonetic">${s.phonetic}</div>
+                <div class="card-name">${s.name}</div>
+                <div class="card-status">▶</div>
+            </div>
+        `).join('')}</div>
+    `;
 }
 
 function renderCombos() {
@@ -598,7 +691,7 @@ function renderCombos() {
         <div class="card" data-type="combo" data-id="${c.id}">
             <div class="card-phonetic">${c.display.join(' ')}</div>
             <div class="card-name">${c.name}</div>
-            <div class="card-status">PLAYING</div>
+            <div class="card-status">▶</div>
         </div>
     `).join('');
 }
@@ -608,7 +701,7 @@ function renderTriplets() {
         <div class="card" data-type="triplet" data-id="${t.id}">
             <div class="card-phonetic">${t.display.join(' ')}</div>
             <div class="card-name">${t.name}</div>
-            <div class="card-status">PLAYING</div>
+            <div class="card-status">▶</div>
         </div>
     `).join('');
 }
@@ -618,7 +711,8 @@ function renderPhrases() {
         <div class="card" data-type="phrase" data-id="${p.id}">
             <div class="card-phonetic">${p.display}</div>
             <div class="card-name">${p.name}</div>
-            <div class="card-status">PLAYING</div>
+            <div class="card-hint">${p.hint}</div>
+            <div class="card-status">▶</div>
         </div>
     `).join('');
 }
@@ -629,44 +723,70 @@ function renderPatterns() {
             <div class="pattern-name">${p.name}</div>
             <div class="pattern-meta">${p.genre} • ${p.tempo} BPM</div>
             <div class="pattern-phonetic">${p.phonetic}</div>
-            <div class="pattern-status">PLAYING</div>
+            <div class="pattern-visualizer" id="viz-${i}">
+                ${Array(16).fill(0).map((_, j) => {
+                    let cls = 'pattern-step';
+                    if (p.grid.kick[j]) cls += ' kick';
+                    else if (p.grid.snare[j]) cls += ' snare';
+                    else if (p.grid.hihat[j]) cls += ' hihat';
+                    return `<div class="${cls}" data-step="${j}"></div>`;
+                }).join('')}
+            </div>
+            <div class="pattern-status">▶</div>
         </div>
     `).join('');
 }
 
 function renderReference() {
-    document.getElementById('refCards').innerHTML = sounds.map(s => `
+    // Group by category
+    const kicks = sounds.filter(s => s.category === 'Kick');
+    const hihats = sounds.filter(s => s.category === 'Hi-Hat');
+    const snares = sounds.filter(s => s.category === 'Snare');
+    
+    const renderGroup = (items) => items.map(s => `
         <div class="ref-card">
             <div class="ref-header">
                 <div class="ref-phonetic">${s.phonetic}</div>
-                <div class="ref-name">${s.name}</div>
+                <div class="ref-title">
+                    <div class="ref-name">${s.name}</div>
+                    <div class="ref-category">${s.category}</div>
+                </div>
             </div>
             <div class="ref-text">${s.ref}</div>
             <a class="ref-link" href="${s.tutorial}" target="_blank">Watch Tutorials →</a>
         </div>
     `).join('');
+    
+    document.getElementById('refCards').innerHTML = 
+        '<div class="section-label" style="margin-top:0">Kicks</div>' + renderGroup(kicks) +
+        '<div class="section-label">Hi-Hats</div>' + renderGroup(hihats) +
+        '<div class="section-label">Snares</div>' + renderGroup(snares);
 }
 
-function updateDisplay(type, current, items) {
-    const displayId = type === 'combo' ? 'comboDisplay' : type === 'triplet' ? 'tripletDisplay' : 'phraseDisplay';
+function updateDisplay(type, current, items, isPlaying = false) {
+    const displayId = type === 'combo' ? 'comboDisplay' : type === 'triplet' ? 'tripletDisplay' : type === 'pattern' ? 'patternDisplay' : 'phraseDisplay';
     const display = document.getElementById(displayId);
     
-    if (!S.timer) {
-        display.innerHTML = `<div class="drill-phonetic">${items.map(x => x).join(' ')}</div>
-            <div class="bpm-control">
-                <button class="bpm-btn" data-delta="-5">−</button>
-                <div class="bpm-value">${S.bpm} BPM</div>
-                <button class="bpm-btn" data-delta="5">+</button>
-            </div>`;
-    } else {
-        const highlighted = items.map((x, i) => i === current ? `<span class="current">${x}</span>` : x).join(' ');
-        display.innerHTML = `<div class="drill-phonetic">${highlighted}</div>
-            <div class="bpm-control">
-                <button class="bpm-btn" data-delta="-5">−</button>
-                <div class="bpm-value">${S.bpm} BPM</div>
-                <button class="bpm-btn" data-delta="5">+</button>
-            </div>`;
-    }
+    const highlighted = items.map((x, i) => i === current ? `<span class="current">${x}</span>` : x).join(' ');
+    display.innerHTML = `
+        <div class="drill-phonetic">${highlighted}</div>
+        <div class="bpm-control">
+            <button class="stop-btn ${isPlaying ? 'playing' : ''}" data-action="stop">${isPlaying ? '■' : '▶'}</button>
+            <button class="bpm-btn" data-delta="-5">−</button>
+            <div class="bpm-value">${S.bpm}</div>
+            <button class="bpm-btn" data-delta="5">+</button>
+        </div>
+    `;
+}
+
+function updatePatternViz() {
+    if (S.type !== 'pattern') return;
+    const viz = document.getElementById(`viz-${S.id}`);
+    if (!viz) return;
+    
+    viz.querySelectorAll('.pattern-step').forEach((el, i) => {
+        el.classList.toggle('current', i === S.step);
+    });
 }
 
 // Playback control
@@ -676,13 +796,13 @@ function stopAll() {
         S.timer = null;
     }
     document.querySelectorAll('.card, .pattern-card').forEach(c => c.classList.remove('playing'));
+    document.querySelectorAll('.pattern-step').forEach(el => el.classList.remove('current'));
+    document.querySelectorAll('.stop-btn').forEach(b => { b.classList.remove('playing'); b.textContent = '▶'; });
     S.type = null;
     S.id = null;
     S.beat = 0;
     S.step = 0;
 }
-
-function flashBeat() {}
 
 function startLoop(type, id) {
     stopAll();
@@ -695,27 +815,25 @@ function startLoop(type, id) {
     if (card) card.classList.add('playing');
     
     function tick() {
-        flashBeat();
-        
         if (type === 'sound') {
             playSound(id);
         }
         else if (type === 'combo') {
             const combo = combos.find(c => c.id === id);
             playSound(combo.sounds[S.beat % combo.sounds.length]);
-            updateDisplay('combo', S.beat % combo.sounds.length, combo.display);
+            updateDisplay('combo', S.beat % combo.sounds.length, combo.display, true);
             S.beat++;
         }
         else if (type === 'triplet') {
             const triplet = triplets.find(t => t.id === id);
             playSound(triplet.sounds[S.beat % triplet.sounds.length]);
-            updateDisplay('triplet', S.beat % triplet.sounds.length, triplet.display);
+            updateDisplay('triplet', S.beat % triplet.sounds.length, triplet.display, true);
             S.beat++;
         }
         else if (type === 'phrase') {
             const phrase = phrases.find(p => p.id === id);
             playSound(phrase.sounds[S.beat % phrase.sounds.length]);
-            updateDisplay('phrase', S.beat % phrase.sounds.length, phrase.display.split(' '));
+            updateDisplay('phrase', S.beat % phrase.sounds.length, phrase.display.split(' '), true);
             S.beat++;
         }
         else if (type === 'pattern') {
@@ -723,6 +841,8 @@ function startLoop(type, id) {
             if (pattern.grid.kick[S.step]) playSound('kick');
             if (pattern.grid.snare[S.step]) playSound('snare');
             if (pattern.grid.hihat[S.step]) playSound('hihat');
+            updatePatternViz();
+            updateDisplay('pattern', Math.floor(S.step / 2), pattern.phonetic.split(' '), true);
             S.step = (S.step + 1) % 16;
         }
     }
@@ -738,38 +858,35 @@ function setBPM(newBpm) {
         clearInterval(S.timer);
         const interval = S.type === 'pattern' ? 60000 / S.bpm / 4 : 60000 / S.bpm;
         S.timer = setInterval(() => {
-            flashBeat();
             if (S.type === 'sound') {
                 playSound(S.id);
             } else if (S.type === 'combo') {
                 const combo = combos.find(c => c.id === S.id);
                 playSound(combo.sounds[S.beat % combo.sounds.length]);
-                updateDisplay('combo', S.beat % combo.sounds.length, combo.display);
+                updateDisplay('combo', S.beat % combo.sounds.length, combo.display, true);
                 S.beat++;
             } else if (S.type === 'triplet') {
                 const triplet = triplets.find(t => t.id === S.id);
                 playSound(triplet.sounds[S.beat % triplet.sounds.length]);
-                updateDisplay('triplet', S.beat % triplet.sounds.length, triplet.display);
+                updateDisplay('triplet', S.beat % triplet.sounds.length, triplet.display, true);
                 S.beat++;
             } else if (S.type === 'phrase') {
                 const phrase = phrases.find(p => p.id === S.id);
                 playSound(phrase.sounds[S.beat % phrase.sounds.length]);
-                updateDisplay('phrase', S.beat % phrase.sounds.length, phrase.display.split(' '));
+                updateDisplay('phrase', S.beat % phrase.sounds.length, phrase.display.split(' '), true);
                 S.beat++;
             } else if (S.type === 'pattern') {
                 const pattern = patterns[parseInt(S.id)];
                 if (pattern.grid.kick[S.step]) playSound('kick');
                 if (pattern.grid.snare[S.step]) playSound('snare');
                 if (pattern.grid.hihat[S.step]) playSound('hihat');
+                updatePatternViz();
+                updateDisplay('pattern', Math.floor(S.step / 2), pattern.phonetic.split(' '), true);
                 S.step = (S.step + 1) % 16;
             }
         }, interval);
     }
-    document.querySelectorAll('.bpm-value').forEach(el => el.textContent = `${S.bpm} BPM`);
-}
-
-function adjustBPM(delta) {
-    setBPM(S.bpm + delta);
+    document.querySelectorAll('.bpm-value').forEach(el => el.textContent = S.bpm);
 }
 
 // Event handlers
@@ -788,17 +905,15 @@ document.addEventListener('click', e => {
                 card.classList.add('playing');
                 S.type = 'sound';
                 S.id = id;
-                S.timer = setInterval(() => {
-                    playSound(id);
-                    flashBeat();
-                }, 60000 / S.bpm);
+                S.timer = setInterval(() => playSound(id), 60000 / S.bpm);
             }
         } else {
             if (S.type === type && S.id === id) {
                 stopAll();
-                if (type === 'combo') updateDisplay('combo', -1, combos.find(c => c.id === id).display);
-                if (type === 'triplet') updateDisplay('triplet', -1, triplets.find(t => t.id === id).display);
-                if (type === 'phrase') updateDisplay('phrase', -1, phrases.find(p => p.id === id).display.split(' '));
+                if (type === 'combo') updateDisplay('combo', -1, combos.find(c => c.id === id).display, false);
+                if (type === 'triplet') updateDisplay('triplet', -1, triplets.find(t => t.id === id).display, false);
+                if (type === 'phrase') updateDisplay('phrase', -1, phrases.find(p => p.id === id).display.split(' '), false);
+                if (type === 'pattern') updateDisplay('pattern', -1, patterns[parseInt(id)].phonetic.split(' '), false);
             } else {
                 if (type === 'pattern') {
                     S.bpm = patterns[parseInt(id)].tempo;
@@ -809,19 +924,38 @@ document.addEventListener('click', e => {
         return;
     }
     
+    const stopBtn = e.target.closest('.stop-btn');
+    if (stopBtn) {
+        if (S.timer) {
+            stopAll();
+            // Reset displays
+            updateDisplay('combo', -1, ['B','t'], false);
+            updateDisplay('triplet', -1, ['B','t','K'], false);
+            updateDisplay('phrase', -1, ['B','t','K','t'], false);
+            updateDisplay('pattern', -1, ['B','t','K','t'], false);
+        }
+        return;
+    }
+    
     const bpmBtn = e.target.closest('.bpm-btn');
     if (bpmBtn) {
-        adjustBPM(parseInt(bpmBtn.dataset.delta));
+        setBPM(S.bpm + parseInt(bpmBtn.dataset.delta));
         return;
     }
     
     const navBtn = e.target.closest('.nav-btn');
     if (navBtn) {
+        stopAll(); // Stop when switching pages
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         navBtn.classList.add('active');
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(navBtn.dataset.view + 'View').classList.add('active');
     }
+});
+
+// Stop on page visibility change (leaving page)
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stopAll();
 });
 
 // Init
@@ -831,9 +965,10 @@ renderTriplets();
 renderPhrases();
 renderPatterns();
 renderReference();
-updateDisplay('combo', -1, ['B','t']);
-updateDisplay('triplet', -1, ['B','t','K']);
-updateDisplay('phrase', -1, ['B','t','K','t']);
+updateDisplay('combo', -1, ['B','t'], false);
+updateDisplay('triplet', -1, ['B','t','K'], false);
+updateDisplay('phrase', -1, ['B','t','K','t'], false);
+updateDisplay('pattern', -1, ['B','t','K','t'], false);
 </script>
 </body>
 </html>
