@@ -676,7 +676,6 @@ function stopAll() {
         S.timer = null;
     }
     document.querySelectorAll('.card, .pattern-card').forEach(c => c.classList.remove('playing'));
-    document.getElementById('beatFlash').classList.remove('on');
     S.type = null;
     S.id = null;
     S.beat = 0;
