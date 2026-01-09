@@ -820,29 +820,34 @@ function startLoop(type, id) {
         }
         else if (type === 'combo') {
             const combo = combos.find(c => c.id === id);
-            playSound(combo.sounds[S.beat % combo.sounds.length]);
+            // Update visuals FIRST
             updateDisplay('combo', S.beat % combo.sounds.length, combo.display, true);
+            playSound(combo.sounds[S.beat % combo.sounds.length]);
             S.beat++;
         }
         else if (type === 'triplet') {
             const triplet = triplets.find(t => t.id === id);
-            playSound(triplet.sounds[S.beat % triplet.sounds.length]);
+            // Update visuals FIRST
             updateDisplay('triplet', S.beat % triplet.sounds.length, triplet.display, true);
+            playSound(triplet.sounds[S.beat % triplet.sounds.length]);
             S.beat++;
         }
         else if (type === 'phrase') {
             const phrase = phrases.find(p => p.id === id);
-            playSound(phrase.sounds[S.beat % phrase.sounds.length]);
+            // Update visuals FIRST
             updateDisplay('phrase', S.beat % phrase.sounds.length, phrase.display.split(' '), true);
+            playSound(phrase.sounds[S.beat % phrase.sounds.length]);
             S.beat++;
         }
         else if (type === 'pattern') {
             const pattern = patterns[parseInt(id)];
+            // Update visuals FIRST (before audio) to compensate for render latency
+            updatePatternViz();
+            updateDisplay('pattern', Math.floor(S.step / 2), pattern.phonetic.split(' '), true);
+            // Then play audio
             if (pattern.grid.kick[S.step]) playSound('kick');
             if (pattern.grid.snare[S.step]) playSound('snare');
             if (pattern.grid.hihat[S.step]) playSound('hihat');
-            updatePatternViz();
-            updateDisplay('pattern', Math.floor(S.step / 2), pattern.phonetic.split(' '), true);
             S.step = (S.step + 1) % 16;
         }
     }
