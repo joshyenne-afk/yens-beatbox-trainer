@@ -19,6 +19,8 @@
             --accent-soft: rgba(255, 107, 53, 0.15);
             --accent-glow: rgba(255, 107, 53, 0.5);
             --border: #2a2a2d;
+            --success: #22c55e;
+            --danger: #ef4444;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -60,13 +62,13 @@
         }
         .nav-btn {
             flex: 1;
-            padding: 12px;
+            padding: 12px 8px;
             background: transparent;
             border: 1px solid var(--border);
             border-radius: 10px;
             color: var(--text-dim);
             font-family: inherit;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
         }
@@ -357,6 +359,240 @@
 
         .view { display: none; }
         .view.active { display: block; }
+
+        /* ===== CREATE VIEW STYLES ===== */
+        .create-header {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .create-name-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .create-name-input {
+            flex: 1;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 14px;
+        }
+        .create-name-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .create-controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .create-btn {
+            padding: 10px 16px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .create-btn:active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        .create-btn.primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+        .create-btn.success {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        .create-btn.danger {
+            background: var(--danger);
+            border-color: var(--danger);
+            color: white;
+        }
+
+        .sequencer-grid {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+        }
+        .seq-track {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .seq-track:last-child {
+            margin-bottom: 0;
+        }
+        .seq-label {
+            width: 50px;
+            flex-shrink: 0;
+        }
+        .seq-label-phonetic {
+            font-family: 'DM Mono', monospace;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--accent);
+        }
+        .seq-label-name {
+            font-size: 9px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+        .seq-steps {
+            display: flex;
+            gap: 4px;
+            flex: 1;
+        }
+        .seq-step {
+            width: 100%;
+            min-width: 20px;
+            max-width: 28px;
+            aspect-ratio: 1;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        .seq-step:nth-child(4n+1) {
+            border-left: 2px solid var(--text-dim);
+        }
+        .seq-step.active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        .seq-step.current {
+            box-shadow: 0 0 0 2px var(--accent-glow);
+            transform: scale(1.1);
+        }
+        .seq-step:active {
+            transform: scale(0.9);
+        }
+
+        .saved-patterns {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .saved-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .saved-title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .saved-count {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+        .saved-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .saved-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .saved-item:last-child {
+            margin-bottom: 0;
+        }
+        .saved-item:active {
+            transform: scale(0.98);
+        }
+        .saved-item.active {
+            border-color: var(--accent);
+        }
+        .saved-item-info {
+            flex: 1;
+        }
+        .saved-item-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        .saved-item-meta {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+        .saved-item-actions {
+            display: flex;
+            gap: 6px;
+        }
+        .saved-item-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-dim);
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .saved-item-btn:active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+        .saved-item-btn.delete:active {
+            background: var(--danger);
+            border-color: var(--danger);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 32px;
+            color: var(--text-dim);
+            font-size: 13px;
+        }
+        .share-url {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim);
+            word-break: break-all;
+            margin-top: 12px;
+            display: none;
+        }
+        .share-url.visible {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -367,8 +603,9 @@
 
         <nav>
             <button class="nav-btn active" data-view="train">Train</button>
+            <button class="nav-btn" data-view="create">Create</button>
             <button class="nav-btn" data-view="patterns">Patterns</button>
-            <button class="nav-btn" data-view="reference">Reference</button>
+            <button class="nav-btn" data-view="reference">Ref</button>
         </nav>
         <main>
             <div class="view active" id="trainView">
@@ -392,6 +629,61 @@
                     <div class="grid" id="phraseGrid"></div>
                 </div>
             </div>
+
+            <div class="view" id="createView">
+                <div class="create-header">
+                    <div class="create-name-row">
+                        <input type="text" class="create-name-input" id="createName" placeholder="My Beat" maxlength="30">
+                    </div>
+                    <div class="create-controls">
+                        <button class="create-btn primary" id="createPlayBtn">▶ Play</button>
+                        <button class="create-btn" id="createClearBtn">Clear</button>
+                        <button class="create-btn success" id="createSaveBtn">💾 Save</button>
+                        <button class="create-btn" id="createShareBtn">🔗 Share</button>
+                    </div>
+                    <div class="bpm-control" style="margin-top: 12px; justify-content: center;">
+                        <button class="bpm-btn" id="createBpmDown">−</button>
+                        <div class="bpm-value" id="createBpmValue">90</div>
+                        <button class="bpm-btn" id="createBpmUp">+</button>
+                    </div>
+                    <div class="share-url" id="shareUrl"></div>
+                </div>
+
+                <div class="sequencer-grid">
+                    <div class="seq-track" data-track="kick">
+                        <div class="seq-label">
+                            <div class="seq-label-phonetic">B</div>
+                            <div class="seq-label-name">Kick</div>
+                        </div>
+                        <div class="seq-steps" id="kickSteps"></div>
+                    </div>
+                    <div class="seq-track" data-track="snare">
+                        <div class="seq-label">
+                            <div class="seq-label-phonetic">K</div>
+                            <div class="seq-label-name">Snare</div>
+                        </div>
+                        <div class="seq-steps" id="snareSteps"></div>
+                    </div>
+                    <div class="seq-track" data-track="hihat">
+                        <div class="seq-label">
+                            <div class="seq-label-phonetic">t</div>
+                            <div class="seq-label-name">Hat</div>
+                        </div>
+                        <div class="seq-steps" id="hihatSteps"></div>
+                    </div>
+                </div>
+
+                <div class="saved-patterns">
+                    <div class="saved-header">
+                        <div class="saved-title">Saved Patterns</div>
+                        <div class="saved-count" id="savedCount">0 / 20</div>
+                    </div>
+                    <div class="saved-list" id="savedList">
+                        <div class="empty-state">No saved patterns yet.<br>Create one above!</div>
+                    </div>
+                </div>
+            </div>
+
             <div class="view" id="patternsView">
                 <div class="section">
                     <div class="drill-display" id="patternDisplay"></div>
@@ -482,50 +774,40 @@ const triplets = [
     { id: 'b-t-b', sounds: ['kick','hihat','kick'], display: ['B','t','B'], name: 'kick sandwich' }
 ];
 
-// Phrases with word-to-sound mapping
 const phrases = [
-    // Each phrase shows: syllables (words you say) → sounds (what they become)
     { id: 'boots-cats', syllables: ['boots','and','cats','and'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'boots and cats', hint: 'boots=B and=t cats=K and=t' },
     { id: 'boots-n-cats', syllables: ['boots','n','cats','n'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'boots n cats', hint: 'boots=B n=t cats=K n=t' },
     { id: 'boots-cats-2', syllables: ['boots','cats','boots','cats'], sounds: ['kick','snare','kick','snare'], display: 'B K B K', name: 'boots cats (no hat)', hint: 'boots=B cats=K (skip the ands)' },
-    
     { id: 'funky-town', syllables: ['fun','ky','town','uh'], sounds: ['kick','snare','kick','hihat'], display: 'B K B t', name: 'funky town', hint: 'fun=B ky=K town=B uh=t' },
     { id: 'get-funky', syllables: ['get','fun','ky','now'], sounds: ['hihat','kick','snare','kick'], display: 't B K B', name: 'get funky now', hint: 'get=t fun=B ky=K now=B' },
     { id: 'bump-ditty', syllables: ['bump','dit','ty','bump'], sounds: ['kick','hihat','hihat','kick'], display: 'B t t B', name: 'bump ditty', hint: 'bump=B dit=t ty=t bump=B' },
     { id: 'do-the-funk', syllables: ['do','the','funk','y'], sounds: ['kick','hihat','kick','snare'], display: 'B t B K', name: 'do the funk', hint: 'do=B the=t funk=B y=K' },
     { id: 'funk-machine', syllables: ['funk','ma','chine','uh'], sounds: ['kick','snare','kick','hihat'], display: 'B K B t', name: 'funk machine', hint: 'funk=B ma=K chine=B uh=t' },
     { id: 'slap-it', syllables: ['slap','it','down','now'], sounds: ['snare','hihat','kick','kick'], display: 'K t B B', name: 'slap it down', hint: 'slap=K it=t down=B now=B' },
-    
     { id: 'in-the-pocket', syllables: ['in','the','pock','et'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'in the pocket', hint: 'in=B the=t pock=K et=t' },
     { id: 'hit-it', syllables: ['hit','it','hit','it'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'hit it', hint: 'hit=B it=t hit=K it=t' },
     { id: 'push-pull', syllables: ['push','uh','pull','uh'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'push pull', hint: 'push=B uh=t pull=K uh=t' },
     { id: 'boom-bap', syllables: ['boom','bap','boom','bap'], sounds: ['kick','snare','kick','snare'], display: 'B K B K', name: 'boom bap', hint: 'boom=B bap=K' },
     { id: 'boom-clap', syllables: ['boom','clap','boom','clap'], sounds: ['kick','snare','kick','snare'], display: 'B K B K', name: 'boom clap', hint: 'boom=B clap=K' },
-    
     { id: 'bubba-cup', syllables: ['bub','ba','cup','uh'], sounds: ['kick','kick','snare','hihat'], display: 'B B K t', name: 'bubba cup', hint: 'bub=B ba=B cup=K uh=t' },
     { id: 'coffee-cup', syllables: ['cof','fee','cup','uh'], sounds: ['kick','kick','snare','hihat'], display: 'B B K t', name: 'coffee cup', hint: 'cof=B fee=B cup=K uh=t' },
     { id: 'butter-cup', syllables: ['but','ter','cup','uh'], sounds: ['kick','kick','snare','hihat'], display: 'B B K t', name: 'butter cup', hint: 'but=B ter=B cup=K uh=t' },
     { id: 'double-up', syllables: ['dou','ble','up','now'], sounds: ['kick','kick','hihat','snare'], display: 'B B t K', name: 'double up', hint: 'dou=B ble=B up=t now=K' },
-    
     { id: 'cats-boots', syllables: ['cats','and','boots','and'], sounds: ['snare','hihat','kick','hihat'], display: 'K t B t', name: 'cats and boots', hint: 'cats=K and=t boots=B and=t' },
     { id: 'clap-stomp', syllables: ['clap','uh','stomp','uh'], sounds: ['snare','hihat','kick','hihat'], display: 'K t B t', name: 'clap stomp', hint: 'clap=K uh=t stomp=B uh=t' },
     { id: 'snare-first', syllables: ['snare','first','kick','last'], sounds: ['snare','hihat','kick','hihat'], display: 'K t B t', name: 'snare first', hint: 'snare=K first=t kick=B last=t' },
-    
     { id: 'pick-it-up', syllables: ['pick','it','up','now'], sounds: ['hihat','kick','hihat','snare'], display: 't B t K', name: 'pick it up', hint: 'pick=t it=B up=t now=K' },
     { id: 'and-one', syllables: ['and','one','and','two'], sounds: ['hihat','kick','hihat','snare'], display: 't B t K', name: 'and one and two', hint: 'and=t one=B and=t two=K' },
     { id: 'upbeat', syllables: ['up','beat','down','beat'], sounds: ['hihat','kick','hihat','snare'], display: 't B t K', name: 'upbeat downbeat', hint: 'up=t beat=B down=t beat=K' },
-    
     { id: 'boots-cats-boots-cats', syllables: ['boots','and','cats','and','boots','and','cats','and'], sounds: ['kick','hihat','snare','hihat','kick','hihat','snare','hihat'], display: 'B t K t B t K t', name: 'boots and cats x2', hint: 'Full bar: boots=B and=t cats=K and=t (repeat)' },
     { id: 'funky-drummer', syllables: ['fun','ky','drum','mer','hit','it','now','uh'], sounds: ['kick','snare','kick','hihat','snare','hihat','kick','hihat'], display: 'B K B t K t B t', name: 'funky drummer', hint: 'fun=B ky=K drum=B mer=t hit=K it=t now=B uh=t' },
     { id: 'give-drummer-some', syllables: ['give','the','drum','mer','some','uh','now','uh'], sounds: ['kick','hihat','kick','snare','kick','hihat','snare','hihat'], display: 'B t B K B t K t', name: 'give drummer some', hint: 'give=B the=t drum=B mer=K some=B uh=t now=K uh=t' },
     { id: 'shake-your-body', syllables: ['shake','your','bo','dy','down','to','ground','uh'], sounds: ['kick','hihat','kick','snare','kick','hihat','snare','hihat'], display: 'B t B K B t K t', name: 'shake your body', hint: 'shake=B your=t bo=B dy=K down=B to=t ground=K uh=t' },
-    
     { id: 'pizza-hut', syllables: ['piz','za','hut','uh'], sounds: ['kick','snare','kick','hihat'], display: 'B K B t', name: 'pizza hut', hint: 'piz=B za=K hut=B uh=t' },
     { id: 'kit-kat', syllables: ['kit','kat','kit','kat'], sounds: ['snare','snare','snare','snare'], display: 'K K K K', name: 'kit kat', hint: 'kit=K kat=K (all snares!)' },
     { id: 'ice-cream', syllables: ['ice','cream','sun','dae'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'ice cream sundae', hint: 'ice=B cream=t sun=K dae=t' },
     { id: 'peanut-butter', syllables: ['pea','nut','but','ter'], sounds: ['kick','hihat','kick','hihat'], display: 'B t B t', name: 'peanut butter', hint: 'pea=B nut=t but=B ter=t (no snare!)' },
     { id: 'coca-cola', syllables: ['co','ca','co','la'], sounds: ['kick','hihat','snare','hihat'], display: 'B t K t', name: 'coca cola', hint: 'co=B ca=t co=K la=t' },
-    
     { id: 'drop-beat', syllables: ['drop','the','beat','now'], sounds: ['kick','hihat','snare','kick'], display: 'B t K B', name: 'drop the beat', hint: 'drop=B the=t beat=K now=B' },
     { id: 'check-it', syllables: ['check','it','out','yo'], sounds: ['snare','hihat','kick','hihat'], display: 'K t B t', name: 'check it out', hint: 'check=K it=t out=B yo=t' },
     { id: 'rock-it', syllables: ['rock','it','dont','stop'], sounds: ['kick','hihat','snare','kick'], display: 'B t K B', name: 'rock it dont stop', hint: 'rock=B it=t dont=K stop=B' },
@@ -561,7 +843,25 @@ const patterns = [
 const S = { type: null, id: null, bpm: 80, beat: 0, step: 0, timer: null };
 let audioCtx;
 
-// Audio - unified playSound function
+// Create state
+const createState = {
+    bpm: 90,
+    grid: {
+        kick: Array(16).fill(0),
+        snare: Array(16).fill(0),
+        hihat: Array(16).fill(0)
+    },
+    step: 0,
+    playing: false,
+    timer: null,
+    currentId: null
+};
+
+// localStorage key
+const STORAGE_KEY = 'beatbox_user_patterns';
+const MAX_PATTERNS = 20;
+
+// Audio
 function getAudio() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     return audioCtx;
@@ -571,36 +871,30 @@ function playSound(id) {
     const ctx = getAudio();
     const now = ctx.currentTime;
     
-    // Map variations to base sounds for now
-    const baseId = id.replace('808','').replace('chest','').replace('open','').replace('inward','').replace('pf','');
-    
     if (id === 'kick' || id === 'kick808' || id === 'kickchest') {
-        // Click transient
         const clickOsc = ctx.createOscillator();
         const clickGain = ctx.createGain();
         clickOsc.type = 'square';
         clickOsc.frequency.setValueAtTime(1200, now);
         clickOsc.frequency.exponentialRampToValueAtTime(200, now + 0.01);
-        clickGain.gain.setValueAtTime(0.15, now); // Reduced from 0.3
+        clickGain.gain.setValueAtTime(0.15, now);
         clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
         clickOsc.connect(clickGain).connect(ctx.destination);
         clickOsc.start(now);
         clickOsc.stop(now + 0.02);
         
-        // Sub body
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'sine';
         osc.frequency.setValueAtTime(id === 'kick808' ? 60 : id === 'kickchest' ? 50 : 120, now);
         osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
-        gain.gain.setValueAtTime(0.5, now); // Reduced from 0.9
+        gain.gain.setValueAtTime(0.5, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
         osc.connect(gain).connect(ctx.destination);
         osc.start(now);
         osc.stop(now + 0.3);
     }
     else if (id === 'snare' || id === 'snarepf' || id === 'snareinward') {
-        // Body
         const bodyOsc = ctx.createOscillator();
         const bodyGain = ctx.createGain();
         bodyOsc.type = 'triangle';
@@ -612,7 +906,6 @@ function playSound(id) {
         bodyOsc.start(now);
         bodyOsc.stop(now + 0.12);
         
-        // Noise
         const buf = ctx.createBuffer(1, ctx.sampleRate * 0.15, ctx.sampleRate);
         const data = buf.getChannelData(0);
         for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
@@ -643,7 +936,7 @@ function playSound(id) {
         bp.frequency.value = 10000;
         bp.Q.value = 1;
         const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.5, now); // Increased from 0.4
+        gain.gain.setValueAtTime(0.5, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
         noise.connect(hp).connect(bp).connect(gain).connect(ctx.destination);
         noise.start(now);
@@ -651,9 +944,188 @@ function playSound(id) {
     }
 }
 
+// ===== CREATE FUNCTIONS =====
+function loadSavedPatterns() {
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    } catch {
+        return [];
+    }
+}
+
+function savePatternsToStorage(patterns) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(patterns));
+}
+
+function renderCreateGrid() {
+    ['kick', 'snare', 'hihat'].forEach(track => {
+        const container = document.getElementById(track + 'Steps');
+        container.innerHTML = '';
+        for (let i = 0; i < 16; i++) {
+            const step = document.createElement('div');
+            step.className = 'seq-step' + (createState.grid[track][i] ? ' active' : '');
+            step.dataset.track = track;
+            step.dataset.step = i;
+            container.appendChild(step);
+        }
+    });
+}
+
+function renderSavedList() {
+    const patterns = loadSavedPatterns();
+    const list = document.getElementById('savedList');
+    const count = document.getElementById('savedCount');
+    
+    count.textContent = `${patterns.length} / ${MAX_PATTERNS}`;
+    
+    if (patterns.length === 0) {
+        list.innerHTML = '<div class="empty-state">No saved patterns yet.<br>Create one above!</div>';
+        return;
+    }
+    
+    list.innerHTML = patterns.map((p, i) => `
+        <div class="saved-item ${createState.currentId === p.id ? 'active' : ''}" data-idx="${i}">
+            <div class="saved-item-info">
+                <div class="saved-item-name">${p.name}</div>
+                <div class="saved-item-meta">${p.bpm} BPM</div>
+            </div>
+            <div class="saved-item-actions">
+                <button class="saved-item-btn" data-action="load" data-idx="${i}" title="Load">📂</button>
+                <button class="saved-item-btn delete" data-action="delete" data-idx="${i}" title="Delete">🗑</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function loadPatternToCreate(pattern) {
+    createState.grid = JSON.parse(JSON.stringify(pattern.grid));
+    createState.bpm = pattern.bpm;
+    createState.currentId = pattern.id;
+    document.getElementById('createName').value = pattern.name;
+    document.getElementById('createBpmValue').textContent = createState.bpm;
+    renderCreateGrid();
+    renderSavedList();
+}
+
+function saveCurrentPattern() {
+    const name = document.getElementById('createName').value.trim() || 'My Beat';
+    const patterns = loadSavedPatterns();
+    
+    // Check if updating existing
+    const existingIdx = patterns.findIndex(p => p.id === createState.currentId);
+    
+    const pattern = {
+        id: createState.currentId || Date.now().toString(),
+        name,
+        bpm: createState.bpm,
+        grid: JSON.parse(JSON.stringify(createState.grid)),
+        created: existingIdx >= 0 ? patterns[existingIdx].created : Date.now()
+    };
+    
+    if (existingIdx >= 0) {
+        patterns[existingIdx] = pattern;
+    } else {
+        if (patterns.length >= MAX_PATTERNS) {
+            alert(`Max ${MAX_PATTERNS} patterns. Delete one first.`);
+            return;
+        }
+        patterns.push(pattern);
+    }
+    
+    createState.currentId = pattern.id;
+    savePatternsToStorage(patterns);
+    renderSavedList();
+}
+
+function deletePattern(idx) {
+    const patterns = loadSavedPatterns();
+    if (patterns[idx] && patterns[idx].id === createState.currentId) {
+        createState.currentId = null;
+    }
+    patterns.splice(idx, 1);
+    savePatternsToStorage(patterns);
+    renderSavedList();
+}
+
+function clearCreateGrid() {
+    createState.grid = { kick: Array(16).fill(0), snare: Array(16).fill(0), hihat: Array(16).fill(0) };
+    createState.currentId = null;
+    document.getElementById('createName').value = '';
+    renderCreateGrid();
+    renderSavedList();
+}
+
+function encodePatternToURL() {
+    const name = document.getElementById('createName').value.trim() || 'My Beat';
+    const kickBits = createState.grid.kick.map(v => v ? '1' : '0').join('');
+    const snareBits = createState.grid.snare.map(v => v ? '1' : '0').join('');
+    const hihatBits = createState.grid.hihat.map(v => v ? '1' : '0').join('');
+    const data = `${createState.bpm}|${kickBits}|${snareBits}|${hihatBits}|${encodeURIComponent(name)}`;
+    return window.location.origin + window.location.pathname + '?p=' + btoa(data);
+}
+
+function decodePatternFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    const encoded = params.get('p');
+    if (!encoded) return null;
+    
+    try {
+        const data = atob(encoded);
+        const [bpm, kickBits, snareBits, hihatBits, name] = data.split('|');
+        return {
+            bpm: parseInt(bpm) || 90,
+            name: decodeURIComponent(name || 'Shared Beat'),
+            grid: {
+                kick: kickBits.split('').map(v => parseInt(v)),
+                snare: snareBits.split('').map(v => parseInt(v)),
+                hihat: hihatBits.split('').map(v => parseInt(v))
+            }
+        };
+    } catch {
+        return null;
+    }
+}
+
+function startCreatePlayback() {
+    if (createState.playing) {
+        stopCreatePlayback();
+        return;
+    }
+    
+    getAudio();
+    createState.playing = true;
+    createState.step = 0;
+    document.getElementById('createPlayBtn').textContent = '■ Stop';
+    
+    function tick() {
+        // Update visuals
+        document.querySelectorAll('.seq-step').forEach(el => el.classList.remove('current'));
+        document.querySelectorAll(`.seq-step[data-step="${createState.step}"]`).forEach(el => el.classList.add('current'));
+        
+        // Play sounds
+        if (createState.grid.kick[createState.step]) playSound('kick');
+        if (createState.grid.snare[createState.step]) playSound('snare');
+        if (createState.grid.hihat[createState.step]) playSound('hihat');
+        
+        createState.step = (createState.step + 1) % 16;
+    }
+    
+    tick();
+    createState.timer = setInterval(tick, 60000 / createState.bpm / 4);
+}
+
+function stopCreatePlayback() {
+    createState.playing = false;
+    if (createState.timer) {
+        clearInterval(createState.timer);
+        createState.timer = null;
+    }
+    document.querySelectorAll('.seq-step').forEach(el => el.classList.remove('current'));
+    document.getElementById('createPlayBtn').textContent = '▶ Play';
+}
+
 // Rendering
 function renderSounds() {
-    // Group by category
     const kicks = sounds.filter(s => s.category === 'Kick');
     const hihats = sounds.filter(s => s.category === 'Hi-Hat');
     const snares = sounds.filter(s => s.category === 'Snare');
@@ -738,7 +1210,6 @@ function renderPatterns() {
 }
 
 function renderReference() {
-    // Group by category
     const kicks = sounds.filter(s => s.category === 'Kick');
     const hihats = sounds.filter(s => s.category === 'Hi-Hat');
     const snares = sounds.filter(s => s.category === 'Snare');
@@ -820,31 +1291,26 @@ function startLoop(type, id) {
         }
         else if (type === 'combo') {
             const combo = combos.find(c => c.id === id);
-            // Update visuals FIRST
             updateDisplay('combo', S.beat % combo.sounds.length, combo.display, true);
             playSound(combo.sounds[S.beat % combo.sounds.length]);
             S.beat++;
         }
         else if (type === 'triplet') {
             const triplet = triplets.find(t => t.id === id);
-            // Update visuals FIRST
             updateDisplay('triplet', S.beat % triplet.sounds.length, triplet.display, true);
             playSound(triplet.sounds[S.beat % triplet.sounds.length]);
             S.beat++;
         }
         else if (type === 'phrase') {
             const phrase = phrases.find(p => p.id === id);
-            // Update visuals FIRST
             updateDisplay('phrase', S.beat % phrase.sounds.length, phrase.display.split(' '), true);
             playSound(phrase.sounds[S.beat % phrase.sounds.length]);
             S.beat++;
         }
         else if (type === 'pattern') {
             const pattern = patterns[parseInt(id)];
-            // Update visuals FIRST (before audio) to compensate for render latency
             updatePatternViz();
             updateDisplay('pattern', Math.floor(S.step / 2), pattern.phonetic.split(' '), true);
-            // Then play audio
             if (pattern.grid.kick[S.step]) playSound('kick');
             if (pattern.grid.snare[S.step]) playSound('snare');
             if (pattern.grid.hihat[S.step]) playSound('hihat');
@@ -896,6 +1362,89 @@ function setBPM(newBpm) {
 
 // Event handlers
 document.addEventListener('click', e => {
+    // Create view handlers
+    if (e.target.closest('#createView')) {
+        const seqStep = e.target.closest('.seq-step');
+        if (seqStep) {
+            const track = seqStep.dataset.track;
+            const step = parseInt(seqStep.dataset.step);
+            createState.grid[track][step] = createState.grid[track][step] ? 0 : 1;
+            seqStep.classList.toggle('active');
+            return;
+        }
+        
+        if (e.target.id === 'createPlayBtn') {
+            startCreatePlayback();
+            return;
+        }
+        if (e.target.id === 'createClearBtn') {
+            stopCreatePlayback();
+            clearCreateGrid();
+            return;
+        }
+        if (e.target.id === 'createSaveBtn') {
+            saveCurrentPattern();
+            return;
+        }
+        if (e.target.id === 'createShareBtn') {
+            const url = encodePatternToURL();
+            const shareEl = document.getElementById('shareUrl');
+            shareEl.textContent = url;
+            shareEl.classList.add('visible');
+            navigator.clipboard.writeText(url).catch(() => {});
+            return;
+        }
+        if (e.target.id === 'createBpmDown') {
+            createState.bpm = Math.max(40, createState.bpm - 5);
+            document.getElementById('createBpmValue').textContent = createState.bpm;
+            if (createState.playing) {
+                stopCreatePlayback();
+                startCreatePlayback();
+            }
+            return;
+        }
+        if (e.target.id === 'createBpmUp') {
+            createState.bpm = Math.min(200, createState.bpm + 5);
+            document.getElementById('createBpmValue').textContent = createState.bpm;
+            if (createState.playing) {
+                stopCreatePlayback();
+                startCreatePlayback();
+            }
+            return;
+        }
+        
+        const savedBtn = e.target.closest('.saved-item-btn');
+        if (savedBtn) {
+            const idx = parseInt(savedBtn.dataset.idx);
+            const action = savedBtn.dataset.action;
+            if (action === 'load') {
+                const patterns = loadSavedPatterns();
+                if (patterns[idx]) {
+                    stopCreatePlayback();
+                    loadPatternToCreate(patterns[idx]);
+                }
+            } else if (action === 'delete') {
+                if (confirm('Delete this pattern?')) {
+                    deletePattern(idx);
+                }
+            }
+            return;
+        }
+        
+        const savedItem = e.target.closest('.saved-item');
+        if (savedItem && !e.target.closest('.saved-item-btn')) {
+            const idx = parseInt(savedItem.dataset.idx);
+            const patterns = loadSavedPatterns();
+            if (patterns[idx]) {
+                stopCreatePlayback();
+                loadPatternToCreate(patterns[idx]);
+            }
+            return;
+        }
+        
+        return;
+    }
+    
     const card = e.target.closest('[data-type]');
     if (card) {
         const type = card.dataset.type;
@@ -933,7 +1482,6 @@ document.addEventListener('click', e => {
     if (stopBtn) {
         if (S.timer) {
             stopAll();
-            // Reset displays
             updateDisplay('combo', -1, ['B','t'], false);
             updateDisplay('triplet', -1, ['B','t','K'], false);
             updateDisplay('phrase', -1, ['B','t','K','t'], false);
@@ -943,14 +1491,15 @@ document.addEventListener('click', e => {
     }
     
     const bpmBtn = e.target.closest('.bpm-btn');
-    if (bpmBtn) {
+    if (bpmBtn && !e.target.closest('#createView')) {
         setBPM(S.bpm + parseInt(bpmBtn.dataset.delta));
         return;
     }
     
     const navBtn = e.target.closest('.nav-btn');
     if (navBtn) {
-        stopAll(); // Stop when switching pages
+        stopAll();
+        stopCreatePlayback();
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         navBtn.classList.add('active');
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -958,22 +1507,46 @@ document.addEventListener('click', e => {
     }
 });
 
-// Stop on page visibility change (leaving page)
+// Stop on page visibility change
 document.addEventListener('visibilitychange', () => {
-    if (document.hidden) stopAll();
+    if (document.hidden) {
+        stopAll();
+        stopCreatePlayback();
+    }
 });
 
 // Init
-renderSounds();
-renderCombos();
-renderTriplets();
-renderPhrases();
-renderPatterns();
-renderReference();
-updateDisplay('combo', -1, ['B','t'], false);
-updateDisplay('triplet', -1, ['B','t','K'], false);
-updateDisplay('phrase', -1, ['B','t','K','t'], false);
-updateDisplay('pattern', -1, ['B','t','K','t'], false);
+function init() {
+    renderSounds();
+    renderCombos();
+    renderTriplets();
+    renderPhrases();
+    renderPatterns();
+    renderReference();
+    renderCreateGrid();
+    renderSavedList();
+    updateDisplay('combo', -1, ['B','t'], false);
+    updateDisplay('triplet', -1, ['B','t','K'], false);
+    updateDisplay('phrase', -1, ['B','t','K','t'], false);
+    updateDisplay('pattern', -1, ['B','t','K','t'], false);
+    
+    // Check for shared pattern in URL
+    const shared = decodePatternFromURL();
+    if (shared) {
+        createState.grid = shared.grid;
+        createState.bpm = shared.bpm;
+        document.getElementById('createName').value = shared.name;
+        document.getElementById('createBpmValue').textContent = shared.bpm;
+        renderCreateGrid();
+        // Switch to Create view
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('[data-view="create"]').classList.add('active');
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById('createView').classList.add('active');
+    }
+}
+
+init();
 </script>
 </body>
 </html>
