@@ -843,6 +843,18 @@ const patterns = [
 const S = { type: null, id: null, bpm: 80, beat: 0, step: 0, timer: null };
 let audioCtx;
 
+// ===== PRECISION AUDIO SCHEDULER =====
+// Uses Web Audio API's hardware-synced clock for tight timing
+const scheduler = {
+    lookahead: 0.1,      // How far ahead to schedule (seconds)
+    scheduleInterval: 25, // How often to call scheduler (ms)
+    nextNoteTime: 0,     // When the next note is due (AudioContext time)
+    timerID: null,
+    rafID: null,
+    currentStep: 0,      // For visual sync
+    visualStepTime: 0    // When current visual step started
+};
+
 // Create state
 const createState = {
     bpm: 90,
@@ -864,65 +876,89 @@ const MAX_PATTERNS = 20;
 // Audio
 function getAudio() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // iOS/Safari fix: resume suspended context on user interaction
+    if (audioCtx.state === 'suspended') audioCtx.resume();
     return audioCtx;
 }
 
-function playSound(id) {
+// Play sound at a SPECIFIC time (for precision scheduling)
+function playSoundAt(id, time) {
     const ctx = getAudio();
-    const now = ctx.currentTime;
+    const when = time || ctx.currentTime;
     
     if (id === 'kick' || id === 'kick808' || id === 'kickchest') {
+        // Click transient for attack punch
         const clickOsc = ctx.createOscillator();
         const clickGain = ctx.createGain();
         clickOsc.type = 'square';
-        clickOsc.frequency.setValueAtTime(1200, now);
-        clickOsc.frequency.exponentialRampToValueAtTime(200, now + 0.01);
-        clickGain.gain.setValueAtTime(0.15, now);
-        clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
+        clickOsc.frequency.setValueAtTime(1500, when);
+        clickOsc.frequency.exponentialRampToValueAtTime(100, when + 0.02);
+        clickGain.gain.setValueAtTime(0.2, when);
+        clickGain.gain.exponentialRampToValueAtTime(0.001, when + 0.02);
         clickOsc.connect(clickGain).connect(ctx.destination);
-        clickOsc.start(now);
-        clickOsc.stop(now + 0.02);
+        clickOsc.start(when);
+        clickOsc.stop(when + 0.02);
+        
+        // Main body with improved frequency sweep
+        const startFreq = id === 'kick808' ? 180 : id === 'kickchest' ? 160 : 180;
+        const midFreq = id === 'kick808' ? 50 : id === 'kickchest' ? 40 : 60;
+        const endFreq = id === 'kick808' ? 40 : id === 'kickchest' ? 35 : 45;
         
         const osc = ctx.createOscillator();
+        const lpf = ctx.createBiquadFilter();
         const gain = ctx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(id === 'kick808' ? 60 : id === 'kickchest' ? 50 : 120, now);
-        osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
-        gain.gain.setValueAtTime(0.5, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-        osc.connect(gain).connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.3);
+        osc.frequency.setValueAtTime(startFreq, when);
+        osc.frequency.exponentialRampToValueAtTime(midFreq, when + 0.05);
+        osc.frequency.exponentialRampToValueAtTime(endFreq, when + 0.15);
+        lpf.type = 'lowpass';
+        lpf.frequency.value = 800;
+        lpf.Q.value = 1;
+        gain.gain.setValueAtTime(1.2, when);
+        gain.gain.linearRampToValueAtTime(0.8, when + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, when + 0.3);
+        osc.connect(lpf).connect(gain).connect(ctx.destination);
+        osc.start(when);
+        osc.stop(when + 0.3);
     }
     else if (id === 'snare' || id === 'snarepf' || id === 'snareinward') {
+        // Body with bandpass filter
         const bodyOsc = ctx.createOscillator();
+        const bodyBp = ctx.createBiquadFilter();
         const bodyGain = ctx.createGain();
         bodyOsc.type = 'triangle';
-        bodyOsc.frequency.setValueAtTime(id === 'snarepf' ? 180 : 200, now);
-        bodyOsc.frequency.exponentialRampToValueAtTime(120, now + 0.05);
-        bodyGain.gain.setValueAtTime(0.35, now);
-        bodyGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-        bodyOsc.connect(bodyGain).connect(ctx.destination);
-        bodyOsc.start(now);
-        bodyOsc.stop(now + 0.12);
+        bodyOsc.frequency.setValueAtTime(id === 'snarepf' ? 220 : 200, when);
+        bodyOsc.frequency.exponentialRampToValueAtTime(120, when + 0.05);
+        bodyBp.type = 'bandpass';
+        bodyBp.frequency.value = id === 'snarepf' ? 180 : 200;
+        bodyBp.Q.value = 2;
+        bodyGain.gain.setValueAtTime(0.5, when);
+        bodyGain.gain.exponentialRampToValueAtTime(0.001, when + 0.12);
+        bodyOsc.connect(bodyBp).connect(bodyGain).connect(ctx.destination);
+        bodyOsc.start(when);
+        bodyOsc.stop(when + 0.12);
         
-        const buf = ctx.createBuffer(1, ctx.sampleRate * 0.15, ctx.sampleRate);
+        // Snare wires with HP + LP filtering
+        const buf = ctx.createBuffer(1, ctx.sampleRate * 0.2, ctx.sampleRate);
         const data = buf.getChannelData(0);
         for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
         const noise = ctx.createBufferSource();
         noise.buffer = buf;
-        const nfilt = ctx.createBiquadFilter();
-        nfilt.type = 'highpass';
-        nfilt.frequency.value = id === 'snarepf' ? 1500 : 2000;
+        const nhp = ctx.createBiquadFilter();
+        nhp.type = 'highpass';
+        nhp.frequency.value = id === 'snarepf' ? 1500 : 2000;
+        const nlp = ctx.createBiquadFilter();
+        nlp.type = 'lowpass';
+        nlp.frequency.value = 8000;
         const ngain = ctx.createGain();
-        ngain.gain.setValueAtTime(0.45, now);
-        ngain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-        noise.connect(nfilt).connect(ngain).connect(ctx.destination);
-        noise.start(now);
-        noise.stop(now + 0.15);
+        ngain.gain.setValueAtTime(0.6, when);
+        ngain.gain.exponentialRampToValueAtTime(0.001, when + 0.18);
+        noise.connect(nhp).connect(nlp).connect(ngain).connect(ctx.destination);
+        noise.start(when);
+        noise.stop(when + 0.2);
     }
     else if (id === 'hihat' || id === 'hihatopen' || id === 'hihatinward') {
-        const duration = id === 'hihatopen' ? 0.15 : 0.05;
+        const duration = id === 'hihatopen' ? 0.25 : 0.08;
         const buf = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate);
         const data = buf.getChannelData(0);
         for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
@@ -934,14 +970,30 @@ function playSound(id) {
         const bp = ctx.createBiquadFilter();
         bp.type = 'bandpass';
         bp.frequency.value = 10000;
-        bp.Q.value = 1;
+        bp.Q.value = 1.5;
+        // High shelf for air/shimmer
+        const hs = ctx.createBiquadFilter();
+        hs.type = 'highshelf';
+        hs.frequency.value = 12000;
+        hs.gain.value = 3;
         const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.5, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-        noise.connect(hp).connect(bp).connect(gain).connect(ctx.destination);
-        noise.start(now);
-        noise.stop(now + duration);
+        if (id === 'hihatopen') {
+            gain.gain.setValueAtTime(0.4, when);
+            gain.gain.linearRampToValueAtTime(0.35, when + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, when + duration);
+        } else {
+            gain.gain.setValueAtTime(0.5, when);
+            gain.gain.exponentialRampToValueAtTime(0.001, when + duration);
+        }
+        noise.connect(hp).connect(bp).connect(hs).connect(gain).connect(ctx.destination);
+        noise.start(when);
+        noise.stop(when + duration);
     }
+}
+
+// Wrapper for immediate playback (tap to preview)
+function playSound(id) {
+    playSoundAt(id, null);
 }
 
 // ===== CREATE FUNCTIONS =====
@@ -1092,34 +1144,91 @@ function startCreatePlayback() {
         return;
     }
     
-    getAudio();
+    const ctx = getAudio();
+    if (ctx.state === 'suspended') ctx.resume();
+    
     createState.playing = true;
     createState.step = 0;
     document.getElementById('createPlayBtn').textContent = '■ Stop';
     
-    function tick() {
-        // Update visuals
-        document.querySelectorAll('.seq-step').forEach(el => el.classList.remove('current'));
-        document.querySelectorAll(`.seq-step[data-step="${createState.step}"]`).forEach(el => el.classList.add('current'));
+    // Initialize precision scheduler
+    scheduler.nextNoteTime = ctx.currentTime + 0.05; // Start slightly in future
+    scheduler.currentStep = 0;
+    scheduler.visualStepTime = performance.now();
+    
+    // Schedule ahead function - schedules notes into the future
+    function scheduleAhead() {
+        const secondsPerBeat = 60.0 / createState.bpm / 4; // 16th notes
         
-        // Play sounds
-        if (createState.grid.kick[createState.step]) playSound('kick');
-        if (createState.grid.snare[createState.step]) playSound('snare');
-        if (createState.grid.hihat[createState.step]) playSound('hihat');
-        
-        createState.step = (createState.step + 1) % 16;
+        // Schedule notes while we're within the lookahead window
+        while (scheduler.nextNoteTime < ctx.currentTime + scheduler.lookahead) {
+            // Schedule sounds at the precise time
+            if (createState.grid.kick[createState.step]) playSoundAt('kick', scheduler.nextNoteTime);
+            if (createState.grid.snare[createState.step]) playSoundAt('snare', scheduler.nextNoteTime);
+            if (createState.grid.hihat[createState.step]) playSoundAt('hihat', scheduler.nextNoteTime);
+            
+            // Store time for visual sync
+            if (createState.step !== scheduler.currentStep) {
+                scheduler.currentStep = createState.step;
+                scheduler.visualStepTime = scheduler.nextNoteTime;
+            }
+            
+            // Advance to next step
+            scheduler.nextNoteTime += secondsPerBeat;
+            createState.step = (createState.step + 1) % 16;
+        }
     }
     
-    tick();
-    createState.timer = setInterval(tick, 60000 / createState.bpm / 4);
+    // Visual update using requestAnimationFrame (synced to screen refresh)
+    function updateVisuals() {
+        if (!createState.playing) return;
+        
+        const ctx = getAudio();
+        const currentTime = ctx.currentTime;
+        const secondsPerBeat = 60.0 / createState.bpm / 4;
+        
+        // Calculate which step should be visually highlighted based on audio time
+        // This syncs visuals to audio clock, not JavaScript timing
+        let visualStep = scheduler.currentStep;
+        const timeSinceLastStep = currentTime - scheduler.visualStepTime;
+        if (timeSinceLastStep >= secondsPerBeat) {
+            visualStep = (visualStep + Math.floor(timeSinceLastStep / secondsPerBeat)) % 16;
+        }
+        
+        // Update visual highlighting
+        document.querySelectorAll('.seq-step').forEach(el => el.classList.remove('current'));
+        document.querySelectorAll(`.seq-step[data-step="${visualStep}"]`).forEach(el => el.classList.add('current'));
+        
+        scheduler.rafID = requestAnimationFrame(updateVisuals);
+    }
+    
+    // Start the scheduler loop
+    scheduler.timerID = setInterval(scheduleAhead, scheduler.scheduleInterval);
+    scheduler.rafID = requestAnimationFrame(updateVisuals);
+    
+    // Initial schedule
+    scheduleAhead();
 }
 
 function stopCreatePlayback() {
     createState.playing = false;
+    
+    // Stop precision scheduler
+    if (scheduler.timerID) {
+        clearInterval(scheduler.timerID);
+        scheduler.timerID = null;
+    }
+    if (scheduler.rafID) {
+        cancelAnimationFrame(scheduler.rafID);
+        scheduler.rafID = null;
+    }
+    
+    // Legacy timer cleanup (for backwards compat)
     if (createState.timer) {
         clearInterval(createState.timer);
         createState.timer = null;
     }
+    
     document.querySelectorAll('.seq-step').forEach(el => el.classList.remove('current'));
     document.getElementById('createPlayBtn').textContent = '▶ Play';
 }
@@ -1255,17 +1364,31 @@ function updatePatternViz() {
     const viz = document.getElementById(`viz-${S.id}`);
     if (!viz) return;
     
+    // Use scheduler's current step for visual sync
+    const visualStep = scheduler.currentStep;
     viz.querySelectorAll('.pattern-step').forEach((el, i) => {
-        el.classList.toggle('current', i === S.step);
+        el.classList.toggle('current', i === visualStep);
     });
 }
 
 // Playback control
 function stopAll() {
+    // Stop precision scheduler
+    if (scheduler.timerID) {
+        clearInterval(scheduler.timerID);
+        scheduler.timerID = null;
+    }
+    if (scheduler.rafID) {
+        cancelAnimationFrame(scheduler.rafID);
+        scheduler.rafID = null;
+    }
+    
+    // Legacy timer cleanup
     if (S.timer) {
         clearInterval(S.timer);
         S.timer = null;
     }
+    
     document.querySelectorAll('.card, .pattern-card').forEach(c => c.classList.remove('playing'));
     document.querySelectorAll('.pattern-step').forEach(el => el.classList.remove('current'));
     document.querySelectorAll('.stop-btn').forEach(b => { b.classList.remove('playing'); b.textContent = '▶'; });
@@ -1277,6 +1400,10 @@ function stopAll() {
 
 function startLoop(type, id) {
     stopAll();
+    
+    const ctx = getAudio();
+    if (ctx.state === 'suspended') ctx.resume();
+    
     S.type = type;
     S.id = id;
     S.beat = 0;
@@ -1285,78 +1412,92 @@ function startLoop(type, id) {
     const card = document.querySelector(`[data-type="${type}"][data-id="${id}"]`);
     if (card) card.classList.add('playing');
     
-    function tick() {
-        if (type === 'sound') {
-            playSound(id);
-        }
-        else if (type === 'combo') {
-            const combo = combos.find(c => c.id === id);
-            updateDisplay('combo', S.beat % combo.sounds.length, combo.display, true);
-            playSound(combo.sounds[S.beat % combo.sounds.length]);
-            S.beat++;
-        }
-        else if (type === 'triplet') {
-            const triplet = triplets.find(t => t.id === id);
-            updateDisplay('triplet', S.beat % triplet.sounds.length, triplet.display, true);
-            playSound(triplet.sounds[S.beat % triplet.sounds.length]);
-            S.beat++;
-        }
-        else if (type === 'phrase') {
-            const phrase = phrases.find(p => p.id === id);
-            updateDisplay('phrase', S.beat % phrase.sounds.length, phrase.display.split(' '), true);
-            playSound(phrase.sounds[S.beat % phrase.sounds.length]);
-            S.beat++;
-        }
-        else if (type === 'pattern') {
-            const pattern = patterns[parseInt(id)];
-            updatePatternViz();
-            updateDisplay('pattern', Math.floor(S.step / 2), pattern.phonetic.split(' '), true);
-            if (pattern.grid.kick[S.step]) playSound('kick');
-            if (pattern.grid.snare[S.step]) playSound('snare');
-            if (pattern.grid.hihat[S.step]) playSound('hihat');
-            S.step = (S.step + 1) % 16;
+    // Initialize precision scheduler for main loops
+    scheduler.nextNoteTime = ctx.currentTime + 0.05;
+    scheduler.currentStep = 0;
+    scheduler.visualStepTime = ctx.currentTime;
+    
+    function scheduleMainAhead() {
+        const secondsPerBeat = type === 'pattern' ? 60.0 / S.bpm / 4 : 60.0 / S.bpm;
+        
+        while (scheduler.nextNoteTime < ctx.currentTime + scheduler.lookahead) {
+            if (type === 'sound') {
+                playSoundAt(id, scheduler.nextNoteTime);
+            }
+            else if (type === 'combo') {
+                const combo = combos.find(c => c.id === id);
+                const soundIdx = S.beat % combo.sounds.length;
+                playSoundAt(combo.sounds[soundIdx], scheduler.nextNoteTime);
+                scheduler.currentStep = soundIdx;
+                S.beat++;
+            }
+            else if (type === 'triplet') {
+                const triplet = triplets.find(t => t.id === id);
+                const soundIdx = S.beat % triplet.sounds.length;
+                playSoundAt(triplet.sounds[soundIdx], scheduler.nextNoteTime);
+                scheduler.currentStep = soundIdx;
+                S.beat++;
+            }
+            else if (type === 'phrase') {
+                const phrase = phrases.find(p => p.id === id);
+                const soundIdx = S.beat % phrase.sounds.length;
+                playSoundAt(phrase.sounds[soundIdx], scheduler.nextNoteTime);
+                scheduler.currentStep = soundIdx;
+                S.beat++;
+            }
+            else if (type === 'pattern') {
+                const pattern = patterns[parseInt(id)];
+                if (pattern.grid.kick[S.step]) playSoundAt('kick', scheduler.nextNoteTime);
+                if (pattern.grid.snare[S.step]) playSoundAt('snare', scheduler.nextNoteTime);
+                if (pattern.grid.hihat[S.step]) playSoundAt('hihat', scheduler.nextNoteTime);
+                scheduler.currentStep = S.step;
+                S.step = (S.step + 1) % 16;
+            }
+            
+            scheduler.visualStepTime = scheduler.nextNoteTime;
+            scheduler.nextNoteTime += secondsPerBeat;
         }
     }
     
-    tick();
-    const interval = type === 'pattern' ? 60000 / S.bpm / 4 : 60000 / S.bpm;
-    S.timer = setInterval(tick, interval);
+    function updateMainVisuals() {
+        if (!S.type) return;
+        
+        const currentTime = ctx.currentTime;
+        const secondsPerBeat = S.type === 'pattern' ? 60.0 / S.bpm / 4 : 60.0 / S.bpm;
+        
+        // Sync visual to audio clock
+        let visualStep = scheduler.currentStep;
+        
+        if (type === 'combo') {
+            const combo = combos.find(c => c.id === id);
+            updateDisplay('combo', visualStep, combo.display, true);
+        }
+        else if (type === 'triplet') {
+            const triplet = triplets.find(t => t.id === id);
+            updateDisplay('triplet', visualStep, triplet.display, true);
+        }
+        else if (type === 'phrase') {
+            const phrase = phrases.find(p => p.id === id);
+            updateDisplay('phrase', visualStep, phrase.display.split(' '), true);
+        }
+        else if (type === 'pattern') {
+            updatePatternViz();
+            const pattern = patterns[parseInt(id)];
+            updateDisplay('pattern', Math.floor(visualStep / 2), pattern.phonetic.split(' '), true);
+        }
+        
+        scheduler.rafID = requestAnimationFrame(updateMainVisuals);
+    }
+    
+    // Start precision scheduler
+    scheduler.timerID = setInterval(scheduleMainAhead, scheduler.scheduleInterval);
+    scheduler.rafID = requestAnimationFrame(updateMainVisuals);
+    scheduleMainAhead();
 }
 
 function setBPM(newBpm) {
     S.bpm = Math.max(40, Math.min(200, newBpm));
-    if (S.timer && S.type && S.id) {
-        clearInterval(S.timer);
-        const interval = S.type === 'pattern' ? 60000 / S.bpm / 4 : 60000 / S.bpm;
-        S.timer = setInterval(() => {
-            if (S.type === 'sound') {
-                playSound(S.id);
-            } else if (S.type === 'combo') {
-                const combo = combos.find(c => c.id === S.id);
-                playSound(combo.sounds[S.beat % combo.sounds.length]);
-                updateDisplay('combo', S.beat % combo.sounds.length, combo.display, true);
-                S.beat++;
-            } else if (S.type === 'triplet') {
-                const triplet = triplets.find(t => t.id === S.id);
-                playSound(triplet.sounds[S.beat % triplet.sounds.length]);
-                updateDisplay('triplet', S.beat % triplet.sounds.length, triplet.display, true);
-                S.beat++;
-            } else if (S.type === 'phrase') {
-                const phrase = phrases.find(p => p.id === S.id);
-                playSound(phrase.sounds[S.beat % phrase.sounds.length]);
-                updateDisplay('phrase', S.beat % phrase.sounds.length, phrase.display.split(' '), true);
-                S.beat++;
-            } else if (S.type === 'pattern') {
-                const pattern = patterns[parseInt(S.id)];
-                if (pattern.grid.kick[S.step]) playSound('kick');
-                if (pattern.grid.snare[S.step]) playSound('snare');
-                if (pattern.grid.hihat[S.step]) playSound('hihat');
-                updatePatternViz();
-                updateDisplay('pattern', Math.floor(S.step / 2), pattern.phonetic.split(' '), true);
-                S.step = (S.step + 1) % 16;
-            }
-        }, interval);
-    }
+    // BPM changes take effect automatically since scheduler reads S.bpm each cycle
     document.querySelectorAll('.bpm-value').forEach(el => el.textContent = S.bpm);
 }
 
