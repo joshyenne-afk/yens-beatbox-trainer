@@ -1412,6 +1412,13 @@ function startLoop(type, id) {
     const card = document.querySelector(`[data-type="${type}"][data-id="${id}"]`);
     if (card) card.classList.add('playing');
     
+    // Optimization: Cache the active object
+    let activeItem;
+    if (type === "combo") activeItem = combos.find(c => c.id === id);
+    else if (type === "triplet") activeItem = triplets.find(t => t.id === id);
+    else if (type === "phrase") activeItem = phrases.find(p => p.id === id);
+    else if (type === "pattern") activeItem = patterns[parseInt(id)];
+
     // Initialize precision scheduler for main loops
     scheduler.nextNoteTime = ctx.currentTime + 0.05;
     scheduler.currentStep = 0;
@@ -1425,31 +1432,27 @@ function startLoop(type, id) {
                 playSoundAt(id, scheduler.nextNoteTime);
             }
             else if (type === 'combo') {
-                const combo = combos.find(c => c.id === id);
-                const soundIdx = S.beat % combo.sounds.length;
-                playSoundAt(combo.sounds[soundIdx], scheduler.nextNoteTime);
+                const soundIdx = S.beat % activeItem.sounds.length;
+                playSoundAt(activeItem.sounds[soundIdx], scheduler.nextNoteTime);
                 scheduler.currentStep = soundIdx;
                 S.beat++;
             }
             else if (type === 'triplet') {
-                const triplet = triplets.find(t => t.id === id);
-                const soundIdx = S.beat % triplet.sounds.length;
-                playSoundAt(triplet.sounds[soundIdx], scheduler.nextNoteTime);
+                const soundIdx = S.beat % activeItem.sounds.length;
+                playSoundAt(activeItem.sounds[soundIdx], scheduler.nextNoteTime);
                 scheduler.currentStep = soundIdx;
                 S.beat++;
             }
             else if (type === 'phrase') {
-                const phrase = phrases.find(p => p.id === id);
-                const soundIdx = S.beat % phrase.sounds.length;
-                playSoundAt(phrase.sounds[soundIdx], scheduler.nextNoteTime);
+                const soundIdx = S.beat % activeItem.sounds.length;
+                playSoundAt(activeItem.sounds[soundIdx], scheduler.nextNoteTime);
                 scheduler.currentStep = soundIdx;
                 S.beat++;
             }
             else if (type === 'pattern') {
-                const pattern = patterns[parseInt(id)];
-                if (pattern.grid.kick[S.step]) playSoundAt('kick', scheduler.nextNoteTime);
-                if (pattern.grid.snare[S.step]) playSoundAt('snare', scheduler.nextNoteTime);
-                if (pattern.grid.hihat[S.step]) playSoundAt('hihat', scheduler.nextNoteTime);
+                if (activeItem.grid.kick[S.step]) playSoundAt('kick', scheduler.nextNoteTime);
+                if (activeItem.grid.snare[S.step]) playSoundAt('snare', scheduler.nextNoteTime);
+                if (activeItem.grid.hihat[S.step]) playSoundAt('hihat', scheduler.nextNoteTime);
                 scheduler.currentStep = S.step;
                 S.step = (S.step + 1) % 16;
             }
@@ -1469,21 +1472,17 @@ function startLoop(type, id) {
         let visualStep = scheduler.currentStep;
         
         if (type === 'combo') {
-            const combo = combos.find(c => c.id === id);
-            updateDisplay('combo', visualStep, combo.display, true);
+            updateDisplay('combo', visualStep, activeItem.display, true);
         }
         else if (type === 'triplet') {
-            const triplet = triplets.find(t => t.id === id);
-            updateDisplay('triplet', visualStep, triplet.display, true);
+            updateDisplay('triplet', visualStep, activeItem.display, true);
         }
         else if (type === 'phrase') {
-            const phrase = phrases.find(p => p.id === id);
-            updateDisplay('phrase', visualStep, phrase.display.split(' '), true);
+            updateDisplay('phrase', visualStep, activeItem.display.split(' '), true);
         }
         else if (type === 'pattern') {
             updatePatternViz();
-            const pattern = patterns[parseInt(id)];
-            updateDisplay('pattern', Math.floor(visualStep / 2), pattern.phonetic.split(' '), true);
+            updateDisplay('pattern', Math.floor(visualStep / 2), activeItem.phonetic.split(' '), true);
         }
         
         scheduler.rafID = requestAnimationFrame(updateMainVisuals);
