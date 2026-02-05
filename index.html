@@ -1347,16 +1347,68 @@ function updateDisplay(type, current, items, isPlaying = false) {
     const displayId = type === 'combo' ? 'comboDisplay' : type === 'triplet' ? 'tripletDisplay' : type === 'pattern' ? 'patternDisplay' : 'phraseDisplay';
     const display = document.getElementById(displayId);
     
-    const highlighted = items.map((x, i) => i === current ? `<span class="current">${x}</span>` : x).join(' ');
-    display.innerHTML = `
-        <div class="drill-phonetic">${highlighted}</div>
-        <div class="bpm-control">
-            <button class="stop-btn ${isPlaying ? 'playing' : ''}" data-action="stop">${isPlaying ? '■' : '▶'}</button>
-            <button class="bpm-btn" data-delta="-5">−</button>
-            <div class="bpm-value">${S.bpm}</div>
-            <button class="bpm-btn" data-delta="5">+</button>
-        </div>
-    `;
+    let phoneticDiv = display.querySelector('.drill-phonetic');
+    let bpmControlDiv = display.querySelector('.bpm-control');
+
+    if (!phoneticDiv || !bpmControlDiv) {
+         display.innerHTML = `
+            <div class="drill-phonetic"></div>
+            <div class="bpm-control">
+                <button class="stop-btn" data-action="stop">▶</button>
+                <button class="bpm-btn" data-delta="-5">−</button>
+                <div class="bpm-value">${S.bpm}</div>
+                <button class="bpm-btn" data-delta="5">+</button>
+            </div>
+        `;
+        phoneticDiv = display.querySelector('.drill-phonetic');
+        bpmControlDiv = display.querySelector('.bpm-control');
+    }
+
+    const currentSpans = phoneticDiv.querySelectorAll('span');
+    let needsRebuild = false;
+
+    if (currentSpans.length !== items.length) {
+        needsRebuild = true;
+    } else {
+        for (let i = 0; i < items.length; i++) {
+            if (currentSpans[i].textContent !== items[i]) {
+                needsRebuild = true;
+                break;
+            }
+        }
+    }
+
+    if (needsRebuild) {
+        phoneticDiv.innerHTML = items.map(x => `<span>${x}</span>`).join(' ');
+    }
+
+    const spans = phoneticDiv.children;
+    for (let i = 0; i < spans.length; i++) {
+        if (i === current) {
+            if (!spans[i].classList.contains('current')) spans[i].classList.add('current');
+        } else {
+            if (spans[i].classList.contains('current')) spans[i].classList.remove('current');
+        }
+    }
+
+    const bpmValue = bpmControlDiv.querySelector('.bpm-value');
+    if (bpmValue && bpmValue.textContent != S.bpm) {
+        bpmValue.textContent = S.bpm;
+    }
+
+    const stopBtn = bpmControlDiv.querySelector('.stop-btn');
+    if (stopBtn) {
+        const isBtnPlaying = stopBtn.classList.contains('playing');
+        if (isPlaying !== isBtnPlaying) {
+            if (isPlaying) {
+                stopBtn.classList.add('playing');
+                stopBtn.textContent = '■';
+            } else {
+                stopBtn.classList.remove('playing');
+                stopBtn.textContent = '▶';
+            }
+        }
+    }
 }
 
 function updatePatternViz() {
