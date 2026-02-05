@@ -1361,12 +1361,20 @@ function updateDisplay(type, current, items, isPlaying = false) {
 
 function updatePatternViz() {
     if (S.type !== 'pattern') return;
-    const viz = document.getElementById(`viz-${S.id}`);
-    if (!viz) return;
+
+    // Cache visual elements to avoid repeated DOM queries
+    if (!S.vizCache || S.vizCache.id !== S.id) {
+        const viz = document.getElementById(`viz-${S.id}`);
+        if (!viz) return;
+        S.vizCache = {
+            id: S.id,
+            steps: viz.querySelectorAll('.pattern-step')
+        };
+    }
     
     // Use scheduler's current step for visual sync
     const visualStep = scheduler.currentStep;
-    viz.querySelectorAll('.pattern-step').forEach((el, i) => {
+    S.vizCache.steps.forEach((el, i) => {
         el.classList.toggle('current', i === visualStep);
     });
 }
