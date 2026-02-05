@@ -1156,6 +1156,13 @@ function startCreatePlayback() {
     scheduler.currentStep = 0;
     scheduler.visualStepTime = performance.now();
     
+    // Performance Optimization: Cache DOM elements to avoid querySelectorAll in loop
+    const stepCache = [];
+    for (let i = 0; i < 16; i++) {
+        stepCache[i] = document.querySelectorAll(`.seq-step[data-step="${i}"]`);
+    }
+    let lastVisualStep = -1;
+
     // Schedule ahead function - schedules notes into the future
     function scheduleAhead() {
         const secondsPerBeat = 60.0 / createState.bpm / 4; // 16th notes
@@ -1195,9 +1202,16 @@ function startCreatePlayback() {
             visualStep = (visualStep + Math.floor(timeSinceLastStep / secondsPerBeat)) % 16;
         }
         
-        // Update visual highlighting
-        document.querySelectorAll('.seq-step').forEach(el => el.classList.remove('current'));
-        document.querySelectorAll(`.seq-step[data-step="${visualStep}"]`).forEach(el => el.classList.add('current'));
+        // Optimized visual highlighting with Change Detection
+        if (visualStep !== lastVisualStep) {
+            if (lastVisualStep !== -1 && stepCache[lastVisualStep]) {
+                stepCache[lastVisualStep].forEach(el => el.classList.remove('current'));
+            }
+            if (stepCache[visualStep]) {
+                stepCache[visualStep].forEach(el => el.classList.add('current'));
+            }
+            lastVisualStep = visualStep;
+        }
         
         scheduler.rafID = requestAnimationFrame(updateVisuals);
     }
