@@ -876,10 +876,19 @@ const MAX_PATTERNS = 20;
 // Audio
 function getAudio() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    // iOS/Safari fix: resume suspended context on user interaction
-    if (audioCtx.state === 'suspended') audioCtx.resume();
     return audioCtx;
 }
+
+// iOS/Safari fix: resume suspended context on user interaction
+function resumeAudioContext() {
+    const ctx = getAudio();
+    if (ctx.state === 'suspended') {
+        ctx.resume();
+    }
+}
+['click', 'touchstart', 'keydown'].forEach(event => {
+    document.addEventListener(event, resumeAudioContext);
+});
 
 // Play sound at a SPECIFIC time (for precision scheduling)
 function playSoundAt(id, time) {
