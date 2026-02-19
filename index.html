@@ -693,10 +693,10 @@ function switchPack(pack) {
     toast(`Sound pack: ${pack}`);
 }
 
-function playSound(inst) {
+function playSound(inst, time) {
     const ctx = getAudio();
     if (ctx.state === 'suspended') ctx.resume();
-    const t = ctx.currentTime;
+    const t = time || ctx.currentTime;
     const packs = { acoustic: playAcoustic, beatbox: playBeatbox, punchy: playPunchy };
     (packs[currentPack] || playAcoustic)(ctx, inst, t);
 }
@@ -1163,7 +1163,9 @@ function adjustP2Tempo(d) { p2.tempo = Math.max(40, Math.min(120, p2.tempo + d))
 // ═══════════════════════════════════════════════════════
 const STEPS = 16;
 const SEQ_INSTS = ['kick','snare','hihat','openhat'];
-let seq = { playing: false, step: 0, tempo: 90, intId: null, pattern: null };
+let seq = { playing: false, step: 0, tempo: 90, timerId: null, pattern: null, nextNoteTime: 0.0, notesInQueue: [] };
+const scheduleAheadTime = 0.1;
+const lookahead = 25.0;
 let activeGenre = 'All';
 
 const patterns = [
@@ -1230,37 +1232,85 @@ function loadPattern(pat) {
 function seqPlay() {
     const ctx = getAudio();
     if (ctx.state === 'suspended') ctx.resume();
-    if (!seq.playing) {
-        seq.playing = true;
-        seq.step = 0;
-        document.getElementById('seqPlayBtn').textContent = '⏸ Pause';
-        const ms = (60 / seq.tempo / 4) * 1000;
-        seqTick();
-        seq.intId = setInterval(seqTick, ms);
-    } else {
+
+    if (seq.playing) {
         seqPause();
+        return;
     }
+
+    seq.playing = true;
+    seq.step = 0;
+    seq.nextNoteTime = ctx.currentTime;
+    seq.notesInQueue = [];
+
+    document.getElementById('seqPlayBtn').textContent = '⏸ Pause';
+
+    scheduler();
+    requestAnimationFrame(draw);
 }
 
-function seqTick() {
-    document.querySelectorAll('.seq-step').forEach(s => s.classList.remove('playing'));
-    SEQ_INSTS.forEach(inst => {
-        const el = document.querySelector(`.seq-step[data-inst="${inst}"][data-step="${seq.step}"]`);
-        el.classList.add('playing');
-        if (seq.pattern && seq.pattern.p[inst][seq.step]) playSound(inst);
-    });
+function nextNote() {
+    const secondsPerBeat = 60.0 / seq.tempo;
+    seq.nextNoteTime += 0.25 * secondsPerBeat;
     seq.step = (seq.step + 1) % STEPS;
+}
+
+function scheduleNote(beatNumber, time) {
+    seq.notesInQueue.push({ note: beatNumber, time: time });
+
+    SEQ_INSTS.forEach(inst => {
+        if (seq.pattern && seq.pattern.p[inst][beatNumber]) {
+            playSound(inst, time);
+        }
+    });
+}
+
+function scheduler() {
+    const ctx = getAudio();
+    while (seq.nextNoteTime < ctx.currentTime + scheduleAheadTime) {
+        scheduleNote(seq.step, seq.nextNoteTime);
+        nextNote();
+    }
+    seq.timerId = setTimeout(scheduler, lookahead);
+}
+
+let lastNoteDrawn = -1;
+function draw() {
+    const ctx = getAudio();
+    const currentTime = ctx.currentTime;
+    let currentNote = lastNoteDrawn;
+
+    while (seq.notesInQueue.length && seq.notesInQueue[0].time < currentTime) {
+        currentNote = seq.notesInQueue[0].note;
+        seq.notesInQueue.shift();
+    }
+
+    if (lastNoteDrawn !== currentNote) {
+        document.querySelectorAll('.seq-step').forEach(s => s.classList.remove('playing'));
+        if (currentNote !== -1) {
+            SEQ_INSTS.forEach(inst => {
+                const el = document.querySelector(`.seq-step[data-inst="${inst}"][data-step="${currentNote}"]`);
+                if (el) el.classList.add('playing');
+            });
+        }
+        lastNoteDrawn = currentNote;
+    }
+
+    if (seq.playing) {
+        requestAnimationFrame(draw);
+    }
 }
 
 function seqPause() {
     seq.playing = false;
-    clearInterval(seq.intId);
+    clearTimeout(seq.timerId);
     document.getElementById('seqPlayBtn').textContent = '▶ Play';
 }
 
 function seqStop() {
     seqPause();
     seq.step = 0;
+    lastNoteDrawn = -1;
     document.querySelectorAll('.seq-step').forEach(s => s.classList.remove('playing'));
 }
 
