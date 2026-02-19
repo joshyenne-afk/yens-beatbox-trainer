@@ -674,8 +674,25 @@
 // AUDIO ENGINE — 3 Sound Packs with Acoustic Modeling
 // ═══════════════════════════════════════════════════════
 let audioCtx;
+let noiseBuffers = {};
 function getAudio() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const sr = audioCtx.sampleRate;
+
+        // 2-second white noise buffer
+        const whiteNoise = audioCtx.createBuffer(1, sr * 2, sr);
+        const wData = whiteNoise.getChannelData(0);
+        for (let i = 0; i < wData.length; i++) wData[i] = Math.random() * 2 - 1;
+        noiseBuffers.white = whiteNoise;
+
+        // Specialized 0.005s fade-out noise for punchy kick
+        const clickLen = Math.floor(sr * 0.005);
+        const clickNoise = audioCtx.createBuffer(1, clickLen, sr);
+        const cData = clickNoise.getChannelData(0);
+        for (let i = 0; i < clickLen; i++) cData[i] = (Math.random() * 2 - 1) * (1 - i / clickLen);
+        noiseBuffers.kickClick = clickNoise;
+    }
     return audioCtx;
 }
 // Resume on first interaction (iOS/Safari)
@@ -741,10 +758,7 @@ function playAcoustic(ctx, inst, t) {
             bodyG.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
             // Wire noise
             const noise = ctx.createBufferSource();
-            const buf = ctx.createBuffer(1, ctx.sampleRate * 0.2, ctx.sampleRate);
-            const data = buf.getChannelData(0);
-            for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
-            noise.buffer = buf;
+            noise.buffer = noiseBuffers.white;
             const hp = ctx.createBiquadFilter();
             hp.type = 'highpass'; hp.frequency.value = 2000;
             const lp = ctx.createBiquadFilter();
@@ -754,15 +768,12 @@ function playAcoustic(ctx, inst, t) {
             nG.gain.setValueAtTime(0.35, t);
             nG.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
             body.start(t); body.stop(t + 0.15);
-            noise.start(t); noise.stop(t + 0.2);
+            noise.start(t, Math.random() * (noiseBuffers.white.duration - 0.5)); noise.stop(t + 0.2);
             break;
         }
         case 'hihat': {
             const noise = ctx.createBufferSource();
-            const buf = ctx.createBuffer(1, ctx.sampleRate * 0.06, ctx.sampleRate);
-            const data = buf.getChannelData(0);
-            for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
-            noise.buffer = buf;
+            noise.buffer = noiseBuffers.white;
             const hp = ctx.createBiquadFilter();
             hp.type = 'highpass'; hp.frequency.value = 7000;
             const peak = ctx.createBiquadFilter();
@@ -771,15 +782,12 @@ function playAcoustic(ctx, inst, t) {
             noise.connect(hp); hp.connect(peak); peak.connect(g); g.connect(ctx.destination);
             g.gain.setValueAtTime(0.4, t);
             g.gain.exponentialRampToValueAtTime(0.001, t + 0.055);
-            noise.start(t); noise.stop(t + 0.06);
+            noise.start(t, Math.random() * (noiseBuffers.white.duration - 0.5)); noise.stop(t + 0.06);
             break;
         }
         case 'openhat': {
             const noise = ctx.createBufferSource();
-            const buf = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
-            const data = buf.getChannelData(0);
-            for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
-            noise.buffer = buf;
+            noise.buffer = noiseBuffers.white;
             const hp = ctx.createBiquadFilter();
             hp.type = 'highpass'; hp.frequency.value = 5000;
             const p1 = ctx.createBiquadFilter();
@@ -791,7 +799,7 @@ function playAcoustic(ctx, inst, t) {
             g.gain.setValueAtTime(0, t);
             g.gain.linearRampToValueAtTime(0.3, t + 0.01);
             g.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
-            noise.start(t); noise.stop(t + 0.5);
+            noise.start(t, Math.random() * (noiseBuffers.white.duration - 0.5)); noise.stop(t + 0.5);
             break;
         }
     }
@@ -822,17 +830,14 @@ function playBeatbox(ctx, inst, t) {
         }
         case 'snare': {
             const noise = ctx.createBufferSource();
-            const buf = ctx.createBuffer(1, ctx.sampleRate * 0.15, ctx.sampleRate);
-            const data = buf.getChannelData(0);
-            for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
-            noise.buffer = buf;
+            noise.buffer = noiseBuffers.white;
             const bp = ctx.createBiquadFilter();
             bp.type = 'bandpass'; bp.frequency.value = 3000; bp.Q.value = 1.5;
             const g = ctx.createGain();
             noise.connect(bp); bp.connect(g); g.connect(ctx.destination);
             g.gain.setValueAtTime(0.5, t);
             g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
-            noise.start(t); noise.stop(t + 0.15);
+            noise.start(t, Math.random() * (noiseBuffers.white.duration - 0.5)); noise.stop(t + 0.15);
             break;
         }
         case 'hihat': playAcoustic(ctx, 'hihat', t); break;
@@ -854,10 +859,7 @@ function playPunchy(ctx, inst, t) {
             g.gain.setValueAtTime(1.0, t);
             g.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
             const click = ctx.createBufferSource();
-            const cbuf = ctx.createBuffer(1, ctx.sampleRate * 0.005, ctx.sampleRate);
-            const cd = cbuf.getChannelData(0);
-            for (let i = 0; i < cbuf.length; i++) cd[i] = (Math.random() * 2 - 1) * (1 - i / cbuf.length);
-            click.buffer = cbuf;
+            click.buffer = noiseBuffers.kickClick;
             const cg = ctx.createGain();
             click.connect(cg); cg.connect(ctx.destination);
             cg.gain.setValueAtTime(0.3, t);
@@ -876,10 +878,7 @@ function playPunchy(ctx, inst, t) {
             bG.gain.setValueAtTime(0.5, t);
             bG.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
             const noise = ctx.createBufferSource();
-            const buf = ctx.createBuffer(1, ctx.sampleRate * 0.15, ctx.sampleRate);
-            const data = buf.getChannelData(0);
-            for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
-            noise.buffer = buf;
+            noise.buffer = noiseBuffers.white;
             const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1500;
             const comp = ctx.createDynamicsCompressor();
             comp.threshold.value = -20; comp.ratio.value = 8; comp.attack.value = 0.001;
@@ -888,7 +887,7 @@ function playPunchy(ctx, inst, t) {
             nG.gain.setValueAtTime(0.45, t);
             nG.gain.exponentialRampToValueAtTime(0.001, t + 0.13);
             body.start(t); body.stop(t + 0.1);
-            noise.start(t); noise.stop(t + 0.15);
+            noise.start(t, Math.random() * (noiseBuffers.white.duration - 0.5)); noise.stop(t + 0.15);
             break;
         }
         case 'hihat': playAcoustic(ctx, 'hihat', t); break;
