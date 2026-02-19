@@ -1163,6 +1163,8 @@ function adjustP2Tempo(d) { p2.tempo = Math.max(40, Math.min(120, p2.tempo + d))
 // ═══════════════════════════════════════════════════════
 const STEPS = 16;
 const SEQ_INSTS = ['kick','snare','hihat','openhat'];
+const seqStepElements = {};
+let lastSeqStep = -1;
 let seq = { playing: false, step: 0, tempo: 90, intId: null, pattern: null };
 let activeGenre = 'All';
 
@@ -1191,6 +1193,7 @@ const patterns = [
 
 function buildSeqGrid() {
     SEQ_INSTS.forEach(inst => {
+        seqStepElements[inst] = [];
         const track = document.querySelector(`.seq-track[data-inst="${inst}"]`);
         for (let i = 0; i < STEPS; i++) {
             const step = document.createElement('div');
@@ -1199,6 +1202,7 @@ function buildSeqGrid() {
             step.dataset.step = i;
             step.addEventListener('click', () => toggleSeqStep(inst, i, step));
             track.appendChild(step);
+            seqStepElements[inst].push(step);
         }
     });
 }
@@ -1243,11 +1247,21 @@ function seqPlay() {
 }
 
 function seqTick() {
-    document.querySelectorAll('.seq-step').forEach(s => s.classList.remove('playing'));
+    if (lastSeqStep !== -1) {
+        SEQ_INSTS.forEach(inst => {
+            const el = seqStepElements[inst][lastSeqStep];
+            if (el) el.classList.remove('playing');
+        });
+    } else {
+        document.querySelectorAll('.seq-step.playing').forEach(s => s.classList.remove('playing'));
+    }
+
     SEQ_INSTS.forEach(inst => {
-        const el = document.querySelector(`.seq-step[data-inst="${inst}"][data-step="${seq.step}"]`);
-        el.classList.add('playing');
-        if (seq.pattern && seq.pattern.p[inst][seq.step]) playSound(inst);
+        const el = seqStepElements[inst][seq.step];
+        if (el) {
+            el.classList.add('playing');
+            if (seq.pattern && seq.pattern.p[inst][seq.step]) playSound(inst);
+        }
     });
     seq.step = (seq.step + 1) % STEPS;
 }
@@ -1262,6 +1276,7 @@ function seqStop() {
     seqPause();
     seq.step = 0;
     document.querySelectorAll('.seq-step').forEach(s => s.classList.remove('playing'));
+    lastSeqStep = -1;
 }
 
 function seqClear() {
