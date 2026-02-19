@@ -701,6 +701,18 @@ function playSound(inst) {
     (packs[currentPack] || playAcoustic)(ctx, inst, t);
 }
 
+
+const noiseBuffers = {};
+function getNoiseBuffer(ctx, duration) {
+    if (!noiseBuffers[duration]) {
+        const buf = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
+        noiseBuffers[duration] = buf;
+    }
+    return noiseBuffers[duration];
+}
+
 // ─── ACOUSTIC KIT ───
 function playAcoustic(ctx, inst, t) {
     switch(inst) {
@@ -741,10 +753,7 @@ function playAcoustic(ctx, inst, t) {
             bodyG.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
             // Wire noise
             const noise = ctx.createBufferSource();
-            const buf = ctx.createBuffer(1, ctx.sampleRate * 0.2, ctx.sampleRate);
-            const data = buf.getChannelData(0);
-            for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
-            noise.buffer = buf;
+            noise.buffer = getNoiseBuffer(ctx, 0.2);
             const hp = ctx.createBiquadFilter();
             hp.type = 'highpass'; hp.frequency.value = 2000;
             const lp = ctx.createBiquadFilter();
@@ -759,10 +768,7 @@ function playAcoustic(ctx, inst, t) {
         }
         case 'hihat': {
             const noise = ctx.createBufferSource();
-            const buf = ctx.createBuffer(1, ctx.sampleRate * 0.06, ctx.sampleRate);
-            const data = buf.getChannelData(0);
-            for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
-            noise.buffer = buf;
+            noise.buffer = getNoiseBuffer(ctx, 0.06);
             const hp = ctx.createBiquadFilter();
             hp.type = 'highpass'; hp.frequency.value = 7000;
             const peak = ctx.createBiquadFilter();
@@ -776,10 +782,7 @@ function playAcoustic(ctx, inst, t) {
         }
         case 'openhat': {
             const noise = ctx.createBufferSource();
-            const buf = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
-            const data = buf.getChannelData(0);
-            for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
-            noise.buffer = buf;
+            noise.buffer = getNoiseBuffer(ctx, 0.5);
             const hp = ctx.createBiquadFilter();
             hp.type = 'highpass'; hp.frequency.value = 5000;
             const p1 = ctx.createBiquadFilter();
@@ -822,10 +825,7 @@ function playBeatbox(ctx, inst, t) {
         }
         case 'snare': {
             const noise = ctx.createBufferSource();
-            const buf = ctx.createBuffer(1, ctx.sampleRate * 0.15, ctx.sampleRate);
-            const data = buf.getChannelData(0);
-            for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
-            noise.buffer = buf;
+            noise.buffer = getNoiseBuffer(ctx, 0.15);
             const bp = ctx.createBiquadFilter();
             bp.type = 'bandpass'; bp.frequency.value = 3000; bp.Q.value = 1.5;
             const g = ctx.createGain();
@@ -876,10 +876,7 @@ function playPunchy(ctx, inst, t) {
             bG.gain.setValueAtTime(0.5, t);
             bG.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
             const noise = ctx.createBufferSource();
-            const buf = ctx.createBuffer(1, ctx.sampleRate * 0.15, ctx.sampleRate);
-            const data = buf.getChannelData(0);
-            for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
-            noise.buffer = buf;
+            noise.buffer = getNoiseBuffer(ctx, 0.15);
             const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1500;
             const comp = ctx.createDynamicsCompressor();
             comp.threshold.value = -20; comp.ratio.value = 8; comp.attack.value = 0.001;
