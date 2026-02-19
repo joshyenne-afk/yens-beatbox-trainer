@@ -674,6 +674,7 @@
 // AUDIO ENGINE — 3 Sound Packs with Acoustic Modeling
 // ═══════════════════════════════════════════════════════
 let audioCtx;
+const noiseBuffers = {};
 function getAudio() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     return audioCtx;
@@ -759,10 +760,13 @@ function playAcoustic(ctx, inst, t) {
         }
         case 'hihat': {
             const noise = ctx.createBufferSource();
-            const buf = ctx.createBuffer(1, ctx.sampleRate * 0.06, ctx.sampleRate);
-            const data = buf.getChannelData(0);
-            for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
-            noise.buffer = buf;
+            if (!noiseBuffers.hihat) {
+                const buf = ctx.createBuffer(1, ctx.sampleRate * 0.06, ctx.sampleRate);
+                const data = buf.getChannelData(0);
+                for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
+                noiseBuffers.hihat = buf;
+            }
+            noise.buffer = noiseBuffers.hihat;
             const hp = ctx.createBiquadFilter();
             hp.type = 'highpass'; hp.frequency.value = 7000;
             const peak = ctx.createBiquadFilter();
