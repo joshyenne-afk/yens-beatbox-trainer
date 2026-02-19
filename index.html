@@ -679,13 +679,16 @@ function getAudio() {
     return audioCtx;
 }
 // Resume on first interaction (iOS/Safari)
-['click','touchstart','keydown'].forEach(evt => {
-    document.addEventListener(evt, function resumeAC() {
-        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-        document.removeEventListener(evt, resumeAC);
-    }, { once: false });
+// iOS/Safari fix: resume suspended context on user interaction
+function resumeAudioContext() {
+    const ctx = getAudio();
+    if (ctx.state === "suspended") {
+        ctx.resume();
+    }
+}
+["click", "touchstart", "keydown"].forEach(event => {
+    document.addEventListener(event, resumeAudioContext);
 });
-
 let currentPack = 'acoustic';
 function switchPack(pack) {
     currentPack = pack;
