@@ -828,11 +828,14 @@ function playBeatbox(ctx, inst, t) {
             break;
         }
         case 'snare': {
+            // Cache buffer to improve performance
+            if (!playPunchy.snareBuf || playPunchy.snareBuf.sampleRate !== ctx.sampleRate) {
+                playPunchy.snareBuf = ctx.createBuffer(1, ctx.sampleRate * 0.15, ctx.sampleRate);
+                const data = playPunchy.snareBuf.getChannelData(0);
+                for (let i = 0; i < playPunchy.snareBuf.length; i++) data[i] = Math.random() * 2 - 1;
+            }
             const noise = ctx.createBufferSource();
-            const buf = ctx.createBuffer(1, ctx.sampleRate * 0.15, ctx.sampleRate);
-            const data = buf.getChannelData(0);
-            for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
-            noise.buffer = buf;
+            noise.buffer = playPunchy.snareBuf;
             const bp = ctx.createBiquadFilter();
             bp.type = 'bandpass'; bp.frequency.value = 3000; bp.Q.value = 1.5;
             const g = ctx.createGain();
@@ -860,11 +863,14 @@ function playPunchy(ctx, inst, t) {
             osc.frequency.exponentialRampToValueAtTime(40, t + 0.05);
             g.gain.setValueAtTime(1.0, t);
             g.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+            // Cache buffer to improve performance
+            if (!playPunchy.kickBuf || playPunchy.kickBuf.sampleRate !== ctx.sampleRate) {
+                playPunchy.kickBuf = ctx.createBuffer(1, ctx.sampleRate * 0.005, ctx.sampleRate);
+                const cd = playPunchy.kickBuf.getChannelData(0);
+                for (let i = 0; i < playPunchy.kickBuf.length; i++) cd[i] = (Math.random() * 2 - 1) * (1 - i / playPunchy.kickBuf.length);
+            }
             const click = ctx.createBufferSource();
-            const cbuf = ctx.createBuffer(1, ctx.sampleRate * 0.005, ctx.sampleRate);
-            const cd = cbuf.getChannelData(0);
-            for (let i = 0; i < cbuf.length; i++) cd[i] = (Math.random() * 2 - 1) * (1 - i / cbuf.length);
-            click.buffer = cbuf;
+            click.buffer = playPunchy.kickBuf;
             const cg = ctx.createGain();
             click.connect(cg); cg.connect(ctx.destination);
             cg.gain.setValueAtTime(0.3, t);
@@ -882,11 +888,14 @@ function playPunchy(ctx, inst, t) {
             body.connect(bG); bG.connect(ctx.destination);
             bG.gain.setValueAtTime(0.5, t);
             bG.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+            // Cache buffer to improve performance
+            if (!playPunchy.snareBuf || playPunchy.snareBuf.sampleRate !== ctx.sampleRate) {
+                playPunchy.snareBuf = ctx.createBuffer(1, ctx.sampleRate * 0.15, ctx.sampleRate);
+                const data = playPunchy.snareBuf.getChannelData(0);
+                for (let i = 0; i < playPunchy.snareBuf.length; i++) data[i] = Math.random() * 2 - 1;
+            }
             const noise = ctx.createBufferSource();
-            const buf = ctx.createBuffer(1, ctx.sampleRate * 0.15, ctx.sampleRate);
-            const data = buf.getChannelData(0);
-            for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
-            noise.buffer = buf;
+            noise.buffer = playPunchy.snareBuf;
             const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1500;
             const comp = ctx.createDynamicsCompressor();
             comp.threshold.value = -20; comp.ratio.value = 8; comp.attack.value = 0.001;
