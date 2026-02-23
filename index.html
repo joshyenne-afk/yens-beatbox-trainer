@@ -72,6 +72,10 @@
         }
         .nav-tab:hover { color: var(--text); }
         .nav-tab.active { background: var(--accent); color: #fff; }
+        .nav-tab.locked { opacity: 0.5; cursor: not-allowed; }
+        .nav-tab.locked:hover { color: var(--text-dim); }
+        .unlock-btn { display: none; margin-top: 24px; width: 100%; justify-content: center; }
+        .unlock-btn.show { display: flex; }
 
         .section { display: none; }
         .section.active { display: block; }
@@ -451,6 +455,10 @@
                 <button class="btn btn-lg" id="breathStopBtn" onclick="stopBreathing()" style="display:none;">Stop</button>
             </div>
 
+            <div class="unlock-btn" id="unlockP1Btn">
+                <button class="btn btn-green btn-lg" onclick="switchSection('phase1')">Phase Complete: Proceed to Sounds →</button>
+            </div>
+
             <div class="breath-instructions">
                 <p><strong>The test:</strong> Place one hand on your chest, one on your belly. Inhale deeply. If your top hand moves, you're chest-breathing — that's what we're fixing. Only the belly hand should rise.</p>
             </div>
@@ -486,6 +494,10 @@
                 <div class="sound-card-phonetic mono">{ B }</div>
                 <div class="sound-card-name">Kick</div>
             </div>
+        </div>
+
+        <div class="unlock-btn" id="unlockP2Btn">
+            <button class="btn btn-green btn-lg" onclick="switchSection('phase2')">Phase Complete: Proceed to Combos →</button>
         </div>
 
         <div class="card" id="p1DrillCard" style="display:none">
@@ -545,6 +557,10 @@
                 <div class="combo-card-sounds mono">B → K</div>
                 <div class="combo-card-name">Kick + Snare</div>
             </div>
+        </div>
+
+        <div class="unlock-btn" id="unlockSeqBtn">
+            <button class="btn btn-green btn-lg" onclick="switchSection('sequencer')">Phase Complete: Proceed to Patterns →</button>
         </div>
 
         <div class="card" id="p2DrillCard" style="display:none">
@@ -913,9 +929,34 @@ function playPunchy(ctx, inst, t) {
 }
 
 // ═══════════════════════════════════════════════════════
-// NAVIGATION
+// NAVIGATION & PROGRESSION
 // ═══════════════════════════════════════════════════════
+let unlockedPhase = 0;
+const PHASE_MAP = { 'breathing': 0, 'phase1': 1, 'phase2': 2, 'sequencer': 3 };
+
+function updateUnlockUI() {
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+        const p = PHASE_MAP[tab.dataset.section];
+        if (p > unlockedPhase) {
+            tab.classList.add('locked');
+            if (!tab.innerHTML.includes('🔒')) tab.innerHTML += ' 🔒';
+        } else {
+            tab.classList.remove('locked');
+            tab.innerHTML = tab.innerHTML.replace(' 🔒', '');
+        }
+    });
+
+    document.getElementById('unlockP1Btn').classList.toggle('show', unlockedPhase >= 1);
+    document.getElementById('unlockP2Btn').classList.toggle('show', unlockedPhase >= 2);
+    document.getElementById('unlockSeqBtn').classList.toggle('show', unlockedPhase >= 3);
+}
+
 function switchSection(id) {
+    if (PHASE_MAP[id] > unlockedPhase) {
+        toast('Complete previous phases to unlock this section 🔒');
+        return;
+    }
+
     // Stop any running drills
     stopBreathing(); stopP1Drill(); stopP2Drill(); seqStop();
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -999,7 +1040,16 @@ function stopBreathing() {
     document.getElementById('breathPhaseText').textContent = 'Ready';
     document.getElementById('breathPhaseText').style.color = '';
     document.getElementById('breathCount').innerHTML = '&nbsp;';
-    if (breathState.totalSeconds >= 60) toast(`${breathState.cycle} breathing cycles completed.`);
+    if (breathState.totalSeconds >= 60) {
+        if (unlockedPhase < 1) {
+            unlockedPhase = 1;
+            saveProgress();
+            updateUnlockUI();
+            toast('Phase 1 (Sounds) Unlocked! 🔓');
+        } else {
+            toast(`${breathState.cycle} breathing cycles completed.`);
+        }
+    }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1077,8 +1127,17 @@ function completeP1() {
     const exp = Math.floor(DRILL_SECS * (p1.tempo / 60));
     document.getElementById('p1Accuracy').textContent = Math.min(100, Math.round((p1.beats / exp) * 100)) + '%';
     document.getElementById('p1Progress').style.width = (p1.completed.size / 3 * 100) + '%';
-    if (p1.completed.size >= 3) toast('Phase 1 complete — all three sounds mastered.');
-    else toast(`${soundInfo[p1.sound].name} drill complete. ${3 - p1.completed.size} remaining.`);
+    if (p1.completed.size >= 3) {
+        if (unlockedPhase < 2) {
+            unlockedPhase = 2;
+            updateUnlockUI();
+            toast('Phase 2 (Combos) Unlocked! 🔓');
+        } else {
+            toast('Phase 1 complete — all three sounds mastered.');
+        }
+    } else {
+        toast(`${soundInfo[p1.sound].name} drill complete. ${3 - p1.completed.size} remaining.`);
+    }
     saveProgress();
 }
 
@@ -1167,8 +1226,17 @@ function completeP2() {
     const exp = Math.floor(DRILL_SECS * (p2.tempo / 60) / 2);
     document.getElementById('p2Accuracy').textContent = Math.min(100, Math.round((p2.cycles / exp) * 100)) + '%';
     document.getElementById('p2Progress').style.width = (p2.completed.size / 3 * 100) + '%';
-    if (p2.completed.size >= 3) toast('Phase 2 complete — transitions mastered. Hit Patterns tab.');
-    else toast(`${combos[p2.combo].name} complete. ${3 - p2.completed.size} remaining.`);
+    if (p2.completed.size >= 3) {
+        if (unlockedPhase < 3) {
+            unlockedPhase = 3;
+            updateUnlockUI();
+            toast('Patterns Unlocked! 🔓');
+        } else {
+            toast('Phase 2 complete — transitions mastered. Hit Patterns tab.');
+        }
+    } else {
+        toast(`${combos[p2.combo].name} complete. ${3 - p2.completed.size} remaining.`);
+    }
     saveProgress();
 }
 
@@ -1378,11 +1446,13 @@ function saveProgress() {
     try {
         localStorage.setItem('yen-bb-p1', JSON.stringify([...p1.completed]));
         localStorage.setItem('yen-bb-p2', JSON.stringify([...p2.completed]));
+        localStorage.setItem('yen-bb-phase-unlocked', unlockedPhase);
     } catch(e) {}
 }
 
 function loadProgress() {
     try {
+        unlockedPhase = parseInt(localStorage.getItem('yen-bb-phase-unlocked') || '0', 10);
         const s1 = JSON.parse(localStorage.getItem('yen-bb-p1') || '[]');
         const s2 = JSON.parse(localStorage.getItem('yen-bb-p2') || '[]');
         s1.forEach(s => {
@@ -1420,6 +1490,7 @@ function init() {
     initPatternUI();
     loadPattern(patterns[0]);
     loadProgress();
+    updateUnlockUI();
 }
 
 init();
