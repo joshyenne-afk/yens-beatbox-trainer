@@ -1061,7 +1061,7 @@ const soundInfo = {
     snare: { phonetic: '{ K }', name: 'K-Snare', technique: 'Hard "K" sound as in "kit" with strong accent — the "cats" in "boots and cats." Back of tongue contacts soft palate. Short, percussive click.' },
     kick: { phonetic: '{ B }', name: 'Kick Drum', technique: 'Say "boo" then whisper it (no vocal cords). Isolate the "B" with heavy emphasis. Lips tightly closed, build pressure, release in one burst. Cheeks stay firm — no puffing.' }
 };
-let p1 = { sound: null, running: false, beat: 0, beats: 0, streak: 0, bestStreak: 0, timeLeft: DRILL_SECS, tempo: 60, intId: null, timerId: null, completed: new Set() };
+let p1 = { sound: null, running: false, beat: 0, beats: 0, streak: 0, bestStreak: 0, timeLeft: DRILL_SECS, tempo: 60, intId: null, timerId: null, completed: new Set(), dots: null };
 
 function selectSound(s) {
     p1.sound = s;
@@ -1099,7 +1099,7 @@ function startP1Drill() {
 }
 
 function p1DrillBeat() {
-    const dots = document.querySelectorAll('#p1Beats .beat-dot');
+    if (!p1.dots) p1.dots = document.querySelectorAll('#p1Beats .beat-dot'); const dots = p1.dots;
     dots.forEach(d => d.classList.remove('on'));
     dots[p1.beat].classList.add('on');
     playSound(p1.sound);
@@ -1151,7 +1151,7 @@ const combos = {
     'hihat-snare': { sounds: ['hihat','snare'], display: ['t','K'], name: 'Hi-Hat + Snare' },
     'kick-snare': { sounds: ['kick','snare'], display: ['B','K'], name: 'Kick + Snare' }
 };
-let p2 = { combo: null, running: false, beat: 0, cycles: 0, streak: 0, bestStreak: 0, timeLeft: DRILL_SECS, tempo: 60, intId: null, timerId: null, completed: new Set() };
+let p2 = { combo: null, running: false, beat: 0, cycles: 0, streak: 0, bestStreak: 0, timeLeft: DRILL_SECS, tempo: 60, intId: null, timerId: null, completed: new Set(), dots: null };
 
 function selectCombo(id) {
     p2.combo = id;
