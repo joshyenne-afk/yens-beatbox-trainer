@@ -72,10 +72,6 @@
         }
         .nav-tab:hover { color: var(--text); }
         .nav-tab.active { background: var(--accent); color: #fff; }
-        .nav-tab.locked { opacity: 0.5; cursor: not-allowed; }
-        .nav-tab.locked:hover { color: var(--text-dim); }
-        .unlock-btn { display: none; margin-top: 24px; width: 100%; justify-content: center; }
-        .unlock-btn.show { display: flex; }
 
         .section { display: none; }
         .section.active { display: block; }
@@ -185,16 +181,10 @@
         }
         .sound-card:hover { border-color: var(--border-focus); }
         .sound-card.selected { border-color: var(--accent); background: var(--accent-subtle); }
-        .sound-card.completed { border-color: var(--green); background: var(--green-subtle); }
-        .sound-card.completed::after {
-            content: '✓'; position: absolute; top: 8px; right: 10px;
-            color: var(--green); font-weight: 700; font-size: 16px;
-        }
         .sound-card-phonetic {
             font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 500;
             color: var(--accent); margin-bottom: 4px;
         }
-        .sound-card.completed .sound-card-phonetic { color: var(--green); }
         .sound-card-name { font-size: 12px; color: var(--text-dim); }
 
         .drill-display { text-align: center; padding: 24px 0; }
@@ -272,9 +262,8 @@
         }
         .combo-card:hover { border-color: var(--border-focus); }
         .combo-card.selected { border-color: var(--accent); background: var(--accent-subtle); }
-        .combo-card.completed { border-color: var(--green); background: var(--green-subtle); }
+
         .combo-card-sounds { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; color: var(--accent); }
-        .combo-card.completed .combo-card-sounds { color: var(--green); }
         .combo-card-name { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
 
         .combo-vis {
@@ -381,8 +370,6 @@
         .sidebar-sound-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
 
         /* ═══════════ PROGRESS BAR ═══════════ */
-        .progress-bar { width: 100%; height: 6px; background: var(--bg-input); border-radius: 3px; overflow: hidden; margin-top: 8px; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-bright)); border-radius: 3px; transition: width 0.5s ease; }
 
         /* ═══════════ STATUS TOAST ═══════════ */
         .toast {
@@ -455,10 +442,6 @@
                 <button class="btn btn-lg" id="breathStopBtn" onclick="stopBreathing()" style="display:none;">Stop</button>
             </div>
 
-            <div class="unlock-btn" id="unlockP1Btn">
-                <button class="btn btn-green btn-lg" onclick="switchSection('phase1')">Phase Complete: Proceed to Sounds →</button>
-            </div>
-
             <div class="breath-instructions">
                 <p><strong>The test:</strong> Place one hand on your chest, one on your belly. Inhale deeply. If your top hand moves, you're chest-breathing — that's what we're fixing. Only the belly hand should rise.</p>
             </div>
@@ -477,8 +460,7 @@
         <div class="card">
             <div class="section-label">Phase 1 — Sound Isolation</div>
             <div class="section-title">Master Each Sound</div>
-            <div class="section-desc">One sound, every beat, 60 seconds. Alem/Wawad method — "It's like bodybuilding. Train hard, intensively." Don't move on until each sound is automatic.</div>
-            <div class="progress-bar"><div class="progress-fill" id="p1Progress" style="width:0%"></div></div>
+            <div class="section-desc">One sound, every beat, 60 seconds. Alem/Wawad method — "It's like bodybuilding. Train hard, intensively."</div>
         </div>
 
         <div class="sound-grid" id="soundGrid">
@@ -494,10 +476,6 @@
                 <div class="sound-card-phonetic mono">{ B }</div>
                 <div class="sound-card-name">Kick</div>
             </div>
-        </div>
-
-        <div class="unlock-btn" id="unlockP2Btn">
-            <button class="btn btn-green btn-lg" onclick="switchSection('phase2')">Phase Complete: Proceed to Combos →</button>
         </div>
 
         <div class="card" id="p1DrillCard" style="display:none">
@@ -541,7 +519,6 @@
             <div class="section-label">Phase 2 — Two-Sound Combinations</div>
             <div class="section-title">Nail the Transitions</div>
             <div class="section-desc">Before "boots and cats" works, you need the transitions to be automatic. Alternate between two sounds until the switch requires zero thought.</div>
-            <div class="progress-bar"><div class="progress-fill" id="p2Progress" style="width:0%"></div></div>
         </div>
 
         <div class="combo-grid" id="comboGrid">
@@ -557,10 +534,6 @@
                 <div class="combo-card-sounds mono">B → K</div>
                 <div class="combo-card-name">Kick + Snare</div>
             </div>
-        </div>
-
-        <div class="unlock-btn" id="unlockSeqBtn">
-            <button class="btn btn-green btn-lg" onclick="switchSection('sequencer')">Phase Complete: Proceed to Patterns →</button>
         </div>
 
         <div class="card" id="p2DrillCard" style="display:none">
@@ -929,33 +902,10 @@ function playPunchy(ctx, inst, t) {
 }
 
 // ═══════════════════════════════════════════════════════
-// NAVIGATION & PROGRESSION
+// NAVIGATION
 // ═══════════════════════════════════════════════════════
-let unlockedPhase = 0;
-const PHASE_MAP = { 'breathing': 0, 'phase1': 1, 'phase2': 2, 'sequencer': 3 };
-
-function updateUnlockUI() {
-    document.querySelectorAll('.nav-tab').forEach(tab => {
-        const p = PHASE_MAP[tab.dataset.section];
-        if (p > unlockedPhase) {
-            tab.classList.add('locked');
-            if (!tab.innerHTML.includes('🔒')) tab.innerHTML += ' 🔒';
-        } else {
-            tab.classList.remove('locked');
-            tab.innerHTML = tab.innerHTML.replace(' 🔒', '');
-        }
-    });
-
-    document.getElementById('unlockP1Btn').classList.toggle('show', unlockedPhase >= 1);
-    document.getElementById('unlockP2Btn').classList.toggle('show', unlockedPhase >= 2);
-    document.getElementById('unlockSeqBtn').classList.toggle('show', unlockedPhase >= 3);
-}
 
 function switchSection(id) {
-    if (PHASE_MAP[id] > unlockedPhase) {
-        toast('Complete previous phases to unlock this section 🔒');
-        return;
-    }
 
     // Stop any running drills
     stopBreathing(); stopP1Drill(); stopP2Drill(); seqStop();
@@ -1041,14 +991,7 @@ function stopBreathing() {
     document.getElementById('breathPhaseText').style.color = '';
     document.getElementById('breathCount').innerHTML = '&nbsp;';
     if (breathState.totalSeconds >= 60) {
-        if (unlockedPhase < 1) {
-            unlockedPhase = 1;
-            saveProgress();
-            updateUnlockUI();
-            toast('Phase 1 (Sounds) Unlocked! 🔓');
-        } else {
-            toast(`${breathState.cycle} breathing cycles completed.`);
-        }
+        toast(`${breathState.cycle} breathing cycles completed.`);
     }
 }
 
@@ -1061,11 +1004,11 @@ const soundInfo = {
     snare: { phonetic: '{ K }', name: 'K-Snare', technique: 'Hard "K" sound as in "kit" with strong accent — the "cats" in "boots and cats." Back of tongue contacts soft palate. Short, percussive click.' },
     kick: { phonetic: '{ B }', name: 'Kick Drum', technique: 'Say "boo" then whisper it (no vocal cords). Isolate the "B" with heavy emphasis. Lips tightly closed, build pressure, release in one burst. Cheeks stay firm — no puffing.' }
 };
-let p1 = { sound: null, running: false, beat: 0, beats: 0, streak: 0, bestStreak: 0, timeLeft: DRILL_SECS, tempo: 60, intId: null, timerId: null, completed: new Set(), dots: null };
+let p1 = { sound: null, running: false, beat: 0, beats: 0, streak: 0, bestStreak: 0, timeLeft: DRILL_SECS, tempo: 60, intId: null, timerId: null, dots: null };
 
 function selectSound(s) {
     p1.sound = s;
-    document.querySelectorAll('.sound-card').forEach(c => c.classList.toggle('selected', c.dataset.sound === s && !p1.completed.has(s)));
+    document.querySelectorAll('.sound-card').forEach(c => c.classList.toggle('selected', c.dataset.sound === s));
     document.getElementById('p1DrillCard').style.display = 'block';
     const info = soundInfo[s];
     document.getElementById('p1Phonetic').textContent = info.phonetic;
@@ -1121,24 +1064,9 @@ function stopP1Drill() {
 
 function completeP1() {
     stopP1Drill();
-    p1.completed.add(p1.sound);
-    document.querySelector(`.sound-card[data-sound="${p1.sound}"]`).classList.remove('selected');
-    document.querySelector(`.sound-card[data-sound="${p1.sound}"]`).classList.add('completed');
     const exp = Math.floor(DRILL_SECS * (p1.tempo / 60));
     document.getElementById('p1Accuracy').textContent = Math.min(100, Math.round((p1.beats / exp) * 100)) + '%';
-    document.getElementById('p1Progress').style.width = (p1.completed.size / 3 * 100) + '%';
-    if (p1.completed.size >= 3) {
-        if (unlockedPhase < 2) {
-            unlockedPhase = 2;
-            updateUnlockUI();
-            toast('Phase 2 (Combos) Unlocked! 🔓');
-        } else {
-            toast('Phase 1 complete — all three sounds mastered.');
-        }
-    } else {
-        toast(`${soundInfo[p1.sound].name} drill complete. ${3 - p1.completed.size} remaining.`);
-    }
-    saveProgress();
+    toast(`${soundInfo[p1.sound].name} drill done.`);
 }
 
 function adjustP1Tempo(d) { p1.tempo = Math.max(40, Math.min(140, p1.tempo + d)); document.getElementById('p1TempoVal').textContent = p1.tempo + ' BPM'; }
@@ -1151,11 +1079,11 @@ const combos = {
     'hihat-snare': { sounds: ['hihat','snare'], display: ['t','K'], name: 'Hi-Hat + Snare' },
     'kick-snare': { sounds: ['kick','snare'], display: ['B','K'], name: 'Kick + Snare' }
 };
-let p2 = { combo: null, running: false, beat: 0, cycles: 0, streak: 0, bestStreak: 0, timeLeft: DRILL_SECS, tempo: 60, intId: null, timerId: null, completed: new Set(), dots: null };
+let p2 = { combo: null, running: false, beat: 0, cycles: 0, streak: 0, bestStreak: 0, timeLeft: DRILL_SECS, tempo: 60, intId: null, timerId: null, dots: null };
 
 function selectCombo(id) {
     p2.combo = id;
-    document.querySelectorAll('.combo-card').forEach(c => c.classList.toggle('selected', c.dataset.combo === id && !p2.completed.has(id)));
+    document.querySelectorAll('.combo-card').forEach(c => c.classList.toggle('selected', c.dataset.combo === id));
     document.getElementById('p2DrillCard').style.display = 'block';
     const c = combos[id];
     document.getElementById('comboS1').textContent = c.display[0];
@@ -1220,24 +1148,9 @@ function stopP2Drill() {
 
 function completeP2() {
     stopP2Drill();
-    p2.completed.add(p2.combo);
-    const card = document.querySelector(`.combo-card[data-combo="${p2.combo}"]`);
-    card.classList.remove('selected'); card.classList.add('completed');
     const exp = Math.floor(DRILL_SECS * (p2.tempo / 60) / 2);
     document.getElementById('p2Accuracy').textContent = Math.min(100, Math.round((p2.cycles / exp) * 100)) + '%';
-    document.getElementById('p2Progress').style.width = (p2.completed.size / 3 * 100) + '%';
-    if (p2.completed.size >= 3) {
-        if (unlockedPhase < 3) {
-            unlockedPhase = 3;
-            updateUnlockUI();
-            toast('Patterns Unlocked! 🔓');
-        } else {
-            toast('Phase 2 complete — transitions mastered. Hit Patterns tab.');
-        }
-    } else {
-        toast(`${combos[p2.combo].name} complete. ${3 - p2.completed.size} remaining.`);
-    }
-    saveProgress();
+    toast(`${combos[p2.combo].name} drill done.`);
 }
 
 function adjustP2Tempo(d) { p2.tempo = Math.max(40, Math.min(120, p2.tempo + d)); document.getElementById('p2TempoVal').textContent = p2.tempo + ' BPM'; }
@@ -1439,36 +1352,6 @@ function renderPatterns() {
     }).join('');
 }
 
-// ═══════════════════════════════════════════════════════
-// PERSISTENCE (localStorage)
-// ═══════════════════════════════════════════════════════
-function saveProgress() {
-    try {
-        localStorage.setItem('yen-bb-p1', JSON.stringify([...p1.completed]));
-        localStorage.setItem('yen-bb-p2', JSON.stringify([...p2.completed]));
-        localStorage.setItem('yen-bb-phase-unlocked', unlockedPhase);
-    } catch(e) {}
-}
-
-function loadProgress() {
-    try {
-        unlockedPhase = parseInt(localStorage.getItem('yen-bb-phase-unlocked') || '0', 10);
-        const s1 = JSON.parse(localStorage.getItem('yen-bb-p1') || '[]');
-        const s2 = JSON.parse(localStorage.getItem('yen-bb-p2') || '[]');
-        s1.forEach(s => {
-            p1.completed.add(s);
-            const card = document.querySelector(`.sound-card[data-sound="${s}"]`);
-            if (card) card.classList.add('completed');
-        });
-        s2.forEach(s => {
-            p2.completed.add(s);
-            const card = document.querySelector(`.combo-card[data-combo="${s}"]`);
-            if (card) card.classList.add('completed');
-        });
-        document.getElementById('p1Progress').style.width = (p1.completed.size / 3 * 100) + '%';
-        document.getElementById('p2Progress').style.width = (p2.completed.size / 3 * 100) + '%';
-    } catch(e) {}
-}
 
 // ═══════════════════════════════════════════════════════
 // UTILITIES
@@ -1489,8 +1372,6 @@ function init() {
     buildSeqGrid();
     initPatternUI();
     loadPattern(patterns[0]);
-    loadProgress();
-    updateUnlockUI();
 }
 
 init();
