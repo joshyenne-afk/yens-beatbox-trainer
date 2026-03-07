@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>YEN's Beatbox Trainer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --bg: #0C0B0F;
-            --bg-card: #141318;
-            --bg-raised: #1B1A20;
-            --bg-input: #1E1D24;
+            --bg-card: rgba(20, 19, 24, 0.7);
+            --bg-raised: rgba(27, 26, 32, 0.8);
+            --bg-input: rgba(30, 29, 36, 0.9);
             --text: #F0EDE6;
             --text-dim: #8A8690;
             --text-muted: #5C5868;
@@ -24,17 +27,26 @@
             --green-subtle: rgba(94, 194, 105, 0.08);
             --blue: #5E9FE8;
             --blue-glow: rgba(94, 159, 232, 0.25);
+            --purple: #A37AE8;
+            --purple-glow: rgba(163, 122, 232, 0.25);
             --red: #E85E5E;
-            --border: #2A2830;
-            --border-focus: #3D3A47;
+            --border: rgba(42, 40, 48, 0.6);
+            --border-focus: rgba(61, 58, 71, 0.8);
             --breath-in: #5EC269;
             --breath-hold: #5E9FE8;
             --breath-out: #E8793A;
             --radius: 12px;
             --radius-sm: 8px;
             --radius-lg: 16px;
+            --glass: backdrop-filter: blur(20px);
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Outfit', -apple-system, sans-serif;
             background: var(--bg);
@@ -44,1337 +56,2095 @@
             -webkit-tap-highlight-color: transparent;
             overflow-x: hidden;
         }
-        .mono { font-family: 'DM Mono', monospace; }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 30%, rgba(232, 121, 58, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 80% at 80% 70%, rgba(94, 159, 232, 0.05) 0%, transparent 60%),
+                radial-gradient(ellipse 70% 50% at 50% 50%, rgba(163, 122, 232, 0.04) 0%, transparent 60%);
+            animation: bgShift 20s ease-in-out infinite;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        @keyframes bgShift {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+
+            33% {
+                opacity: 0.8;
+                transform: scale(1.1) rotate(1deg);
+            }
+
+            66% {
+                opacity: 1;
+                transform: scale(0.95) rotate(-1deg);
+            }
+        }
+
+        .mono {
+            font-family: 'DM Mono', monospace;
+        }
 
         /* ═══════════ LAYOUT ═══════════ */
-        .app { max-width: 900px; margin: 0 auto; padding: 16px; }
-        
+        .app {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
         .header {
-            display: flex; align-items: center; justify-content: space-between;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             padding: 20px 0 24px;
             border-bottom: 1px solid var(--border);
             margin-bottom: 24px;
         }
-        .logo { font-size: 22px; font-weight: 700; letter-spacing: -0.03em; }
-        .logo span { color: var(--accent); }
-        .header-sub { font-size: 11px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
-        
-        .nav-tabs {
-            display: flex; gap: 4px;
-            background: var(--bg-card); border-radius: var(--radius);
-            padding: 4px; border: 1px solid var(--border);
-        }
-        .nav-tab {
-            padding: 8px 16px; border: none; border-radius: var(--radius-sm);
-            background: transparent; color: var(--text-dim); font-family: inherit;
-            font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s;
-            white-space: nowrap;
-        }
-        .nav-tab:hover { color: var(--text); }
-        .nav-tab.active { background: var(--accent); color: #fff; }
 
-        .section { display: none; }
-        .section.active { display: block; }
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .header-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 4px;
+            background: rgba(20, 19, 24, 0.6);
+            border-radius: var(--radius);
+            padding: 4px;
+            border: 1px solid var(--border);
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+        }
+
+        .nav-tab {
+            padding: 8px 16px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: var(--text-dim);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .nav-tab:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .nav-tab.active {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
 
         .card {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: var(--radius-lg); padding: 24px; margin-bottom: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 16px;
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        .card-flush { padding: 0; overflow: hidden; }
+
+        .card:hover {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .card-flush {
+            padding: 0;
+            overflow: hidden;
+        }
 
         .section-label {
-            font-size: 10px; font-weight: 600; text-transform: uppercase;
-            letter-spacing: 0.12em; color: var(--text-muted); margin-bottom: 8px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+            margin-bottom: 8px;
         }
-        .section-title { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px; }
-        .section-desc { font-size: 14px; color: var(--text-dim); line-height: 1.6; max-width: 600px; }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 6px;
+        }
+
+        .section-desc {
+            font-size: 14px;
+            color: var(--text-dim);
+            line-height: 1.6;
+            max-width: 600px;
+        }
 
         /* ═══════════ BUTTONS ═══════════ */
         .btn {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 12px 20px; border: 1px solid var(--border); border-radius: var(--radius-sm);
-            background: var(--bg-raised); color: var(--text); font-family: inherit;
-            font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s;
-            -webkit-user-select: none; user-select: none;
-            min-height: 48px; /* touch target */
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-raised);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            -webkit-user-select: none;
+            user-select: none;
+            min-height: 48px;
+            /* touch target */
         }
-        .btn:hover { background: var(--bg-input); border-color: var(--border-focus); }
-        .btn:active { transform: scale(0.97); }
-        .btn-accent { background: var(--accent); border-color: var(--accent); color: #fff; }
-        .btn-accent:hover { background: var(--accent-bright); border-color: var(--accent-bright); }
-        .btn-green { background: var(--green); border-color: var(--green); color: #fff; }
-        .btn-lg { padding: 16px 32px; font-size: 16px; border-radius: var(--radius); min-height: 56px; }
-        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .btn:hover {
+            background: var(--bg-input);
+            border-color: var(--border-focus);
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: scale(0.97) translateY(0);
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        .btn-accent:hover {
+            background: var(--accent-bright);
+            border-color: var(--accent-bright);
+            box-shadow: 0 6px 28px var(--accent-glow);
+        }
+
+        .btn-green {
+            background: var(--green);
+            border-color: var(--green);
+            color: #fff;
+            box-shadow: 0 4px 20px var(--green-glow);
+        }
+
+        .btn-lg {
+            padding: 16px 32px;
+            font-size: 16px;
+            border-radius: var(--radius);
+            min-height: 56px;
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
 
         /* ═══════════ PHASE 0: BREATHING ═══════════ */
         .breath-ring-container {
-            display: flex; justify-content: center; align-items: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             padding: 32px 0;
         }
+
         .breath-ring {
-            width: 220px; height: 220px; border-radius: 50%;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
             border: 3px solid var(--border);
-            display: flex; align-items: center; justify-content: center;
-            flex-direction: column; position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            position: relative;
             transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
         .breath-ring.inhale {
             transform: scale(1.25);
             border-color: var(--breath-in);
             box-shadow: 0 0 60px var(--green-glow), inset 0 0 40px var(--green-subtle);
         }
+
         .breath-ring.hold {
             transform: scale(1.25);
             border-color: var(--breath-hold);
-            box-shadow: 0 0 60px var(--blue-glow), inset 0 0 40px rgba(94,159,232,0.08);
+            box-shadow: 0 0 60px var(--blue-glow), inset 0 0 40px rgba(94, 159, 232, 0.08);
         }
+
         .breath-ring.exhale {
             transform: scale(1);
             border-color: var(--breath-out);
             box-shadow: 0 0 60px var(--accent-glow), inset 0 0 40px var(--accent-subtle);
         }
+
         .breath-ring.rest {
             transform: scale(1);
             border-color: var(--border);
         }
+
         .breath-phase-text {
-            font-size: 24px; font-weight: 700; letter-spacing: -0.02em;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
             transition: color 0.3s;
         }
+
         .breath-count {
-            font-family: 'DM Mono', monospace; font-size: 48px; font-weight: 500;
+            font-family: 'DM Mono', monospace;
+            font-size: 48px;
+            font-weight: 500;
             margin-top: 4px;
         }
+
         .breath-timer {
-            text-align: center; margin-top: 16px;
-            font-family: 'DM Mono', monospace; font-size: 14px; color: var(--text-dim);
+            text-align: center;
+            margin-top: 16px;
+            font-family: 'DM Mono', monospace;
+            font-size: 14px;
+            color: var(--text-dim);
         }
+
         .breath-instructions {
-            background: var(--bg-raised); border-radius: var(--radius);
-            padding: 16px 20px; margin-top: 20px;
+            background: var(--bg-raised);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            margin-top: 20px;
         }
-        .breath-instructions p { color: var(--text-dim); font-size: 13px; line-height: 1.6; }
-        .breath-instructions strong { color: var(--text); }
+
+        .breath-instructions p {
+            color: var(--text-dim);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .breath-instructions strong {
+            color: var(--text);
+        }
+
         .diaphragm-check {
-            display: flex; gap: 16px; align-items: center;
-            background: var(--bg-raised); border-radius: var(--radius);
-            padding: 16px 20px; margin-top: 12px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            background: var(--bg-raised);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            margin-top: 12px;
         }
+
         .diaphragm-icon {
-            width: 48px; height: 48px; border-radius: 50%;
-            background: var(--accent-subtle); border: 2px solid var(--accent);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 24px; flex-shrink: 0;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--accent-subtle);
+            border: 2px solid var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
         }
-        .diaphragm-text { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+
+        .diaphragm-text {
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
 
         /* ═══════════ PHASE 1: SOUND ISOLATION ═══════════ */
         .sound-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr);
-            gap: 12px; margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
         }
-        .sound-card {
-            background: var(--bg-raised); border: 2px solid var(--border);
-            border-radius: var(--radius); padding: 20px; cursor: pointer;
-            transition: all 0.2s; text-align: center; position: relative;
-            min-height: 100px;
-        }
-        .sound-card:hover { border-color: var(--border-focus); }
-        .sound-card.selected { border-color: var(--accent); background: var(--accent-subtle); }
-        .sound-card-phonetic {
-            font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 500;
-            color: var(--accent); margin-bottom: 4px;
-        }
-        .sound-card-name { font-size: 12px; color: var(--text-dim); }
 
-        .drill-display { text-align: center; padding: 24px 0; }
+        .sound-card {
+            background: var(--bg-raised);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            position: relative;
+            min-height: 100px;
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
+        }
+
+        .sound-card:hover {
+            border-color: var(--border-focus);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .sound-card.selected {
+            border-color: var(--accent);
+            background: var(--accent-subtle);
+            box-shadow: 0 0 24px var(--accent-glow);
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+
+        .sound-card-phonetic {
+            font-family: 'DM Mono', monospace;
+            font-size: 28px;
+            font-weight: 500;
+            color: var(--accent);
+            margin-bottom: 4px;
+            text-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .sound-card-name {
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        .drill-display {
+            text-align: center;
+            padding: 24px 0;
+        }
+
         .drill-big-phonetic {
-            font-family: 'DM Mono', monospace; font-size: 72px; font-weight: 500;
-            color: var(--accent); text-shadow: 0 0 80px var(--accent-glow);
+            font-family: 'DM Mono', monospace;
+            font-size: 72px;
+            font-weight: 500;
+            color: var(--accent);
+            text-shadow: 0 0 80px var(--accent-glow);
             letter-spacing: -0.02em;
         }
-        .drill-sound-name { font-size: 16px; color: var(--text-dim); margin-top: 4px; }
-        
+
+        .drill-sound-name {
+            font-size: 16px;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
         .technique-box {
-            background: var(--bg-raised); border-radius: var(--radius);
-            padding: 16px 20px; margin: 20px 0;
+            background: var(--bg-raised);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            margin: 20px 0;
         }
+
         .technique-label {
-            font-size: 10px; font-weight: 600; text-transform: uppercase;
-            letter-spacing: 0.1em; color: var(--accent); margin-bottom: 8px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent);
+            margin-bottom: 8px;
         }
-        .technique-text { font-size: 14px; color: var(--text); line-height: 1.7; }
+
+        .technique-text {
+            font-size: 14px;
+            color: var(--text);
+            line-height: 1.7;
+        }
 
         .beat-dots {
-            display: flex; gap: 16px; justify-content: center;
+            display: flex;
+            gap: 16px;
+            justify-content: center;
             margin: 24px 0;
         }
+
         .beat-dot {
-            width: 20px; height: 20px; border-radius: 50%;
-            background: var(--bg-input); border: 2px solid var(--border);
-            transition: all 0.12s;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
         .beat-dot.on {
-            background: var(--accent); border-color: var(--accent);
-            box-shadow: 0 0 16px var(--accent-glow); transform: scale(1.3);
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 16px var(--accent-glow), 0 0 40px rgba(232, 121, 58, 0.15);
+            transform: scale(1.4);
         }
 
         .timer-big {
             text-align: center;
-            font-family: 'DM Mono', monospace; font-size: 42px; font-weight: 400;
-            color: var(--text); letter-spacing: -0.02em;
+            font-family: 'DM Mono', monospace;
+            font-size: 42px;
+            font-weight: 400;
+            color: var(--text);
+            letter-spacing: -0.02em;
         }
-        .timer-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px; text-align: center; }
 
-        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; }
+        .timer-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 2px;
+            text-align: center;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
         .stat-box {
-            background: var(--bg-raised); border-radius: var(--radius-sm);
-            padding: 14px; text-align: center;
+            background: var(--bg-raised);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            text-align: center;
         }
-        .stat-val { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; }
-        .stat-lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
 
-        .drill-controls { display: flex; gap: 12px; justify-content: center; margin: 20px 0; flex-wrap: wrap; }
+        .stat-val {
+            font-family: 'DM Mono', monospace;
+            font-size: 22px;
+            font-weight: 500;
+        }
+
+        .stat-lbl {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-top: 2px;
+        }
+
+        .drill-controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
 
         .tempo-row {
-            display: flex; align-items: center; gap: 12px;
-            justify-content: center; margin: 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+            margin: 16px 0;
         }
-        .tempo-lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
-        .tempo-val { font-family: 'DM Mono', monospace; font-size: 14px; min-width: 70px; }
-        .tempo-btns { display: flex; gap: 4px; }
+
+        .tempo-lbl {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .tempo-val {
+            font-family: 'DM Mono', monospace;
+            font-size: 14px;
+            min-width: 70px;
+        }
+
+        .tempo-btns {
+            display: flex;
+            gap: 4px;
+        }
+
         .tempo-btn {
-            width: 40px; height: 40px; border-radius: var(--radius-sm);
-            background: var(--bg-raised); border: 1px solid var(--border);
-            color: var(--text); font-family: 'DM Mono', monospace; font-size: 18px;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-raised);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: 'DM Mono', monospace;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.15s;
         }
-        .tempo-btn:hover { background: var(--bg-input); border-color: var(--border-focus); }
-        .tempo-btn:active { transform: scale(0.93); }
+
+        .tempo-btn:hover {
+            background: var(--bg-input);
+            border-color: var(--border-focus);
+        }
+
+        .tempo-btn:active {
+            transform: scale(0.93);
+        }
 
         /* ═══════════ PHASE 2: COMBINATIONS ═══════════ */
-        .combo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-        .combo-card {
-            background: var(--bg-raised); border: 2px solid var(--border);
-            border-radius: var(--radius); padding: 16px; cursor: pointer;
-            transition: all 0.2s; text-align: center;
+        .combo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
         }
-        .combo-card:hover { border-color: var(--border-focus); }
-        .combo-card.selected { border-color: var(--accent); background: var(--accent-subtle); }
 
-        .combo-card-sounds { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; color: var(--accent); }
-        .combo-card-name { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+        .combo-card {
+            background: var(--bg-raised);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
+        }
+
+        .combo-card:hover {
+            border-color: var(--border-focus);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .combo-card.selected {
+            border-color: var(--accent);
+            background: var(--accent-subtle);
+            box-shadow: 0 0 24px var(--accent-glow);
+        }
+
+        .combo-card-sounds {
+            font-family: 'DM Mono', monospace;
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--accent);
+        }
+
+        .combo-card-name {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
 
         .combo-vis {
-            display: flex; align-items: center; justify-content: center;
-            gap: 24px; padding: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            padding: 20px 0;
         }
+
         .combo-vis-sound {
-            font-family: 'DM Mono', monospace; font-size: 48px; font-weight: 500;
-            color: var(--text-muted); transition: all 0.15s;
+            font-family: 'DM Mono', monospace;
+            font-size: 48px;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: all 0.15s;
         }
-        .combo-vis-sound.active { color: var(--accent); text-shadow: 0 0 40px var(--accent-glow); transform: scale(1.15); }
-        .combo-vis-arrow { font-size: 28px; color: var(--text-muted); }
+
+        .combo-vis-sound.active {
+            color: var(--accent);
+            text-shadow: 0 0 40px var(--accent-glow);
+            transform: scale(1.2);
+        }
+
+        .combo-vis-arrow {
+            font-size: 28px;
+            color: var(--text-muted);
+        }
 
         /* ═══════════ PATTERN SEQUENCER ═══════════ */
-        .transport { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
-        
-        .pattern-info-bar {
-            background: var(--bg-raised); border-radius: var(--radius);
-            padding: 14px 18px; margin-bottom: 12px;
+        .transport {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
         }
-        .pattern-info-title { font-size: 16px; font-weight: 600; }
-        .pattern-info-desc { font-size: 13px; color: var(--text-dim); margin-top: 4px; line-height: 1.5; }
-        
-        .phonetic-bar {
-            background: var(--accent-subtle); border: 1px solid var(--accent);
-            border-radius: var(--radius); padding: 12px 18px;
-            text-align: center; margin-bottom: 16px;
-        }
-        .phonetic-bar-text { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 500; color: var(--accent); letter-spacing: 2px; }
-        .phonetic-bar-help { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
 
-        .sequencer-grid { 
-            background: var(--bg-raised); border-radius: var(--radius);
-            padding: 16px; overflow-x: auto;
+        .pattern-info-bar {
+            background: var(--bg-raised);
+            border-radius: var(--radius);
+            padding: 14px 18px;
+            margin-bottom: 12px;
         }
+
+        .pattern-info-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .pattern-info-desc {
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-top: 4px;
+            line-height: 1.5;
+        }
+
+        .phonetic-bar {
+            background: var(--accent-subtle);
+            border: 1px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 12px 18px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .phonetic-bar-text {
+            font-family: 'DM Mono', monospace;
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--accent);
+            letter-spacing: 2px;
+        }
+
+        .phonetic-bar-help {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        .sequencer-grid {
+            background: var(--bg-raised);
+            border-radius: var(--radius);
+            padding: 16px;
+            overflow-x: auto;
+        }
+
         .seq-track {
-            display: grid; grid-template-columns: 80px repeat(16, 1fr);
-            gap: 3px; align-items: center; margin-bottom: 4px;
+            display: grid;
+            grid-template-columns: 80px repeat(16, 1fr);
+            gap: 3px;
+            align-items: center;
+            margin-bottom: 4px;
         }
-        .seq-track:last-child { margin-bottom: 0; }
-        .seq-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); padding-right: 8px; }
-        .seq-label-name { font-weight: 600; color: var(--text-dim); }
-        .seq-label-phonetic { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--accent); }
+
+        .seq-track:last-child {
+            margin-bottom: 0;
+        }
+
+        .seq-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            padding-right: 8px;
+        }
+
+        .seq-label-name {
+            font-weight: 600;
+            color: var(--text-dim);
+        }
+
+        .seq-label-phonetic {
+            font-family: 'DM Mono', monospace;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--accent);
+        }
+
         .seq-step {
-            aspect-ratio: 1; background: var(--bg-input);
-            border: 1px solid var(--border); border-radius: 4px;
-            cursor: pointer; transition: all 0.1s; min-width: 28px;
+            aspect-ratio: 1;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s;
+            min-width: 28px;
         }
-        .seq-step:hover { border-color: var(--accent); }
-        .seq-step.on { background: var(--accent); border-color: var(--accent); }
-        .seq-step.playing { box-shadow: 0 0 0 2px var(--accent-glow); transform: scale(1.08); }
-        .seq-step:nth-child(5n+2) { margin-left: 3px; }
+
+        .seq-step:hover {
+            border-color: var(--accent);
+            background: rgba(232, 121, 58, 0.08);
+        }
+
+        .seq-step.on {
+            border-color: transparent;
+        }
+
+        .seq-track[data-inst="kick"] .seq-step.on {
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent-glow);
+        }
+
+        .seq-track[data-inst="snare"] .seq-step.on {
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green-glow);
+        }
+
+        .seq-track[data-inst="hihat"] .seq-step.on {
+            background: var(--blue);
+            box-shadow: 0 0 8px var(--blue-glow);
+        }
+
+        .seq-track[data-inst="openhat"] .seq-step.on {
+            background: var(--purple);
+            box-shadow: 0 0 8px var(--purple-glow);
+        }
+
+        .seq-step.playing {
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4), 0 0 12px rgba(255, 255, 255, 0.15);
+            transform: scale(1.12);
+        }
+
+        .seq-step:nth-child(5n+2) {
+            margin-left: 3px;
+        }
+        }
 
         .pattern-sidebar {
-            background: var(--bg-raised); border-radius: var(--radius);
-            padding: 16px; margin-top: 16px;
+            background: var(--bg-raised);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-top: 16px;
         }
+
         .pattern-search {
-            width: 100%; padding: 10px 12px;
-            background: var(--bg-input); border: 1px solid var(--border);
-            border-radius: var(--radius-sm); font-size: 13px; font-family: inherit;
-            color: var(--text); margin-bottom: 10px;
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-family: inherit;
+            color: var(--text);
+            margin-bottom: 10px;
         }
-        .pattern-search::placeholder { color: var(--text-muted); }
-        .pattern-search:focus { outline: none; border-color: var(--accent); }
-        .genre-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+
+        .pattern-search::placeholder {
+            color: var(--text-muted);
+        }
+
+        .pattern-search:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .genre-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
         .genre-pill {
-            padding: 5px 12px; background: var(--bg-input);
-            border: 1px solid var(--border); border-radius: 20px;
-            font-size: 11px; color: var(--text-dim); cursor: pointer; transition: all 0.15s;
+            padding: 5px 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 11px;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.15s;
         }
-        .genre-pill:hover, .genre-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-        .pattern-list { max-height: 300px; overflow-y: auto; }
+
+        .genre-pill:hover,
+        .genre-pill.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .pattern-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
         .pattern-item {
-            padding: 10px 12px; border-radius: var(--radius-sm);
-            cursor: pointer; transition: all 0.15s; margin-bottom: 4px;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-bottom: 4px;
         }
-        .pattern-item:hover { background: var(--bg-input); }
-        .pattern-item.active { background: var(--accent-subtle); }
-        .pattern-item-name { font-size: 13px; font-weight: 600; }
-        .pattern-item-meta { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+        .pattern-item:hover {
+            background: var(--bg-input);
+        }
+
+        .pattern-item.active {
+            background: var(--accent-subtle);
+        }
+
+        .pattern-item-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .pattern-item-meta {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
 
         /* ═══════════ SOUND PACK SELECTOR ═══════════ */
-        .pack-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-        .pack-btn {
-            padding: 8px 16px; background: var(--bg-input);
-            border: 1px solid var(--border); border-radius: 20px;
-            font-family: inherit; font-size: 12px; color: var(--text-dim);
-            cursor: pointer; transition: all 0.15s;
+        .pack-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
         }
-        .pack-btn:hover { border-color: var(--border-focus); color: var(--text); }
-        .pack-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+        .pack-btn {
+            padding: 8px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-family: inherit;
+            font-size: 12px;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .pack-btn:hover {
+            border-color: var(--border-focus);
+            color: var(--text);
+        }
+
+        .pack-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
 
         /* ═══════════ SIDEBAR SOUNDS ═══════════ */
         .sidebar-sound {
-            background: var(--bg-raised); border: 1px solid var(--border);
-            border-radius: var(--radius-sm); padding: 12px; margin-bottom: 8px;
-            cursor: pointer; transition: all 0.15s;
+            background: var(--bg-raised);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
         }
-        .sidebar-sound:hover { border-color: var(--accent); }
-        .sidebar-sound:active { transform: scale(0.97); }
-        .sidebar-sound-name { font-size: 12px; font-weight: 600; }
-        .sidebar-sound-phonetic { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; color: var(--accent); }
-        .sidebar-sound-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+
+        .sidebar-sound:hover {
+            border-color: var(--accent);
+        }
+
+        .sidebar-sound:active {
+            transform: scale(0.97);
+        }
+
+        .sidebar-sound-name {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .sidebar-sound-phonetic {
+            font-family: 'DM Mono', monospace;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--accent);
+        }
+
+        .sidebar-sound-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+            line-height: 1.4;
+        }
 
         /* ═══════════ PROGRESS BAR ═══════════ */
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-input);
+            border-radius: 3px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-bright));
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        /* ═══════════ ANIMATIONS ═══════════ */
+        @keyframes pulseGlow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 16px var(--accent-glow);
+            }
+
+            50% {
+                box-shadow: 0 0 30px var(--accent-glow), 0 0 60px rgba(232, 121, 58, 0.1);
+            }
+        }
+
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section.active {
+            animation: fadeSlideIn 0.3s ease;
+        }
 
         /* ═══════════ STATUS TOAST ═══════════ */
         .toast {
-            position: fixed; bottom: 20px; right: 20px;
-            background: var(--bg-card); border: 1px solid var(--green);
-            border-radius: var(--radius); padding: 12px 18px;
-            font-size: 13px; color: var(--green); z-index: 1000;
-            opacity: 0; transform: translateY(10px); transition: all 0.3s;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--green);
+            border-radius: var(--radius);
+            padding: 12px 18px;
+            font-size: 13px;
+            color: var(--green);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s;
             pointer-events: none;
         }
-        .toast.show { opacity: 1; transform: translateY(0); }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
         /* ═══════════ RESPONSIVE ═══════════ */
         @media (max-width: 640px) {
-            .app { padding: 10px; }
-            .header { padding: 14px 0 18px; }
-            .logo { font-size: 18px; }
-            .nav-tab { padding: 7px 10px; font-size: 11px; }
-            .sound-grid, .combo-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-            .sound-card { padding: 14px 10px; min-height: 80px; }
-            .sound-card-phonetic { font-size: 22px; }
-            .drill-big-phonetic { font-size: 48px; }
-            .combo-vis-sound { font-size: 36px; }
-            .breath-ring { width: 180px; height: 180px; }
-            .breath-count { font-size: 36px; }
-            .timer-big { font-size: 32px; }
-            .seq-track { grid-template-columns: 60px repeat(16, 1fr); gap: 2px; }
-            .seq-step { min-width: 18px; }
-            .btn-lg { padding: 14px 24px; font-size: 15px; }
+            .app {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 14px 0 18px;
+            }
+
+            .logo {
+                font-size: 18px;
+            }
+
+            .nav-tab {
+                padding: 7px 10px;
+                font-size: 11px;
+            }
+
+            .sound-grid,
+            .combo-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+
+            .sound-card {
+                padding: 14px 10px;
+                min-height: 80px;
+            }
+
+            .sound-card-phonetic {
+                font-size: 22px;
+            }
+
+            .drill-big-phonetic {
+                font-size: 48px;
+            }
+
+            .combo-vis-sound {
+                font-size: 36px;
+            }
+
+            .breath-ring {
+                width: 180px;
+                height: 180px;
+            }
+
+            .breath-count {
+                font-size: 36px;
+            }
+
+            .timer-big {
+                font-size: 32px;
+            }
+
+            .seq-track {
+                grid-template-columns: 60px repeat(16, 1fr);
+                gap: 2px;
+            }
+
+            .seq-step {
+                min-width: 18px;
+            }
+
+            .btn-lg {
+                padding: 14px 24px;
+                font-size: 15px;
+            }
         }
 
         /* scrollbar */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: var(--bg-card); }
-        ::-webkit-scrollbar-thumb { background: var(--border-focus); border-radius: 3px; }
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-card);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-focus);
+            border-radius: 3px;
+        }
     </style>
 </head>
+
 <body>
-<div class="app">
-    <div class="header">
-        <div>
-            <div class="logo">YEN's <span>Beatbox</span> Trainer</div>
-            <div class="header-sub">Progressive Training System</div>
-        </div>
-        <div class="nav-tabs">
-            <button class="nav-tab active" data-section="breathing" onclick="switchSection('breathing')">Breathe</button>
-            <button class="nav-tab" data-section="phase1" onclick="switchSection('phase1')">Sounds</button>
-            <button class="nav-tab" data-section="phase2" onclick="switchSection('phase2')">Combos</button>
-            <button class="nav-tab" data-section="sequencer" onclick="switchSection('sequencer')">Patterns</button>
-        </div>
-    </div>
-
-    <!-- ═══════════ PHASE 0: BREATHING ═══════════ -->
-    <div class="section active" id="sec-breathing">
-        <div class="card">
-            <div class="section-label">Phase 0 — Foundation</div>
-            <div class="section-title">Diaphragmatic Breathing</div>
-            <div class="section-desc">Every championship beatboxer starts here. Your diaphragm is the engine — without proper breath control, every sound suffers. This isn't optional warmup; it's the prerequisite.</div>
-            
-            <div class="breath-ring-container">
-                <div class="breath-ring" id="breathRing">
-                    <div class="breath-phase-text" id="breathPhaseText">Ready</div>
-                    <div class="breath-count mono" id="breathCount">&nbsp;</div>
-                </div>
+    <div class="app">
+        <div class="header">
+            <div>
+                <div class="logo">YEN's <span>Beatbox</span> Trainer</div>
+                <div class="header-sub">Progressive Training System</div>
             </div>
-            <div class="breath-timer" id="breathTimer"></div>
-
-            <div class="drill-controls">
-                <button class="btn btn-accent btn-lg" id="breathStartBtn" onclick="startBreathing()">Start 4-4-4-4 Box Breathing</button>
-                <button class="btn btn-lg" id="breathStopBtn" onclick="stopBreathing()" style="display:none;">Stop</button>
-            </div>
-
-            <div class="breath-instructions">
-                <p><strong>The test:</strong> Place one hand on your chest, one on your belly. Inhale deeply. If your top hand moves, you're chest-breathing — that's what we're fixing. Only the belly hand should rise.</p>
-            </div>
-            <div class="diaphragm-check">
-                <div class="diaphragm-icon">🫁</div>
-                <div class="diaphragm-text">
-                    <strong style="color:var(--text)">Why this matters for beatbox:</strong><br>
-                    Diaphragmatic breathing gives you more air, stronger sounds, and the ability to sustain patterns. Circular breathing — inhaling through nose while pushing air from cheeks — is impossible without this foundation.
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ═══════════ PHASE 1: SOUND ISOLATION ═══════════ -->
-    <div class="section" id="sec-phase1">
-        <div class="card">
-            <div class="section-label">Phase 1 — Sound Isolation</div>
-            <div class="section-title">Master Each Sound</div>
-            <div class="section-desc">One sound, every beat, 60 seconds. Alem/Wawad method — "It's like bodybuilding. Train hard, intensively."</div>
-        </div>
-
-        <div class="sound-grid" id="soundGrid">
-            <div class="sound-card" data-sound="hihat" onclick="selectSound('hihat')">
-                <div class="sound-card-phonetic mono">{ t }</div>
-                <div class="sound-card-name">Hi-Hat</div>
-            </div>
-            <div class="sound-card" data-sound="snare" onclick="selectSound('snare')">
-                <div class="sound-card-phonetic mono">{ K }</div>
-                <div class="sound-card-name">K-Snare</div>
-            </div>
-            <div class="sound-card" data-sound="kick" onclick="selectSound('kick')">
-                <div class="sound-card-phonetic mono">{ B }</div>
-                <div class="sound-card-name">Kick</div>
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-section="breathing"
+                    onclick="switchSection('breathing')">Breathe</button>
+                <button class="nav-tab" data-section="phase1" onclick="switchSection('phase1')">Sounds</button>
+                <button class="nav-tab" data-section="phase2" onclick="switchSection('phase2')">Combos</button>
+                <button class="nav-tab" data-section="sequencer" onclick="switchSection('sequencer')">Patterns</button>
             </div>
         </div>
 
-        <div class="card" id="p1DrillCard" style="display:none">
-            <div class="drill-display">
-                <div class="drill-big-phonetic" id="p1Phonetic">{ t }</div>
-                <div class="drill-sound-name" id="p1SoundName">Hi-Hat</div>
-            </div>
-            <div class="technique-box">
-                <div class="technique-label">Technique</div>
-                <div class="technique-text" id="p1Technique"></div>
-            </div>
-            <div class="beat-dots" id="p1Beats">
-                <div class="beat-dot"></div><div class="beat-dot"></div>
-                <div class="beat-dot"></div><div class="beat-dot"></div>
-            </div>
-            <div class="timer-big" id="p1Timer">1:00</div>
-            <div class="timer-label">remaining</div>
-            <div class="drill-controls">
-                <button class="btn btn-accent btn-lg" id="p1StartBtn" onclick="startP1Drill()">Start Drill</button>
-                <button class="btn btn-lg" id="p1StopBtn" onclick="stopP1Drill()" style="display:none">Stop</button>
-            </div>
-            <div class="tempo-row">
-                <span class="tempo-lbl">Tempo</span>
-                <div class="tempo-btns">
-                    <button class="tempo-btn" onclick="adjustP1Tempo(-5)">−</button>
-                    <button class="tempo-btn" onclick="adjustP1Tempo(5)">+</button>
-                </div>
-                <span class="tempo-val mono" id="p1TempoVal">60 BPM</span>
-            </div>
-            <div class="stats-row">
-                <div class="stat-box"><div class="stat-val mono" id="p1Beats_ct">0</div><div class="stat-lbl">Beats</div></div>
-                <div class="stat-box"><div class="stat-val mono" id="p1Accuracy">—</div><div class="stat-lbl">Timing</div></div>
-                <div class="stat-box"><div class="stat-val mono" id="p1Streak">0</div><div class="stat-lbl">Streak</div></div>
-            </div>
-        </div>
-    </div>
+        <!-- ═══════════ PHASE 0: BREATHING ═══════════ -->
+        <div class="section active" id="sec-breathing">
+            <div class="card">
+                <div class="section-label">Phase 0 — Foundation</div>
+                <div class="section-title">Diaphragmatic Breathing</div>
+                <div class="section-desc">Every championship beatboxer starts here. Your diaphragm is the engine —
+                    without proper breath control, every sound suffers. This isn't optional warmup; it's the
+                    prerequisite.</div>
 
-    <!-- ═══════════ PHASE 2: COMBINATIONS ═══════════ -->
-    <div class="section" id="sec-phase2">
-        <div class="card">
-            <div class="section-label">Phase 2 — Two-Sound Combinations</div>
-            <div class="section-title">Nail the Transitions</div>
-            <div class="section-desc">Before "boots and cats" works, you need the transitions to be automatic. Alternate between two sounds until the switch requires zero thought.</div>
-        </div>
-
-        <div class="combo-grid" id="comboGrid">
-            <div class="combo-card" data-combo="kick-hihat" onclick="selectCombo('kick-hihat')">
-                <div class="combo-card-sounds mono">B → t</div>
-                <div class="combo-card-name">Kick + Hi-Hat</div>
-            </div>
-            <div class="combo-card" data-combo="hihat-snare" onclick="selectCombo('hihat-snare')">
-                <div class="combo-card-sounds mono">t → K</div>
-                <div class="combo-card-name">Hi-Hat + Snare</div>
-            </div>
-            <div class="combo-card" data-combo="kick-snare" onclick="selectCombo('kick-snare')">
-                <div class="combo-card-sounds mono">B → K</div>
-                <div class="combo-card-name">Kick + Snare</div>
-            </div>
-        </div>
-
-        <div class="card" id="p2DrillCard" style="display:none">
-            <div class="combo-vis" id="comboVis">
-                <div class="combo-vis-sound" id="comboS1">B</div>
-                <div class="combo-vis-arrow">→</div>
-                <div class="combo-vis-sound" id="comboS2">t</div>
-            </div>
-            <div class="beat-dots" id="p2Beats">
-                <div class="beat-dot"></div><div class="beat-dot"></div>
-                <div class="beat-dot"></div><div class="beat-dot"></div>
-                <div class="beat-dot"></div><div class="beat-dot"></div>
-                <div class="beat-dot"></div><div class="beat-dot"></div>
-            </div>
-            <div class="timer-big" id="p2Timer">1:00</div>
-            <div class="timer-label">remaining</div>
-            <div class="drill-controls">
-                <button class="btn btn-accent btn-lg" id="p2StartBtn" onclick="startP2Drill()">Start Drill</button>
-                <button class="btn btn-lg" id="p2StopBtn" onclick="stopP2Drill()" style="display:none">Stop</button>
-            </div>
-            <div class="tempo-row">
-                <span class="tempo-lbl">Tempo</span>
-                <div class="tempo-btns">
-                    <button class="tempo-btn" onclick="adjustP2Tempo(-5)">−</button>
-                    <button class="tempo-btn" onclick="adjustP2Tempo(5)">+</button>
-                </div>
-                <span class="tempo-val mono" id="p2TempoVal">60 BPM</span>
-            </div>
-            <div class="stats-row">
-                <div class="stat-box"><div class="stat-val mono" id="p2Cycles">0</div><div class="stat-lbl">Cycles</div></div>
-                <div class="stat-box"><div class="stat-val mono" id="p2Accuracy">—</div><div class="stat-lbl">Timing</div></div>
-                <div class="stat-box"><div class="stat-val mono" id="p2Streak">0</div><div class="stat-lbl">Streak</div></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ═══════════ PATTERN SEQUENCER ═══════════ -->
-    <div class="section" id="sec-sequencer">
-        <div class="card">
-            <div class="section-label">Patterns — Apply What You've Learned</div>
-
-            <div class="pack-row" id="packRow">
-                <button class="pack-btn active" data-pack="acoustic" onclick="switchPack('acoustic')">🥁 Acoustic Kit</button>
-                <button class="pack-btn" data-pack="beatbox" onclick="switchPack('beatbox')">🎤 Clean Beatbox</button>
-                <button class="pack-btn" data-pack="punchy" onclick="switchPack('punchy')">💥 Punchy Studio</button>
-            </div>
-
-            <div class="transport">
-                <button class="btn" id="seqPlayBtn" onclick="seqPlay()">▶ Play</button>
-                <button class="btn" id="seqStopBtn" onclick="seqStop()">■ Stop</button>
-                <button class="btn" onclick="seqClear()">✕ Clear</button>
-                <div style="flex:1"></div>
-                <div class="tempo-row" style="margin:0">
-                    <span class="tempo-lbl">BPM</span>
-                    <div class="tempo-btns">
-                        <button class="tempo-btn" onclick="adjustSeqTempo(-5)">−</button>
-                        <button class="tempo-btn" onclick="adjustSeqTempo(5)">+</button>
+                <div class="breath-ring-container">
+                    <div class="breath-ring" id="breathRing">
+                        <div class="breath-phase-text" id="breathPhaseText">Ready</div>
+                        <div class="breath-count mono" id="breathCount">&nbsp;</div>
                     </div>
-                    <span class="tempo-val mono" id="seqTempoVal">90</span>
                 </div>
-            </div>
+                <div class="breath-timer" id="breathTimer"></div>
 
-            <div class="pattern-info-bar" id="patternInfoBar">
-                <div class="pattern-info-title" id="seqPatTitle">Boots and Cats</div>
-                <div class="pattern-info-desc" id="seqPatDesc">THE beginner pattern. Say it out loud — that's beatboxing.</div>
-            </div>
-            <div class="phonetic-bar">
-                <div class="phonetic-bar-text mono" id="seqPhonetic">B - t - K - t</div>
-                <div class="phonetic-bar-help">Speak this rhythm slowly, then speed up</div>
-            </div>
+                <div class="drill-controls">
+                    <button class="btn btn-accent btn-lg" id="breathStartBtn" onclick="startBreathing()">Start 4-4-4-4
+                        Box Breathing</button>
+                    <button class="btn btn-lg" id="breathStopBtn" onclick="stopBreathing()"
+                        style="display:none;">Stop</button>
+                </div>
 
-            <div class="sequencer-grid" id="seqGrid">
-                <div class="seq-track" data-inst="kick">
-                    <div class="seq-label"><div class="seq-label-name">Kick</div><div class="seq-label-phonetic mono">{ B }</div></div>
+                <div class="breath-instructions">
+                    <p><strong>The test:</strong> Place one hand on your chest, one on your belly. Inhale deeply. If
+                        your top hand moves, you're chest-breathing — that's what we're fixing. Only the belly hand
+                        should rise.</p>
                 </div>
-                <div class="seq-track" data-inst="snare">
-                    <div class="seq-label"><div class="seq-label-name">Snare</div><div class="seq-label-phonetic mono">{ K }</div></div>
-                </div>
-                <div class="seq-track" data-inst="hihat">
-                    <div class="seq-label"><div class="seq-label-name">HiHat</div><div class="seq-label-phonetic mono">{ t }</div></div>
-                </div>
-                <div class="seq-track" data-inst="openhat">
-                    <div class="seq-label"><div class="seq-label-name">Open</div><div class="seq-label-phonetic mono">{ ts }</div></div>
+                <div class="diaphragm-check">
+                    <div class="diaphragm-icon">🫁</div>
+                    <div class="diaphragm-text">
+                        <strong style="color:var(--text)">Why this matters for beatbox:</strong><br>
+                        Diaphragmatic breathing gives you more air, stronger sounds, and the ability to sustain
+                        patterns. Circular breathing — inhaling through nose while pushing air from cheeks — is
+                        impossible without this foundation.
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Pattern Library -->
-        <div class="pattern-sidebar">
-            <div class="section-label">Pattern Library</div>
-            <input type="text" class="pattern-search" id="patSearch" placeholder="Search patterns..." oninput="renderPatterns()">
-            <div class="genre-pills" id="genrePills"></div>
-            <div class="pattern-list" id="patList"></div>
+        <!-- ═══════════ PHASE 1: SOUND ISOLATION ═══════════ -->
+        <div class="section" id="sec-phase1">
+            <div class="card">
+                <div class="section-label">Phase 1 — Sound Isolation</div>
+                <div class="section-title">Master Each Sound</div>
+                <div class="section-desc">One sound, every beat, 60 seconds. Alem/Wawad method — "It's like
+                    bodybuilding. Train hard, intensively." Don't move on until each sound is automatic.</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="p1Progress" style="width:0%"></div>
+                </div>
+            </div>
+
+            <div class="sound-grid" id="soundGrid">
+                <div class="sound-card" data-sound="hihat" onclick="selectSound('hihat')">
+                    <div class="sound-card-phonetic mono">{ t }</div>
+                    <div class="sound-card-name">Hi-Hat</div>
+                </div>
+                <div class="sound-card" data-sound="snare" onclick="selectSound('snare')">
+                    <div class="sound-card-phonetic mono">{ K }</div>
+                    <div class="sound-card-name">K-Snare</div>
+                </div>
+                <div class="sound-card" data-sound="kick" onclick="selectSound('kick')">
+                    <div class="sound-card-phonetic mono">{ B }</div>
+                    <div class="sound-card-name">Kick</div>
+                </div>
+            </div>
+
+            <div class="card" id="p1DrillCard" style="display:none">
+                <div class="drill-display">
+                    <div class="drill-big-phonetic" id="p1Phonetic">{ t }</div>
+                    <div class="drill-sound-name" id="p1SoundName">Hi-Hat</div>
+                </div>
+                <div class="technique-box">
+                    <div class="technique-label">Technique</div>
+                    <div class="technique-text" id="p1Technique"></div>
+                </div>
+                <div class="beat-dots" id="p1Beats">
+                    <div class="beat-dot"></div>
+                    <div class="beat-dot"></div>
+                    <div class="beat-dot"></div>
+                    <div class="beat-dot"></div>
+                </div>
+                <div class="timer-big" id="p1Timer">1:00</div>
+                <div class="timer-label">remaining</div>
+                <div class="drill-controls">
+                    <button class="btn btn-accent btn-lg" id="p1StartBtn" onclick="startP1Drill()">Start Drill</button>
+                    <button class="btn btn-lg" id="p1StopBtn" onclick="stopP1Drill()" style="display:none">Stop</button>
+                </div>
+                <div class="tempo-row">
+                    <span class="tempo-lbl">Tempo</span>
+                    <div class="tempo-btns">
+                        <button class="tempo-btn" onclick="adjustP1Tempo(-5)">−</button>
+                        <button class="tempo-btn" onclick="adjustP1Tempo(5)">+</button>
+                    </div>
+                    <span class="tempo-val mono" id="p1TempoVal">60 BPM</span>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-box">
+                        <div class="stat-val mono" id="p1Beats_ct">0</div>
+                        <div class="stat-lbl">Beats</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-val mono" id="p1Accuracy">—</div>
+                        <div class="stat-lbl">Timing</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-val mono" id="p1Streak">0</div>
+                        <div class="stat-lbl">Streak</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Core Sounds Reference -->
-        <div class="card" style="margin-top:16px">
-            <div class="section-label">Sound Reference — Tap to Hear</div>
-            <div class="sidebar-sound" onclick="playSound('kick')">
-                <div class="sidebar-sound-phonetic mono">{ B } "Boots"</div>
-                <div class="sidebar-sound-name">Kick Drum</div>
-                <div class="sidebar-sound-desc">Whispered 'B', lips closed, no voice. Deep bass from diaphragm.</div>
+        <!-- ═══════════ PHASE 2: COMBINATIONS ═══════════ -->
+        <div class="section" id="sec-phase2">
+            <div class="card">
+                <div class="section-label">Phase 2 — Two-Sound Combinations</div>
+                <div class="section-title">Nail the Transitions</div>
+                <div class="section-desc">Before "boots and cats" works, you need the transitions to be automatic.
+                    Alternate between two sounds until the switch requires zero thought.</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="p2Progress" style="width:0%"></div>
+                </div>
             </div>
-            <div class="sidebar-sound" onclick="playSound('snare')">
-                <div class="sidebar-sound-phonetic mono">{ K } "Cats"</div>
-                <div class="sidebar-sound-name">K-Snare</div>
-                <div class="sidebar-sound-desc">Hard 'K' sound, back of tongue to soft palate. Short percussive click.</div>
+
+            <div class="combo-grid" id="comboGrid">
+                <div class="combo-card" data-combo="kick-hihat" onclick="selectCombo('kick-hihat')">
+                    <div class="combo-card-sounds mono">B → t</div>
+                    <div class="combo-card-name">Kick + Hi-Hat</div>
+                </div>
+                <div class="combo-card" data-combo="hihat-snare" onclick="selectCombo('hihat-snare')">
+                    <div class="combo-card-sounds mono">t → K</div>
+                    <div class="combo-card-name">Hi-Hat + Snare</div>
+                </div>
+                <div class="combo-card" data-combo="kick-snare" onclick="selectCombo('kick-snare')">
+                    <div class="combo-card-sounds mono">B → K</div>
+                    <div class="combo-card-name">Kick + Snare</div>
+                </div>
             </div>
-            <div class="sidebar-sound" onclick="playSound('hihat')">
-                <div class="sidebar-sound-phonetic mono">{ t } "Ts"</div>
-                <div class="sidebar-sound-name">Hi-Hat (Closed)</div>
-                <div class="sidebar-sound-desc">Tongue behind teeth, quick pull. Easiest sound — start here.</div>
+
+            <div class="card" id="p2DrillCard" style="display:none">
+                <div class="combo-vis" id="comboVis">
+                    <div class="combo-vis-sound" id="comboS1">B</div>
+                    <div class="combo-vis-arrow">→</div>
+                    <div class="combo-vis-sound" id="comboS2">t</div>
+                </div>
+                <div class="beat-dots" id="p2Beats">
+                    <div class="beat-dot"></div>
+                    <div class="beat-dot"></div>
+                    <div class="beat-dot"></div>
+                    <div class="beat-dot"></div>
+                    <div class="beat-dot"></div>
+                    <div class="beat-dot"></div>
+                    <div class="beat-dot"></div>
+                    <div class="beat-dot"></div>
+                </div>
+                <div class="timer-big" id="p2Timer">1:00</div>
+                <div class="timer-label">remaining</div>
+                <div class="drill-controls">
+                    <button class="btn btn-accent btn-lg" id="p2StartBtn" onclick="startP2Drill()">Start Drill</button>
+                    <button class="btn btn-lg" id="p2StopBtn" onclick="stopP2Drill()" style="display:none">Stop</button>
+                </div>
+                <div class="tempo-row">
+                    <span class="tempo-lbl">Tempo</span>
+                    <div class="tempo-btns">
+                        <button class="tempo-btn" onclick="adjustP2Tempo(-5)">−</button>
+                        <button class="tempo-btn" onclick="adjustP2Tempo(5)">+</button>
+                    </div>
+                    <span class="tempo-val mono" id="p2TempoVal">60 BPM</span>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-box">
+                        <div class="stat-val mono" id="p2Cycles">0</div>
+                        <div class="stat-lbl">Cycles</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-val mono" id="p2Accuracy">—</div>
+                        <div class="stat-lbl">Timing</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-val mono" id="p2Streak">0</div>
+                        <div class="stat-lbl">Streak</div>
+                    </div>
+                </div>
             </div>
-            <div class="sidebar-sound" onclick="playSound('openhat')">
-                <div class="sidebar-sound-phonetic mono">{ ts } "Tssss"</div>
-                <div class="sidebar-sound-name">Hi-Hat (Open)</div>
-                <div class="sidebar-sound-desc">Extended { t } with sustained 's'. Hold it longer.</div>
+        </div>
+
+        <!-- ═══════════ PATTERN SEQUENCER ═══════════ -->
+        <div class="section" id="sec-sequencer">
+            <div class="card">
+                <div class="section-label">Patterns — Apply What You've Learned</div>
+
+                <div class="pack-row" id="packRow">
+                    <button class="pack-btn active" data-pack="acoustic" onclick="switchPack('acoustic')">🥁 Acoustic
+                        Kit</button>
+                    <button class="pack-btn" data-pack="beatbox" onclick="switchPack('beatbox')">🎤 Clean
+                        Beatbox</button>
+                    <button class="pack-btn" data-pack="punchy" onclick="switchPack('punchy')">💥 Punchy Studio</button>
+                </div>
+
+                <div class="transport">
+                    <button class="btn" id="seqPlayBtn" onclick="seqPlay()">▶ Play</button>
+                    <button class="btn" id="seqStopBtn" onclick="seqStop()">■ Stop</button>
+                    <button class="btn" onclick="seqClear()">✕ Clear</button>
+                    <div style="flex:1"></div>
+                    <div class="tempo-row" style="margin:0">
+                        <span class="tempo-lbl">BPM</span>
+                        <div class="tempo-btns">
+                            <button class="tempo-btn" onclick="adjustSeqTempo(-5)">−</button>
+                            <button class="tempo-btn" onclick="adjustSeqTempo(5)">+</button>
+                        </div>
+                        <span class="tempo-val mono" id="seqTempoVal">90</span>
+                    </div>
+                </div>
+
+                <div class="pattern-info-bar" id="patternInfoBar">
+                    <div class="pattern-info-title" id="seqPatTitle">Boots and Cats</div>
+                    <div class="pattern-info-desc" id="seqPatDesc">THE beginner pattern. Say it out loud — that's
+                        beatboxing.</div>
+                </div>
+                <div class="phonetic-bar">
+                    <div class="phonetic-bar-text mono" id="seqPhonetic">B - t - K - t</div>
+                    <div class="phonetic-bar-help">Speak this rhythm slowly, then speed up</div>
+                </div>
+
+                <div class="sequencer-grid" id="seqGrid">
+                    <div class="seq-track" data-inst="kick">
+                        <div class="seq-label">
+                            <div class="seq-label-name">Kick</div>
+                            <div class="seq-label-phonetic mono">{ B }</div>
+                        </div>
+                    </div>
+                    <div class="seq-track" data-inst="snare">
+                        <div class="seq-label">
+                            <div class="seq-label-name">Snare</div>
+                            <div class="seq-label-phonetic mono">{ K }</div>
+                        </div>
+                    </div>
+                    <div class="seq-track" data-inst="hihat">
+                        <div class="seq-label">
+                            <div class="seq-label-name">HiHat</div>
+                            <div class="seq-label-phonetic mono">{ t }</div>
+                        </div>
+                    </div>
+                    <div class="seq-track" data-inst="openhat">
+                        <div class="seq-label">
+                            <div class="seq-label-name">Open</div>
+                            <div class="seq-label-phonetic mono">{ ts }</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pattern Library -->
+            <div class="pattern-sidebar">
+                <div class="section-label">Pattern Library</div>
+                <input type="text" class="pattern-search" id="patSearch" placeholder="Search patterns..."
+                    oninput="renderPatterns()">
+                <div class="genre-pills" id="genrePills"></div>
+                <div class="pattern-list" id="patList"></div>
+            </div>
+
+            <!-- Core Sounds Reference -->
+            <div class="card" style="margin-top:16px">
+                <div class="section-label">Sound Reference — Tap to Hear</div>
+                <div class="sidebar-sound" onclick="playSound('kick')">
+                    <div class="sidebar-sound-phonetic mono">{ B } "Boots"</div>
+                    <div class="sidebar-sound-name">Kick Drum</div>
+                    <div class="sidebar-sound-desc">Whispered 'B', lips closed, no voice. Deep bass from diaphragm.
+                    </div>
+                </div>
+                <div class="sidebar-sound" onclick="playSound('snare')">
+                    <div class="sidebar-sound-phonetic mono">{ K } "Cats"</div>
+                    <div class="sidebar-sound-name">K-Snare</div>
+                    <div class="sidebar-sound-desc">Hard 'K' sound, back of tongue to soft palate. Short percussive
+                        click.</div>
+                </div>
+                <div class="sidebar-sound" onclick="playSound('hihat')">
+                    <div class="sidebar-sound-phonetic mono">{ t } "Ts"</div>
+                    <div class="sidebar-sound-name">Hi-Hat (Closed)</div>
+                    <div class="sidebar-sound-desc">Tongue behind teeth, quick pull. Easiest sound — start here.</div>
+                </div>
+                <div class="sidebar-sound" onclick="playSound('openhat')">
+                    <div class="sidebar-sound-phonetic mono">{ ts } "Tssss"</div>
+                    <div class="sidebar-sound-name">Hi-Hat (Open)</div>
+                    <div class="sidebar-sound-desc">Extended { t } with sustained 's'. Hold it longer.</div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="toast" id="toast"></div>
+    <div class="toast" id="toast"></div>
 
-<script>
-// ═══════════════════════════════════════════════════════
-// AUDIO ENGINE — 3 Sound Packs with Acoustic Modeling
-// ═══════════════════════════════════════════════════════
-let audioCtx;
-const noiseBuffers = {};
-function getAudio() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    return audioCtx;
-}
-// Resume on first interaction (iOS/Safari)
-// iOS/Safari fix: resume suspended context on user interaction
-function resumeAudioContext() {
-    const ctx = getAudio();
-    if (ctx.state === "suspended") {
-        ctx.resume();
-    }
-}
-["click", "touchstart", "keydown"].forEach(event => {
-    document.addEventListener(event, resumeAudioContext);
-});
-let currentPack = 'acoustic';
-function switchPack(pack) {
-    currentPack = pack;
-    document.querySelectorAll('.pack-btn').forEach(b => b.classList.toggle('active', b.dataset.pack === pack));
-    toast(`Sound pack: ${pack}`);
-}
-
-function playSound(inst, time) {
-    const ctx = getAudio();
-    if (ctx.state === 'suspended') ctx.resume();
-    const t = time || ctx.currentTime;
-    const packs = { acoustic: playAcoustic, beatbox: playBeatbox, punchy: playPunchy };
-    (packs[currentPack] || playAcoustic)(ctx, inst, t);
-}
-
-// ─── ACOUSTIC KIT ───
-function playAcoustic(ctx, inst, t) {
-    switch(inst) {
-        case 'kick': {
-            // 3-stage frequency sweep modeling real kick drum resonance
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            const lp = ctx.createBiquadFilter();
-            lp.type = 'lowpass'; lp.frequency.value = 800;
-            osc.connect(lp); lp.connect(gain); gain.connect(ctx.destination);
-            osc.frequency.setValueAtTime(180, t);
-            osc.frequency.exponentialRampToValueAtTime(60, t + 0.04);
-            osc.frequency.exponentialRampToValueAtTime(45, t + 0.15);
-            gain.gain.setValueAtTime(1.0, t);
-            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
-            // click transient
-            const click = ctx.createOscillator();
-            const clickG = ctx.createGain();
-            click.type = 'square';
-            click.frequency.value = 3500;
-            click.connect(clickG); clickG.connect(ctx.destination);
-            clickG.gain.setValueAtTime(0.15, t);
-            clickG.gain.exponentialRampToValueAtTime(0.001, t + 0.008);
-            osc.start(t); osc.stop(t + 0.4);
-            click.start(t); click.stop(t + 0.01);
-            break;
-        }
-        case 'snare': {
-            // Body oscillator
-            const body = ctx.createOscillator();
-            const bodyG = ctx.createGain();
-            const bodyBP = ctx.createBiquadFilter();
-            bodyBP.type = 'bandpass'; bodyBP.frequency.value = 200; bodyBP.Q.value = 2;
-            body.connect(bodyBP); bodyBP.connect(bodyG); bodyG.connect(ctx.destination);
-            body.frequency.setValueAtTime(220, t);
-            body.frequency.exponentialRampToValueAtTime(120, t + 0.08);
-            bodyG.gain.setValueAtTime(0.45, t);
-            bodyG.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
-            // Wire noise
-            const noise = ctx.createBufferSource();
-            const buf = ctx.createBuffer(1, ctx.sampleRate * 0.2, ctx.sampleRate);
-            const data = buf.getChannelData(0);
-            for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
-            noise.buffer = buf;
-            const hp = ctx.createBiquadFilter();
-            hp.type = 'highpass'; hp.frequency.value = 2000;
-            const lp = ctx.createBiquadFilter();
-            lp.type = 'lowpass'; lp.frequency.value = 7000;
-            const nG = ctx.createGain();
-            noise.connect(hp); hp.connect(lp); lp.connect(nG); nG.connect(ctx.destination);
-            nG.gain.setValueAtTime(0.35, t);
-            nG.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
-            body.start(t); body.stop(t + 0.15);
-            noise.start(t); noise.stop(t + 0.2);
-            break;
-        }
-        case 'hihat': {
-            const noise = ctx.createBufferSource();
-            if (!noiseBuffers.hihat) {
-                const buf = ctx.createBuffer(1, ctx.sampleRate * 0.06, ctx.sampleRate);
-                const data = buf.getChannelData(0);
-                for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
-                noiseBuffers.hihat = buf;
+    <script>
+        // ═══════════════════════════════════════════════════════
+        // AUDIO ENGINE — 3 Sound Packs with Acoustic Modeling
+        // ═══════════════════════════════════════════════════════
+        let audioCtx;
+        let noiseBuffers = {};
+        function getAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const sr = audioCtx.sampleRate;
+                // Pre-create shared white noise buffer (2 seconds)
+                const whiteNoise = audioCtx.createBuffer(1, sr * 2, sr);
+                const wData = whiteNoise.getChannelData(0);
+                for (let i = 0; i < wData.length; i++) wData[i] = Math.random() * 2 - 1;
+                noiseBuffers.white = whiteNoise;
+                // Specialized fade-out noise for punchy kick click
+                const clickLen = Math.floor(sr * 0.005);
+                const clickNoise = audioCtx.createBuffer(1, clickLen, sr);
+                const cData = clickNoise.getChannelData(0);
+                for (let i = 0; i < clickLen; i++) cData[i] = (Math.random() * 2 - 1) * (1 - i / clickLen);
+                noiseBuffers.kickClick = clickNoise;
             }
-            noise.buffer = noiseBuffers.hihat;
-            const hp = ctx.createBiquadFilter();
-            hp.type = 'highpass'; hp.frequency.value = 7000;
-            const peak = ctx.createBiquadFilter();
-            peak.type = 'peaking'; peak.frequency.value = 12000; peak.Q.value = 2; peak.gain.value = 6;
-            const g = ctx.createGain();
-            noise.connect(hp); hp.connect(peak); peak.connect(g); g.connect(ctx.destination);
-            g.gain.setValueAtTime(0.4, t);
-            g.gain.exponentialRampToValueAtTime(0.001, t + 0.055);
-            noise.start(t); noise.stop(t + 0.06);
-            break;
+            return audioCtx;
         }
-        case 'openhat': {
-            const noise = ctx.createBufferSource();
-            const buf = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
-            const data = buf.getChannelData(0);
-            for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
-            noise.buffer = buf;
-            const hp = ctx.createBiquadFilter();
-            hp.type = 'highpass'; hp.frequency.value = 5000;
-            const p1 = ctx.createBiquadFilter();
-            p1.type = 'peaking'; p1.frequency.value = 8000; p1.Q.value = 3; p1.gain.value = 6;
-            const p2 = ctx.createBiquadFilter();
-            p2.type = 'peaking'; p2.frequency.value = 11000; p2.Q.value = 2; p2.gain.value = 4;
-            const g = ctx.createGain();
-            noise.connect(hp); hp.connect(p1); p1.connect(p2); p2.connect(g); g.connect(ctx.destination);
-            g.gain.setValueAtTime(0, t);
-            g.gain.linearRampToValueAtTime(0.3, t + 0.01);
-            g.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
-            noise.start(t); noise.stop(t + 0.5);
-            break;
-        }
-    }
-}
-
-// ─── CLEAN BEATBOX (brighter, more mid-forward) ───
-function playBeatbox(ctx, inst, t) {
-    switch(inst) {
-        case 'kick': {
-            const osc = ctx.createOscillator();
-            const g = ctx.createGain();
-            osc.connect(g); g.connect(ctx.destination);
-            osc.frequency.setValueAtTime(160, t);
-            osc.frequency.exponentialRampToValueAtTime(50, t + 0.06);
-            g.gain.setValueAtTime(0.9, t);
-            g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
-            // lip pop transient
-            const pop = ctx.createOscillator();
-            const popG = ctx.createGain();
-            pop.type = 'triangle';
-            pop.frequency.value = 800;
-            pop.connect(popG); popG.connect(ctx.destination);
-            popG.gain.setValueAtTime(0.25, t);
-            popG.gain.exponentialRampToValueAtTime(0.001, t + 0.015);
-            osc.start(t); osc.stop(t + 0.3);
-            pop.start(t); pop.stop(t + 0.02);
-            break;
-        }
-        case 'snare': {
-            // Cache buffer to improve performance
-            if (!playPunchy.snareBuf || playPunchy.snareBuf.sampleRate !== ctx.sampleRate) {
-                playPunchy.snareBuf = ctx.createBuffer(1, ctx.sampleRate * 0.15, ctx.sampleRate);
-                const data = playPunchy.snareBuf.getChannelData(0);
-                for (let i = 0; i < playPunchy.snareBuf.length; i++) data[i] = Math.random() * 2 - 1;
-            }
-            const noise = ctx.createBufferSource();
-            noise.buffer = playPunchy.snareBuf;
-            const bp = ctx.createBiquadFilter();
-            bp.type = 'bandpass'; bp.frequency.value = 3000; bp.Q.value = 1.5;
-            const g = ctx.createGain();
-            noise.connect(bp); bp.connect(g); g.connect(ctx.destination);
-            g.gain.setValueAtTime(0.5, t);
-            g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
-            noise.start(t); noise.stop(t + 0.15);
-            break;
-        }
-        case 'hihat': playAcoustic(ctx, 'hihat', t); break;
-        case 'openhat': playAcoustic(ctx, 'openhat', t); break;
-    }
-}
-
-// ─── PUNCHY STUDIO (aggressive, compressed) ───
-function playPunchy(ctx, inst, t) {
-    switch(inst) {
-        case 'kick': {
-            const osc = ctx.createOscillator();
-            const g = ctx.createGain();
-            const comp = ctx.createDynamicsCompressor();
-            comp.threshold.value = -24; comp.ratio.value = 12; comp.attack.value = 0.001; comp.release.value = 0.1;
-            osc.connect(comp); comp.connect(g); g.connect(ctx.destination);
-            osc.frequency.setValueAtTime(200, t);
-            osc.frequency.exponentialRampToValueAtTime(40, t + 0.05);
-            g.gain.setValueAtTime(1.0, t);
-            g.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
-            // Cache buffer to improve performance
-            if (!playPunchy.kickBuf || playPunchy.kickBuf.sampleRate !== ctx.sampleRate) {
-                playPunchy.kickBuf = ctx.createBuffer(1, ctx.sampleRate * 0.005, ctx.sampleRate);
-                const cd = playPunchy.kickBuf.getChannelData(0);
-                for (let i = 0; i < playPunchy.kickBuf.length; i++) cd[i] = (Math.random() * 2 - 1) * (1 - i / playPunchy.kickBuf.length);
-            }
-            const click = ctx.createBufferSource();
-            click.buffer = playPunchy.kickBuf;
-            const cg = ctx.createGain();
-            click.connect(cg); cg.connect(ctx.destination);
-            cg.gain.setValueAtTime(0.3, t);
-            cg.gain.exponentialRampToValueAtTime(0.001, t + 0.005);
-            osc.start(t); osc.stop(t + 0.35);
-            click.start(t); click.stop(t + 0.005);
-            break;
-        }
-        case 'snare': {
-            const body = ctx.createOscillator();
-            const bG = ctx.createGain();
-            body.type = 'triangle';
-            body.frequency.setValueAtTime(250, t);
-            body.frequency.exponentialRampToValueAtTime(150, t + 0.05);
-            body.connect(bG); bG.connect(ctx.destination);
-            bG.gain.setValueAtTime(0.5, t);
-            bG.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
-            // Cache buffer to improve performance
-            if (!playPunchy.snareBuf || playPunchy.snareBuf.sampleRate !== ctx.sampleRate) {
-                playPunchy.snareBuf = ctx.createBuffer(1, ctx.sampleRate * 0.15, ctx.sampleRate);
-                const data = playPunchy.snareBuf.getChannelData(0);
-                for (let i = 0; i < playPunchy.snareBuf.length; i++) data[i] = Math.random() * 2 - 1;
-            }
-            const noise = ctx.createBufferSource();
-            noise.buffer = playPunchy.snareBuf;
-            const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1500;
-            const comp = ctx.createDynamicsCompressor();
-            comp.threshold.value = -20; comp.ratio.value = 8; comp.attack.value = 0.001;
-            const nG = ctx.createGain();
-            noise.connect(hp); hp.connect(comp); comp.connect(nG); nG.connect(ctx.destination);
-            nG.gain.setValueAtTime(0.45, t);
-            nG.gain.exponentialRampToValueAtTime(0.001, t + 0.13);
-            body.start(t); body.stop(t + 0.1);
-            noise.start(t); noise.stop(t + 0.15);
-            break;
-        }
-        case 'hihat': playAcoustic(ctx, 'hihat', t); break;
-        case 'openhat': playAcoustic(ctx, 'openhat', t); break;
-    }
-}
-
-// ═══════════════════════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════════════════════
-
-function switchSection(id) {
-
-    // Stop any running drills
-    stopBreathing(); stopP1Drill(); stopP2Drill(); seqStop();
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('sec-' + id).classList.add('active');
-    document.querySelector(`[data-section="${id}"]`).classList.add('active');
-}
-
-// ═══════════════════════════════════════════════════════
-// PHASE 0: BREATHING
-// ═══════════════════════════════════════════════════════
-let breathState = { running: false, phase: 0, count: 0, cycle: 0, intervalId: null, timerIntervalId: null, totalSeconds: 0 };
-const BREATH_PHASES = [
-    { name: 'Inhale', duration: 4, cls: 'inhale', color: 'var(--breath-in)' },
-    { name: 'Hold', duration: 4, cls: 'hold', color: 'var(--breath-hold)' },
-    { name: 'Exhale', duration: 4, cls: 'exhale', color: 'var(--breath-out)' },
-    { name: 'Hold', duration: 4, cls: 'rest', color: 'var(--text-dim)' }
-];
-
-function startBreathing() {
-    breathState.running = true;
-    breathState.phase = 0;
-    breathState.count = BREATH_PHASES[0].duration;
-    breathState.cycle = 0;
-    breathState.totalSeconds = 0;
-    document.getElementById('breathStartBtn').style.display = 'none';
-    document.getElementById('breathStopBtn').style.display = 'inline-flex';
-    updateBreathUI();
-    breathState.intervalId = setInterval(breathTick, 1000);
-    breathState.timerIntervalId = setInterval(() => {
-        breathState.totalSeconds++;
-        document.getElementById('breathTimer').textContent = `Total: ${fmtTime(breathState.totalSeconds)}`;
-    }, 1000);
-    // Play a subtle tick
-    playBreathTick();
-}
-
-function breathTick() {
-    breathState.count--;
-    if (breathState.count <= 0) {
-        breathState.phase = (breathState.phase + 1) % 4;
-        if (breathState.phase === 0) breathState.cycle++;
-        breathState.count = BREATH_PHASES[breathState.phase].duration;
-    }
-    updateBreathUI();
-    playBreathTick();
-}
-
-function playBreathTick() {
-    const ctx = getAudio();
-    if (ctx.state === 'suspended') ctx.resume();
-    const t = ctx.currentTime;
-    const osc = ctx.createOscillator();
-    const g = ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.value = breathState.count === BREATH_PHASES[breathState.phase].duration ? 880 : 440;
-    osc.connect(g); g.connect(ctx.destination);
-    g.gain.setValueAtTime(0.06, t);
-    g.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
-    osc.start(t); osc.stop(t + 0.1);
-}
-
-function updateBreathUI() {
-    const bp = BREATH_PHASES[breathState.phase];
-    const ring = document.getElementById('breathRing');
-    ring.className = 'breath-ring ' + bp.cls;
-    document.getElementById('breathPhaseText').textContent = bp.name;
-    document.getElementById('breathPhaseText').style.color = bp.color;
-    document.getElementById('breathCount').textContent = breathState.count;
-    document.getElementById('breathCount').style.color = bp.color;
-}
-
-function stopBreathing() {
-    if (!breathState.running) return;
-    breathState.running = false;
-    clearInterval(breathState.intervalId);
-    clearInterval(breathState.timerIntervalId);
-    document.getElementById('breathStartBtn').style.display = 'inline-flex';
-    document.getElementById('breathStopBtn').style.display = 'none';
-    document.getElementById('breathRing').className = 'breath-ring';
-    document.getElementById('breathPhaseText').textContent = 'Ready';
-    document.getElementById('breathPhaseText').style.color = '';
-    document.getElementById('breathCount').innerHTML = '&nbsp;';
-    if (breathState.totalSeconds >= 60) {
-        toast(`${breathState.cycle} breathing cycles completed.`);
-    }
-}
-
-// ═══════════════════════════════════════════════════════
-// PHASE 1: SOUND ISOLATION
-// ═══════════════════════════════════════════════════════
-const DRILL_SECS = 60;
-const soundInfo = {
-    hihat: { phonetic: '{ t }', name: 'Hi-Hat', technique: 'Tongue tip contacts ridge behind upper front teeth. Make the "t" sound from "hat" — remove all vocalization, keeping only the consonant. Short, sharp burst with teeth lightly closed.' },
-    snare: { phonetic: '{ K }', name: 'K-Snare', technique: 'Hard "K" sound as in "kit" with strong accent — the "cats" in "boots and cats." Back of tongue contacts soft palate. Short, percussive click.' },
-    kick: { phonetic: '{ B }', name: 'Kick Drum', technique: 'Say "boo" then whisper it (no vocal cords). Isolate the "B" with heavy emphasis. Lips tightly closed, build pressure, release in one burst. Cheeks stay firm — no puffing.' }
-};
-let p1 = { sound: null, running: false, beat: 0, beats: 0, streak: 0, bestStreak: 0, timeLeft: DRILL_SECS, tempo: 60, intId: null, timerId: null, dots: null };
-
-function selectSound(s) {
-    p1.sound = s;
-    document.querySelectorAll('.sound-card').forEach(c => c.classList.toggle('selected', c.dataset.sound === s));
-    document.getElementById('p1DrillCard').style.display = 'block';
-    const info = soundInfo[s];
-    document.getElementById('p1Phonetic').textContent = info.phonetic;
-    document.getElementById('p1SoundName').textContent = info.name;
-    document.getElementById('p1Technique').textContent = info.technique;
-    resetP1Stats();
-}
-
-function resetP1Stats() {
-    p1.beats = 0; p1.streak = 0; p1.bestStreak = 0; p1.timeLeft = DRILL_SECS; p1.beat = 0;
-    document.getElementById('p1Timer').textContent = fmtTime(DRILL_SECS);
-    document.getElementById('p1Beats_ct').textContent = '0';
-    document.getElementById('p1Accuracy').textContent = '—';
-    document.getElementById('p1Streak').textContent = '0';
-    document.querySelectorAll('#p1Beats .beat-dot').forEach(d => d.classList.remove('on'));
-}
-
-function startP1Drill() {
-    getAudio();
-    p1.running = true; p1.beat = 0; p1.beats = 0; p1.streak = 0; p1.bestStreak = 0; p1.timeLeft = DRILL_SECS;
-    document.getElementById('p1StartBtn').style.display = 'none';
-    document.getElementById('p1StopBtn').style.display = 'inline-flex';
-    const ms = (60 / p1.tempo) * 1000;
-    p1DrillBeat();
-    p1.intId = setInterval(p1DrillBeat, ms);
-    p1.timerId = setInterval(() => {
-        p1.timeLeft--;
-        document.getElementById('p1Timer').textContent = fmtTime(p1.timeLeft);
-        if (p1.timeLeft <= 0) completeP1();
-    }, 1000);
-}
-
-function p1DrillBeat() {
-    if (!p1.dots) p1.dots = document.querySelectorAll('#p1Beats .beat-dot'); const dots = p1.dots;
-    dots.forEach(d => d.classList.remove('on'));
-    dots[p1.beat].classList.add('on');
-    playSound(p1.sound);
-    p1.beats++; p1.streak++;
-    if (p1.streak > p1.bestStreak) p1.bestStreak = p1.streak;
-    document.getElementById('p1Beats_ct').textContent = p1.beats;
-    document.getElementById('p1Streak').textContent = p1.bestStreak;
-    p1.beat = (p1.beat + 1) % 4;
-}
-
-function stopP1Drill() {
-    if (!p1.running) return;
-    p1.running = false;
-    clearInterval(p1.intId); clearInterval(p1.timerId);
-    document.getElementById('p1StartBtn').style.display = 'inline-flex';
-    document.getElementById('p1StopBtn').style.display = 'none';
-    document.querySelectorAll('#p1Beats .beat-dot').forEach(d => d.classList.remove('on'));
-}
-
-function completeP1() {
-    stopP1Drill();
-    const exp = Math.floor(DRILL_SECS * (p1.tempo / 60));
-    document.getElementById('p1Accuracy').textContent = Math.min(100, Math.round((p1.beats / exp) * 100)) + '%';
-    toast(`${soundInfo[p1.sound].name} drill done.`);
-}
-
-function adjustP1Tempo(d) { p1.tempo = Math.max(40, Math.min(140, p1.tempo + d)); document.getElementById('p1TempoVal').textContent = p1.tempo + ' BPM'; }
-
-// ═══════════════════════════════════════════════════════
-// PHASE 2: COMBINATIONS
-// ═══════════════════════════════════════════════════════
-const combos = {
-    'kick-hihat': { sounds: ['kick','hihat'], display: ['B','t'], name: 'Kick + Hi-Hat' },
-    'hihat-snare': { sounds: ['hihat','snare'], display: ['t','K'], name: 'Hi-Hat + Snare' },
-    'kick-snare': { sounds: ['kick','snare'], display: ['B','K'], name: 'Kick + Snare' }
-};
-let p2 = { combo: null, running: false, beat: 0, cycles: 0, streak: 0, bestStreak: 0, timeLeft: DRILL_SECS, tempo: 60, intId: null, timerId: null, dots: null };
-
-function selectCombo(id) {
-    p2.combo = id;
-    document.querySelectorAll('.combo-card').forEach(c => c.classList.toggle('selected', c.dataset.combo === id));
-    document.getElementById('p2DrillCard').style.display = 'block';
-    const c = combos[id];
-    document.getElementById('comboS1').textContent = c.display[0];
-    document.getElementById('comboS2').textContent = c.display[1];
-    resetP2Stats();
-}
-
-function resetP2Stats() {
-    p2.cycles = 0; p2.streak = 0; p2.bestStreak = 0; p2.timeLeft = DRILL_SECS; p2.beat = 0;
-    document.getElementById('p2Timer').textContent = fmtTime(DRILL_SECS);
-    document.getElementById('p2Cycles').textContent = '0';
-    document.getElementById('p2Accuracy').textContent = '—';
-    document.getElementById('p2Streak').textContent = '0';
-    document.querySelectorAll('#p2Beats .beat-dot').forEach(d => d.classList.remove('on'));
-    document.getElementById('comboS1').classList.remove('active');
-    document.getElementById('comboS2').classList.remove('active');
-}
-
-function startP2Drill() {
-    getAudio();
-    p2.running = true; p2.beat = 0; p2.cycles = 0; p2.streak = 0; p2.bestStreak = 0; p2.timeLeft = DRILL_SECS;
-    document.getElementById('p2StartBtn').style.display = 'none';
-    document.getElementById('p2StopBtn').style.display = 'inline-flex';
-    const ms = (60 / p2.tempo) * 1000;
-    p2DrillBeat();
-    p2.intId = setInterval(p2DrillBeat, ms);
-    p2.timerId = setInterval(() => {
-        p2.timeLeft--;
-        document.getElementById('p2Timer').textContent = fmtTime(p2.timeLeft);
-        if (p2.timeLeft <= 0) completeP2();
-    }, 1000);
-}
-
-function p2DrillBeat() {
-    const dots = document.querySelectorAll('#p2Beats .beat-dot');
-    dots.forEach(d => d.classList.remove('on'));
-    dots[p2.beat].classList.add('on');
-    const c = combos[p2.combo];
-    const si = p2.beat % 2;
-    playSound(c.sounds[si]);
-    document.getElementById('comboS1').classList.toggle('active', si === 0);
-    document.getElementById('comboS2').classList.toggle('active', si === 1);
-    if (p2.beat % 2 === 1) {
-        p2.cycles++; p2.streak++;
-        if (p2.streak > p2.bestStreak) p2.bestStreak = p2.streak;
-        document.getElementById('p2Cycles').textContent = p2.cycles;
-        document.getElementById('p2Streak').textContent = p2.bestStreak;
-    }
-    p2.beat = (p2.beat + 1) % 8;
-}
-
-function stopP2Drill() {
-    if (!p2.running) return;
-    p2.running = false;
-    clearInterval(p2.intId); clearInterval(p2.timerId);
-    document.getElementById('p2StartBtn').style.display = 'inline-flex';
-    document.getElementById('p2StopBtn').style.display = 'none';
-    document.querySelectorAll('#p2Beats .beat-dot').forEach(d => d.classList.remove('on'));
-    document.getElementById('comboS1').classList.remove('active');
-    document.getElementById('comboS2').classList.remove('active');
-}
-
-function completeP2() {
-    stopP2Drill();
-    const exp = Math.floor(DRILL_SECS * (p2.tempo / 60) / 2);
-    document.getElementById('p2Accuracy').textContent = Math.min(100, Math.round((p2.cycles / exp) * 100)) + '%';
-    toast(`${combos[p2.combo].name} drill done.`);
-}
-
-function adjustP2Tempo(d) { p2.tempo = Math.max(40, Math.min(120, p2.tempo + d)); document.getElementById('p2TempoVal').textContent = p2.tempo + ' BPM'; }
-
-// ═══════════════════════════════════════════════════════
-// PATTERN SEQUENCER
-// ═══════════════════════════════════════════════════════
-const STEPS = 16;
-const SEQ_INSTS = ['kick','snare','hihat','openhat'];
-let seq = { playing: false, step: 0, tempo: 90, timerId: null, pattern: null, nextNoteTime: 0.0, notesInQueue: [] };
-const scheduleAheadTime = 0.1;
-const lookahead = 25.0;
-let activeGenre = 'All';
-
-const patterns = [
-    { name:"Boots and Cats", genre:"Beginner", tempo:60, desc:"THE beginner pattern. Say it out loud — that's beatboxing.", phonetic:"B - t - K - t", p:{ kick:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0], openhat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] }},
-    { name:"Simple Two-Step", genre:"Beginner", tempo:60, desc:"Just kick and snare. No hi-hat. Master the backbeat.", phonetic:"B - - - K - - -", p:{ kick:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], openhat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] }},
-    { name:"Hi-Hat Fill", genre:"Beginner", tempo:70, desc:"Kick → 3 hi-hats → Snare → 3 hi-hats. Builds subdivision.", phonetic:"B t t t K t t t", p:{ kick:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1], openhat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] }},
-    { name:"Basic Rock", genre:"Rock", tempo:90, desc:"Classic 4/4. Kick on 1 & 3, snare on 2 & 4. The foundation.", phonetic:"B-t-K-t-B-t-K-t", p:{ kick:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0], openhat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] }},
-    { name:"Hard Rock", genre:"Rock", tempo:130, desc:"Driving rock with doubled kicks for extra punch.", phonetic:"B-t-B-K-B-t-B-K", p:{ kick:[1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0], openhat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] }},
-    { name:"Half-Time Rock", genre:"Rock", tempo:85, desc:"Heavy half-time feel. Snare only on 3.", phonetic:"B-t-t-t-K-t-t-t", p:{ kick:[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], snare:[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], hihat:[0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0], openhat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] }},
-    { name:"Boom Bap", genre:"Hip-Hop", tempo:90, desc:"Classic hip-hop. The boom (kick) bap (snare).", phonetic:"B-t-t-K-B-B-t-K", p:{ kick:[1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0], openhat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] }},
-    { name:"Trap", genre:"Hip-Hop", tempo:140, desc:"Modern trap with rapid hi-hats. Advanced timing.", phonetic:"B-tttt-K-tttt", p:{ kick:[1,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], openhat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0] }},
-    { name:"Four-on-Floor", genre:"House", tempo:125, desc:"Essential house music. Kick on every beat.", phonetic:"B-t-B-t-B-t-B-ts", p:{ kick:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0], openhat:[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1] }},
-    { name:"Deep House", genre:"House", tempo:122, desc:"Smooth deep house groove.", phonetic:"B-t-K-t-B-ts-K-t", p:{ kick:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0], openhat:[0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0] }},
-    { name:"Funk Groove", genre:"Funk", tempo:105, desc:"Syncopated funk. It's all about the pocket.", phonetic:"B-t-K-t-B-t-K-t-t", p:{ kick:[1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0], openhat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] }},
-    { name:"P-Funk", genre:"Funk", tempo:98, desc:"Parliament-style with complex syncopation.", phonetic:"B-t-B-K-t-B-K-t", p:{ kick:[1,0,0,1,0,0,0,0,1,0,0,0,0,0,1,0], snare:[0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0], hihat:[1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0], openhat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] }},
-    { name:"Bossa Nova", genre:"Latin", tempo:140, desc:"Brazilian bossa. Smooth and laid-back.", phonetic:"B-t-B-K-t-B-K-t", p:{ kick:[1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0], openhat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] }},
-    { name:"Reggaeton", genre:"Latin", tempo:95, desc:"Modern dembow rhythm.", phonetic:"B-t-B-K-B-t-K", p:{ kick:[1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0], openhat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] }},
-    { name:"Amen Break", genre:"Breakbeat", tempo:138, desc:"The most sampled drum break in history.", phonetic:"B-t-K-t-B-K-t-K", p:{ kick:[1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0], openhat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0] }},
-    { name:"Funky Drummer", genre:"Breakbeat", tempo:100, desc:"Clyde Stubblefield's iconic break.", phonetic:"B-t-K-t-B-t-K-t-t", p:{ kick:[1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,1], hihat:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], openhat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] }},
-    { name:"Jazz Swing", genre:"Jazz", tempo:160, desc:"Swing ride pattern. Triplet feel.", phonetic:"B-ts-ts-K-ts-ts", p:{ kick:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0], openhat:[0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1] }},
-    { name:"Shuffle Blues", genre:"Blues", tempo:110, desc:"12/8 shuffle feel. Foundation of blues drumming.", phonetic:"B-t-t-K-t-t", p:{ kick:[1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0], snare:[0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0], hihat:[1,0,1,1,0,1,1,0,1,1,0,1,1,0,1,0], openhat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] }},
-    { name:"Reggae One Drop", genre:"Reggae", tempo:80, desc:"Snare and kick together on beat 3. Space defines reggae.", phonetic:"t-t-BK-t", p:{ kick:[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0], openhat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] }},
-    { name:"Country Train", genre:"Country", tempo:120, desc:"Driving train beat. Alternating kick pattern.", phonetic:"B-t-K-t-B-t-K-t", p:{ kick:[1,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], openhat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] }},
-];
-
-function buildSeqGrid() {
-    SEQ_INSTS.forEach(inst => {
-        const track = document.querySelector(`.seq-track[data-inst="${inst}"]`);
-        for (let i = 0; i < STEPS; i++) {
-            const step = document.createElement('div');
-            step.className = 'seq-step';
-            step.dataset.inst = inst;
-            step.dataset.step = i;
-            step.addEventListener('click', () => toggleSeqStep(inst, i, step));
-            track.appendChild(step);
-        }
-    });
-}
-
-function toggleSeqStep(inst, step, el) {
-    if (seq.pattern) {
-        seq.pattern.p[inst][step] = seq.pattern.p[inst][step] ? 0 : 1;
-        el.classList.toggle('on');
-    }
-}
-
-function loadPattern(pat) {
-    seq.pattern = pat;
-    seq.tempo = pat.tempo;
-    document.getElementById('seqTempoVal').textContent = pat.tempo;
-    document.getElementById('seqPatTitle').textContent = pat.name;
-    document.getElementById('seqPatDesc').textContent = pat.desc;
-    document.getElementById('seqPhonetic').textContent = pat.phonetic;
-    SEQ_INSTS.forEach(inst => {
-        pat.p[inst].forEach((v, i) => {
-            const el = document.querySelector(`.seq-step[data-inst="${inst}"][data-step="${i}"]`);
-            el.classList.toggle('on', v === 1);
+        // Resume on first interaction (iOS/Safari)
+        ['click', 'touchstart', 'keydown'].forEach(evt => {
+            document.addEventListener(evt, function resumeAC() {
+                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+                document.removeEventListener(evt, resumeAC);
+            }, { once: true });
         });
-    });
-    renderPatterns();
-    toast(`Loaded: ${pat.name}`);
-}
 
-function seqPlay() {
-    const ctx = getAudio();
-    if (ctx.state === 'suspended') ctx.resume();
-
-    if (seq.playing) {
-        seqPause();
-        return;
-    }
-
-    seq.playing = true;
-    seq.step = 0;
-    seq.nextNoteTime = ctx.currentTime;
-    seq.notesInQueue = [];
-
-    document.getElementById('seqPlayBtn').textContent = '⏸ Pause';
-
-    scheduler();
-    requestAnimationFrame(draw);
-}
-
-function nextNote() {
-    const secondsPerBeat = 60.0 / seq.tempo;
-    seq.nextNoteTime += 0.25 * secondsPerBeat;
-    seq.step = (seq.step + 1) % STEPS;
-}
-
-function scheduleNote(beatNumber, time) {
-    seq.notesInQueue.push({ note: beatNumber, time: time });
-
-    SEQ_INSTS.forEach(inst => {
-        if (seq.pattern && seq.pattern.p[inst][beatNumber]) {
-            playSound(inst, time);
+        let currentPack = 'acoustic';
+        function switchPack(pack) {
+            currentPack = pack;
+            document.querySelectorAll('.pack-btn').forEach(b => b.classList.toggle('active', b.dataset.pack === pack));
+            toast(`Sound pack: ${pack}`);
         }
-    });
-}
 
-function scheduler() {
-    const ctx = getAudio();
-    while (seq.nextNoteTime < ctx.currentTime + scheduleAheadTime) {
-        scheduleNote(seq.step, seq.nextNoteTime);
-        nextNote();
-    }
-    seq.timerId = setTimeout(scheduler, lookahead);
-}
+        function playSound(inst) {
+            const ctx = getAudio();
+            if (ctx.state === 'suspended') ctx.resume();
+            const t = ctx.currentTime;
+            const packs = { acoustic: playAcoustic, beatbox: playBeatbox, punchy: playPunchy };
+            (packs[currentPack] || playAcoustic)(ctx, inst, t);
+        }
 
-let lastNoteDrawn = -1;
-function draw() {
-    const ctx = getAudio();
-    const currentTime = ctx.currentTime;
-    let currentNote = lastNoteDrawn;
+        // ─── ACOUSTIC KIT ───
+        function playAcoustic(ctx, inst, t) {
+            switch (inst) {
+                case 'kick': {
+                    // 3-stage frequency sweep modeling real kick drum resonance
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    const lp = ctx.createBiquadFilter();
+                    lp.type = 'lowpass'; lp.frequency.value = 800;
+                    osc.connect(lp); lp.connect(gain); gain.connect(ctx.destination);
+                    osc.frequency.setValueAtTime(180, t);
+                    osc.frequency.exponentialRampToValueAtTime(60, t + 0.04);
+                    osc.frequency.exponentialRampToValueAtTime(45, t + 0.15);
+                    gain.gain.setValueAtTime(1.0, t);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+                    // click transient
+                    const click = ctx.createOscillator();
+                    const clickG = ctx.createGain();
+                    click.type = 'square';
+                    click.frequency.value = 3500;
+                    click.connect(clickG); clickG.connect(ctx.destination);
+                    clickG.gain.setValueAtTime(0.15, t);
+                    clickG.gain.exponentialRampToValueAtTime(0.001, t + 0.008);
+                    osc.start(t); osc.stop(t + 0.4);
+                    click.start(t); click.stop(t + 0.01);
+                    break;
+                }
+                case 'snare': {
+                    // Body oscillator
+                    const body = ctx.createOscillator();
+                    const bodyG = ctx.createGain();
+                    const bodyBP = ctx.createBiquadFilter();
+                    bodyBP.type = 'bandpass'; bodyBP.frequency.value = 200; bodyBP.Q.value = 2;
+                    body.connect(bodyBP); bodyBP.connect(bodyG); bodyG.connect(ctx.destination);
+                    body.frequency.setValueAtTime(220, t);
+                    body.frequency.exponentialRampToValueAtTime(120, t + 0.08);
+                    bodyG.gain.setValueAtTime(0.45, t);
+                    bodyG.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+                    // Wire noise
+                    const noise = ctx.createBufferSource();
+                    noise.buffer = noiseBuffers.white;
+                    const hp = ctx.createBiquadFilter();
+                    hp.type = 'highpass'; hp.frequency.value = 2000;
+                    const lp = ctx.createBiquadFilter();
+                    lp.type = 'lowpass'; lp.frequency.value = 7000;
+                    const nG = ctx.createGain();
+                    noise.connect(hp); hp.connect(lp); lp.connect(nG); nG.connect(ctx.destination);
+                    nG.gain.setValueAtTime(0.35, t);
+                    nG.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+                    body.start(t); body.stop(t + 0.15);
+                    noise.start(t, Math.random() * (noiseBuffers.white.duration - 0.5)); noise.stop(t + 0.2);
+                    break;
+                }
+                case 'hihat': {
+                    const noise = ctx.createBufferSource();
+                    noise.buffer = noiseBuffers.white;
+                    const hp = ctx.createBiquadFilter();
+                    hp.type = 'highpass'; hp.frequency.value = 7000;
+                    const peak = ctx.createBiquadFilter();
+                    peak.type = 'peaking'; peak.frequency.value = 12000; peak.Q.value = 2; peak.gain.value = 6;
+                    const g = ctx.createGain();
+                    noise.connect(hp); hp.connect(peak); peak.connect(g); g.connect(ctx.destination);
+                    g.gain.setValueAtTime(0.4, t);
+                    g.gain.exponentialRampToValueAtTime(0.001, t + 0.055);
+                    noise.start(t, Math.random() * (noiseBuffers.white.duration - 0.5)); noise.stop(t + 0.06);
+                    break;
+                }
+                case 'openhat': {
+                    const noise = ctx.createBufferSource();
+                    noise.buffer = noiseBuffers.white;
+                    const hp = ctx.createBiquadFilter();
+                    hp.type = 'highpass'; hp.frequency.value = 5000;
+                    const p1 = ctx.createBiquadFilter();
+                    p1.type = 'peaking'; p1.frequency.value = 8000; p1.Q.value = 3; p1.gain.value = 6;
+                    const p2 = ctx.createBiquadFilter();
+                    p2.type = 'peaking'; p2.frequency.value = 11000; p2.Q.value = 2; p2.gain.value = 4;
+                    const g = ctx.createGain();
+                    noise.connect(hp); hp.connect(p1); p1.connect(p2); p2.connect(g); g.connect(ctx.destination);
+                    g.gain.setValueAtTime(0, t);
+                    g.gain.linearRampToValueAtTime(0.3, t + 0.01);
+                    g.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+                    noise.start(t, Math.random() * (noiseBuffers.white.duration - 0.5)); noise.stop(t + 0.5);
+                    break;
+                }
+            }
+        }
 
-    while (seq.notesInQueue.length && seq.notesInQueue[0].time < currentTime) {
-        currentNote = seq.notesInQueue[0].note;
-        seq.notesInQueue.shift();
-    }
+        // ─── CLEAN BEATBOX (brighter, more mid-forward) ───
+        function playBeatbox(ctx, inst, t) {
+            switch (inst) {
+                case 'kick': {
+                    const osc = ctx.createOscillator();
+                    const g = ctx.createGain();
+                    osc.connect(g); g.connect(ctx.destination);
+                    osc.frequency.setValueAtTime(160, t);
+                    osc.frequency.exponentialRampToValueAtTime(50, t + 0.06);
+                    g.gain.setValueAtTime(0.9, t);
+                    g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+                    // lip pop transient
+                    const pop = ctx.createOscillator();
+                    const popG = ctx.createGain();
+                    pop.type = 'triangle';
+                    pop.frequency.value = 800;
+                    pop.connect(popG); popG.connect(ctx.destination);
+                    popG.gain.setValueAtTime(0.25, t);
+                    popG.gain.exponentialRampToValueAtTime(0.001, t + 0.015);
+                    osc.start(t); osc.stop(t + 0.3);
+                    pop.start(t); pop.stop(t + 0.02);
+                    break;
+                }
+                case 'snare': {
+                    const noise = ctx.createBufferSource();
+                    noise.buffer = noiseBuffers.white;
+                    const bp = ctx.createBiquadFilter();
+                    bp.type = 'bandpass'; bp.frequency.value = 3000; bp.Q.value = 1.5;
+                    const g = ctx.createGain();
+                    noise.connect(bp); bp.connect(g); g.connect(ctx.destination);
+                    g.gain.setValueAtTime(0.5, t);
+                    g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+                    noise.start(t, Math.random() * (noiseBuffers.white.duration - 0.5)); noise.stop(t + 0.15);
+                    break;
+                }
+                case 'hihat': playAcoustic(ctx, 'hihat', t); break;
+                case 'openhat': playAcoustic(ctx, 'openhat', t); break;
+            }
+        }
 
-    if (lastNoteDrawn !== currentNote) {
-        document.querySelectorAll('.seq-step').forEach(s => s.classList.remove('playing'));
-        if (currentNote !== -1) {
+        // ─── PUNCHY STUDIO (aggressive, compressed) ───
+        function playPunchy(ctx, inst, t) {
+            switch (inst) {
+                case 'kick': {
+                    const osc = ctx.createOscillator();
+                    const g = ctx.createGain();
+                    const comp = ctx.createDynamicsCompressor();
+                    comp.threshold.value = -24; comp.ratio.value = 12; comp.attack.value = 0.001; comp.release.value = 0.1;
+                    osc.connect(comp); comp.connect(g); g.connect(ctx.destination);
+                    osc.frequency.setValueAtTime(200, t);
+                    osc.frequency.exponentialRampToValueAtTime(40, t + 0.05);
+                    g.gain.setValueAtTime(1.0, t);
+                    g.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+                    const click = ctx.createBufferSource();
+                    click.buffer = noiseBuffers.kickClick;
+                    const cg = ctx.createGain();
+                    click.connect(cg); cg.connect(ctx.destination);
+                    cg.gain.setValueAtTime(0.3, t);
+                    cg.gain.exponentialRampToValueAtTime(0.001, t + 0.005);
+                    osc.start(t); osc.stop(t + 0.35);
+                    click.start(t); click.stop(t + 0.005);
+                    break;
+                }
+                case 'snare': {
+                    const body = ctx.createOscillator();
+                    const bG = ctx.createGain();
+                    body.type = 'triangle';
+                    body.frequency.setValueAtTime(250, t);
+                    body.frequency.exponentialRampToValueAtTime(150, t + 0.05);
+                    body.connect(bG); bG.connect(ctx.destination);
+                    bG.gain.setValueAtTime(0.5, t);
+                    bG.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+                    const noise = ctx.createBufferSource();
+                    noise.buffer = noiseBuffers.white;
+                    const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1500;
+                    const comp = ctx.createDynamicsCompressor();
+                    comp.threshold.value = -20; comp.ratio.value = 8; comp.attack.value = 0.001;
+                    const nG = ctx.createGain();
+                    noise.connect(hp); hp.connect(comp); comp.connect(nG); nG.connect(ctx.destination);
+                    nG.gain.setValueAtTime(0.45, t);
+                    nG.gain.exponentialRampToValueAtTime(0.001, t + 0.13);
+                    body.start(t); body.stop(t + 0.1);
+                    noise.start(t, Math.random() * (noiseBuffers.white.duration - 0.5)); noise.stop(t + 0.15);
+                    break;
+                }
+                case 'hihat': playAcoustic(ctx, 'hihat', t); break;
+                case 'openhat': playAcoustic(ctx, 'openhat', t); break;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // NAVIGATION
+        // ═══════════════════════════════════════════════════════
+
+        function switchSection(id) {
+
+            // Stop any running drills
+            stopBreathing(); stopP1Drill(); stopP2Drill(); seqStop();
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('sec-' + id).classList.add('active');
+            document.querySelector(`[data-section="${id}"]`).classList.add('active');
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // PHASE 0: BREATHING
+        // ═══════════════════════════════════════════════════════
+        let breathState = { running: false, phase: 0, count: 0, cycle: 0, intervalId: null, timerIntervalId: null, totalSeconds: 0 };
+        const BREATH_PHASES = [
+            { name: 'Inhale', duration: 4, cls: 'inhale', color: 'var(--breath-in)' },
+            { name: 'Hold', duration: 4, cls: 'hold', color: 'var(--breath-hold)' },
+            { name: 'Exhale', duration: 4, cls: 'exhale', color: 'var(--breath-out)' },
+            { name: 'Hold', duration: 4, cls: 'rest', color: 'var(--text-dim)' }
+        ];
+
+        function startBreathing() {
+            breathState.running = true;
+            breathState.phase = 0;
+            breathState.count = BREATH_PHASES[0].duration;
+            breathState.cycle = 0;
+            breathState.totalSeconds = 0;
+            document.getElementById('breathStartBtn').style.display = 'none';
+            document.getElementById('breathStopBtn').style.display = 'inline-flex';
+            updateBreathUI();
+            breathState.intervalId = setInterval(breathTick, 1000);
+            breathState.timerIntervalId = setInterval(() => {
+                breathState.totalSeconds++;
+                document.getElementById('breathTimer').textContent = `Total: ${fmtTime(breathState.totalSeconds)}`;
+            }, 1000);
+            // Play a subtle tick
+            playBreathTick();
+        }
+
+        function breathTick() {
+            breathState.count--;
+            if (breathState.count <= 0) {
+                breathState.phase = (breathState.phase + 1) % 4;
+                if (breathState.phase === 0) breathState.cycle++;
+                breathState.count = BREATH_PHASES[breathState.phase].duration;
+            }
+            updateBreathUI();
+            playBreathTick();
+        }
+
+        function playBreathTick() {
+            const ctx = getAudio();
+            if (ctx.state === 'suspended') ctx.resume();
+            const t = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = breathState.count === BREATH_PHASES[breathState.phase].duration ? 880 : 440;
+            osc.connect(g); g.connect(ctx.destination);
+            g.gain.setValueAtTime(0.06, t);
+            g.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+            osc.start(t); osc.stop(t + 0.1);
+        }
+
+        function updateBreathUI() {
+            const bp = BREATH_PHASES[breathState.phase];
+            const ring = document.getElementById('breathRing');
+            ring.className = 'breath-ring ' + bp.cls;
+            document.getElementById('breathPhaseText').textContent = bp.name;
+            document.getElementById('breathPhaseText').style.color = bp.color;
+            document.getElementById('breathCount').textContent = breathState.count;
+            document.getElementById('breathCount').style.color = bp.color;
+        }
+
+        function stopBreathing() {
+            if (!breathState.running) return;
+            breathState.running = false;
+            clearInterval(breathState.intervalId);
+            clearInterval(breathState.timerIntervalId);
+            document.getElementById('breathStartBtn').style.display = 'inline-flex';
+            document.getElementById('breathStopBtn').style.display = 'none';
+            document.getElementById('breathRing').className = 'breath-ring';
+            document.getElementById('breathPhaseText').textContent = 'Ready';
+            document.getElementById('breathPhaseText').style.color = '';
+            document.getElementById('breathCount').innerHTML = '&nbsp;';
+            if (breathState.totalSeconds >= 60) {
+                toast(`${breathState.cycle} breathing cycles completed.`);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // PHASE 1: SOUND ISOLATION
+        // ═══════════════════════════════════════════════════════
+        const DRILL_SECS = 60;
+        const soundInfo = {
+            hihat: { phonetic: '{ t }', name: 'Hi-Hat', technique: 'Tongue tip contacts ridge behind upper front teeth. Make the "t" sound from "hat" — remove all vocalization, keeping only the consonant. Short, sharp burst with teeth lightly closed.' },
+            snare: { phonetic: '{ K }', name: 'K-Snare', technique: 'Hard "K" sound as in "kit" with strong accent — the "cats" in "boots and cats." Back of tongue contacts soft palate. Short, percussive click.' },
+            kick: { phonetic: '{ B }', name: 'Kick Drum', technique: 'Say "boo" then whisper it (no vocal cords). Isolate the "B" with heavy emphasis. Lips tightly closed, build pressure, release in one burst. Cheeks stay firm — no puffing.' }
+        };
+        let p1 = { sound: null, running: false, beat: 0, beats: 0, streak: 0, bestStreak: 0, timeLeft: DRILL_SECS, tempo: 60, intId: null, timerId: null, dots: null };
+
+        function selectSound(s) {
+            p1.sound = s;
+            document.querySelectorAll('.sound-card').forEach(c => c.classList.toggle('selected', c.dataset.sound === s));
+            document.getElementById('p1DrillCard').style.display = 'block';
+            const info = soundInfo[s];
+            document.getElementById('p1Phonetic').textContent = info.phonetic;
+            document.getElementById('p1SoundName').textContent = info.name;
+            document.getElementById('p1Technique').textContent = info.technique;
+            resetP1Stats();
+        }
+
+        function resetP1Stats() {
+            p1.beats = 0; p1.streak = 0; p1.bestStreak = 0; p1.timeLeft = DRILL_SECS; p1.beat = 0;
+            document.getElementById('p1Timer').textContent = fmtTime(DRILL_SECS);
+            document.getElementById('p1Beats_ct').textContent = '0';
+            document.getElementById('p1Accuracy').textContent = '—';
+            document.getElementById('p1Streak').textContent = '0';
+            document.querySelectorAll('#p1Beats .beat-dot').forEach(d => d.classList.remove('on'));
+        }
+
+        function startP1Drill() {
+            getAudio();
+            p1.running = true; p1.beat = 0; p1.beats = 0; p1.streak = 0; p1.bestStreak = 0; p1.timeLeft = DRILL_SECS;
+            document.getElementById('p1StartBtn').style.display = 'none';
+            document.getElementById('p1StopBtn').style.display = 'inline-flex';
+            const ms = (60 / p1.tempo) * 1000;
+            p1DrillBeat();
+            p1.intId = setInterval(p1DrillBeat, ms);
+            p1.timerId = setInterval(() => {
+                p1.timeLeft--;
+                document.getElementById('p1Timer').textContent = fmtTime(p1.timeLeft);
+                if (p1.timeLeft <= 0) completeP1();
+            }, 1000);
+        }
+
+        function p1DrillBeat() {
+            if (!p1.dots) p1.dots = document.querySelectorAll('#p1Beats .beat-dot'); const dots = p1.dots;
+            dots.forEach(d => d.classList.remove('on'));
+            dots[p1.beat].classList.add('on');
+            playSound(p1.sound);
+            p1.beats++; p1.streak++;
+            if (p1.streak > p1.bestStreak) p1.bestStreak = p1.streak;
+            document.getElementById('p1Beats_ct').textContent = p1.beats;
+            document.getElementById('p1Streak').textContent = p1.bestStreak;
+            p1.beat = (p1.beat + 1) % 4;
+        }
+
+        function stopP1Drill() {
+            if (!p1.running) return;
+            p1.running = false;
+            clearInterval(p1.intId); clearInterval(p1.timerId);
+            document.getElementById('p1StartBtn').style.display = 'inline-flex';
+            document.getElementById('p1StopBtn').style.display = 'none';
+            document.querySelectorAll('#p1Beats .beat-dot').forEach(d => d.classList.remove('on'));
+        }
+
+        function completeP1() {
+            stopP1Drill();
+            const exp = Math.floor(DRILL_SECS * (p1.tempo / 60));
+            document.getElementById('p1Accuracy').textContent = Math.min(100, Math.round((p1.beats / exp) * 100)) + '%';
+            toast(`${soundInfo[p1.sound].name} drill done.`);
+        }
+
+        function adjustP1Tempo(d) { p1.tempo = Math.max(40, Math.min(140, p1.tempo + d)); document.getElementById('p1TempoVal').textContent = p1.tempo + ' BPM'; }
+
+        // ═══════════════════════════════════════════════════════
+        // PHASE 2: COMBINATIONS
+        // ═══════════════════════════════════════════════════════
+        const combos = {
+            'kick-hihat': { sounds: ['kick', 'hihat'], display: ['B', 't'], name: 'Kick + Hi-Hat' },
+            'hihat-snare': { sounds: ['hihat', 'snare'], display: ['t', 'K'], name: 'Hi-Hat + Snare' },
+            'kick-snare': { sounds: ['kick', 'snare'], display: ['B', 'K'], name: 'Kick + Snare' }
+        };
+        let p2 = { combo: null, running: false, beat: 0, cycles: 0, streak: 0, bestStreak: 0, timeLeft: DRILL_SECS, tempo: 60, intId: null, timerId: null, dots: null };
+
+        function selectCombo(id) {
+            p2.combo = id;
+            document.querySelectorAll('.combo-card').forEach(c => c.classList.toggle('selected', c.dataset.combo === id));
+            document.getElementById('p2DrillCard').style.display = 'block';
+            const c = combos[id];
+            document.getElementById('comboS1').textContent = c.display[0];
+            document.getElementById('comboS2').textContent = c.display[1];
+            resetP2Stats();
+        }
+
+        function resetP2Stats() {
+            p2.cycles = 0; p2.streak = 0; p2.bestStreak = 0; p2.timeLeft = DRILL_SECS; p2.beat = 0;
+            document.getElementById('p2Timer').textContent = fmtTime(DRILL_SECS);
+            document.getElementById('p2Cycles').textContent = '0';
+            document.getElementById('p2Accuracy').textContent = '—';
+            document.getElementById('p2Streak').textContent = '0';
+            document.querySelectorAll('#p2Beats .beat-dot').forEach(d => d.classList.remove('on'));
+            document.getElementById('comboS1').classList.remove('active');
+            document.getElementById('comboS2').classList.remove('active');
+        }
+
+        function startP2Drill() {
+            getAudio();
+            p2.running = true; p2.beat = 0; p2.cycles = 0; p2.streak = 0; p2.bestStreak = 0; p2.timeLeft = DRILL_SECS;
+            document.getElementById('p2StartBtn').style.display = 'none';
+            document.getElementById('p2StopBtn').style.display = 'inline-flex';
+            const ms = (60 / p2.tempo) * 1000;
+            p2DrillBeat();
+            p2.intId = setInterval(p2DrillBeat, ms);
+            p2.timerId = setInterval(() => {
+                p2.timeLeft--;
+                document.getElementById('p2Timer').textContent = fmtTime(p2.timeLeft);
+                if (p2.timeLeft <= 0) completeP2();
+            }, 1000);
+        }
+
+        function p2DrillBeat() {
+            const dots = document.querySelectorAll('#p2Beats .beat-dot');
+            dots.forEach(d => d.classList.remove('on'));
+            dots[p2.beat].classList.add('on');
+            const c = combos[p2.combo];
+            const si = p2.beat % 2;
+            playSound(c.sounds[si]);
+            document.getElementById('comboS1').classList.toggle('active', si === 0);
+            document.getElementById('comboS2').classList.toggle('active', si === 1);
+            if (p2.beat % 2 === 1) {
+                p2.cycles++; p2.streak++;
+                if (p2.streak > p2.bestStreak) p2.bestStreak = p2.streak;
+                document.getElementById('p2Cycles').textContent = p2.cycles;
+                document.getElementById('p2Streak').textContent = p2.bestStreak;
+            }
+            p2.beat = (p2.beat + 1) % 8;
+        }
+
+        function stopP2Drill() {
+            if (!p2.running) return;
+            p2.running = false;
+            clearInterval(p2.intId); clearInterval(p2.timerId);
+            document.getElementById('p2StartBtn').style.display = 'inline-flex';
+            document.getElementById('p2StopBtn').style.display = 'none';
+            document.querySelectorAll('#p2Beats .beat-dot').forEach(d => d.classList.remove('on'));
+            document.getElementById('comboS1').classList.remove('active');
+            document.getElementById('comboS2').classList.remove('active');
+        }
+
+        function completeP2() {
+            stopP2Drill();
+            const exp = Math.floor(DRILL_SECS * (p2.tempo / 60) / 2);
+            document.getElementById('p2Accuracy').textContent = Math.min(100, Math.round((p2.cycles / exp) * 100)) + '%';
+            toast(`${combos[p2.combo].name} drill done.`);
+        }
+
+        function adjustP2Tempo(d) { p2.tempo = Math.max(40, Math.min(120, p2.tempo + d)); document.getElementById('p2TempoVal').textContent = p2.tempo + ' BPM'; }
+
+        // ═══════════════════════════════════════════════════════
+        // PATTERN SEQUENCER
+        // ═══════════════════════════════════════════════════════
+        const STEPS = 16;
+        const SEQ_INSTS = ['kick', 'snare', 'hihat', 'openhat'];
+        let seq = { playing: false, step: 0, tempo: 90, timerId: null, pattern: null, nextNoteTime: 0.0, notesInQueue: [] };
+        const scheduleAheadTime = 0.1;
+        const lookahead = 25.0;
+        let activeGenre = 'All';
+
+        const patterns = [
+            { name: "Boots and Cats", genre: "Beginner", tempo: 60, desc: "THE beginner pattern. Say it out loud — that's beatboxing.", phonetic: "B - t - K - t", p: { kick: [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], hihat: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0], openhat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] } },
+            { name: "Simple Two-Step", genre: "Beginner", tempo: 60, desc: "Just kick and snare. No hi-hat. Master the backbeat.", phonetic: "B - - - K - - -", p: { kick: [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], hihat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], openhat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] } },
+            { name: "Hi-Hat Fill", genre: "Beginner", tempo: 70, desc: "Kick → 3 hi-hats → Snare → 3 hi-hats. Builds subdivision.", phonetic: "B t t t K t t t", p: { kick: [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], hihat: [0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1], openhat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] } },
+            { name: "Basic Rock", genre: "Rock", tempo: 90, desc: "Classic 4/4. Kick on 1 & 3, snare on 2 & 4. The foundation.", phonetic: "B-t-K-t-B-t-K-t", p: { kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0], snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], hihat: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], openhat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] } },
+            { name: "Hard Rock", genre: "Rock", tempo: 130, desc: "Driving rock with doubled kicks for extra punch.", phonetic: "B-t-B-K-B-t-B-K", p: { kick: [1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0], snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], hihat: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], openhat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] } },
+            { name: "Half-Time Rock", genre: "Rock", tempo: 85, desc: "Heavy half-time feel. Snare only on 3.", phonetic: "B-t-t-t-K-t-t-t", p: { kick: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], snare: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], hihat: [0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], openhat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] } },
+            { name: "Boom Bap", genre: "Hip-Hop", tempo: 90, desc: "Classic hip-hop. The boom (kick) bap (snare).", phonetic: "B-t-t-K-B-B-t-K", p: { kick: [1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0], snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], hihat: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0], openhat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] } },
+            { name: "Trap", genre: "Hip-Hop", tempo: 140, desc: "Modern trap with rapid hi-hats. Advanced timing.", phonetic: "B-tttt-K-tttt", p: { kick: [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0], snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], hihat: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], openhat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0] } },
+            { name: "Four-on-Floor", genre: "House", tempo: 125, desc: "Essential house music. Kick on every beat.", phonetic: "B-t-B-t-B-t-B-ts", p: { kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0], snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], hihat: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0], openhat: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1] } },
+            { name: "Deep House", genre: "House", tempo: 122, desc: "Smooth deep house groove.", phonetic: "B-t-K-t-B-ts-K-t", p: { kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0], snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], hihat: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0], openhat: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] } },
+            { name: "Funk Groove", genre: "Funk", tempo: 105, desc: "Syncopated funk. It's all about the pocket.", phonetic: "B-t-K-t-B-t-K-t-t", p: { kick: [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0], snare: [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0], hihat: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], openhat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] } },
+            { name: "P-Funk", genre: "Funk", tempo: 98, desc: "Parliament-style with complex syncopation.", phonetic: "B-t-B-K-t-B-K-t", p: { kick: [1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0], snare: [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0], hihat: [1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0], openhat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] } },
+            { name: "Bossa Nova", genre: "Latin", tempo: 140, desc: "Brazilian bossa. Smooth and laid-back.", phonetic: "B-t-B-K-t-B-K-t", p: { kick: [1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], hihat: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], openhat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] } },
+            { name: "Reggaeton", genre: "Latin", tempo: 95, desc: "Modern dembow rhythm.", phonetic: "B-t-B-K-B-t-K", p: { kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], hihat: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0], openhat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] } },
+            { name: "Amen Break", genre: "Breakbeat", tempo: 138, desc: "The most sampled drum break in history.", phonetic: "B-t-K-t-B-K-t-K", p: { kick: [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0], snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0], hihat: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], openhat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0] } },
+            { name: "Funky Drummer", genre: "Breakbeat", tempo: 100, desc: "Clyde Stubblefield's iconic break.", phonetic: "B-t-K-t-B-t-K-t-t", p: { kick: [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0], snare: [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1], hihat: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], openhat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] } },
+            { name: "Jazz Swing", genre: "Jazz", tempo: 160, desc: "Swing ride pattern. Triplet feel.", phonetic: "B-ts-ts-K-ts-ts", p: { kick: [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], hihat: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], openhat: [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1] } },
+            { name: "Shuffle Blues", genre: "Blues", tempo: 110, desc: "12/8 shuffle feel. Foundation of blues drumming.", phonetic: "B-t-t-K-t-t", p: { kick: [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0], snare: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], hihat: [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0], openhat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] } },
+            { name: "Reggae One Drop", genre: "Reggae", tempo: 80, desc: "Snare and kick together on beat 3. Space defines reggae.", phonetic: "t-t-BK-t", p: { kick: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], snare: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], hihat: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], openhat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] } },
+            { name: "Country Train", genre: "Country", tempo: 120, desc: "Driving train beat. Alternating kick pattern.", phonetic: "B-t-K-t-B-t-K-t", p: { kick: [1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0], snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], hihat: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], openhat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] } },
+        ];
+
+        function buildSeqGrid() {
             SEQ_INSTS.forEach(inst => {
-                const el = document.querySelector(`.seq-step[data-inst="${inst}"][data-step="${currentNote}"]`);
-                if (el) el.classList.add('playing');
+                const track = document.querySelector(`.seq-track[data-inst="${inst}"]`);
+                for (let i = 0; i < STEPS; i++) {
+                    const step = document.createElement('div');
+                    step.className = 'seq-step';
+                    step.dataset.inst = inst;
+                    step.dataset.step = i;
+                    step.addEventListener('click', () => toggleSeqStep(inst, i, step));
+                    track.appendChild(step);
+                }
             });
         }
-        lastNoteDrawn = currentNote;
-    }
 
-    if (seq.playing) {
-        requestAnimationFrame(draw);
-    }
-}
+        function toggleSeqStep(inst, step, el) {
+            if (seq.pattern) {
+                seq.pattern.p[inst][step] = seq.pattern.p[inst][step] ? 0 : 1;
+                el.classList.toggle('on');
+            }
+        }
 
-function seqPause() {
-    seq.playing = false;
-    clearTimeout(seq.timerId);
-    document.getElementById('seqPlayBtn').textContent = '▶ Play';
-}
+        function loadPattern(pat) {
+            seq.pattern = pat;
+            seq.tempo = pat.tempo;
+            document.getElementById('seqTempoVal').textContent = pat.tempo;
+            document.getElementById('seqPatTitle').textContent = pat.name;
+            document.getElementById('seqPatDesc').textContent = pat.desc;
+            document.getElementById('seqPhonetic').textContent = pat.phonetic;
+            SEQ_INSTS.forEach(inst => {
+                pat.p[inst].forEach((v, i) => {
+                    const el = document.querySelector(`.seq-step[data-inst="${inst}"][data-step="${i}"]`);
+                    el.classList.toggle('on', v === 1);
+                });
+            });
+            renderPatterns();
+            toast(`Loaded: ${pat.name}`);
+        }
 
-function seqStop() {
-    seqPause();
-    seq.step = 0;
-    lastNoteDrawn = -1;
-    document.querySelectorAll('.seq-step').forEach(s => s.classList.remove('playing'));
-}
+        function seqPlay() {
+            const ctx = getAudio();
+            if (ctx.state === 'suspended') ctx.resume();
 
-function seqClear() {
-    if (!seq.pattern) return;
-    SEQ_INSTS.forEach(inst => {
-        seq.pattern.p[inst].fill(0);
-        document.querySelectorAll(`.seq-step[data-inst="${inst}"]`).forEach(s => s.classList.remove('on'));
-    });
-}
+            if (seq.playing) {
+                seqPause();
+                return;
+            }
 
-function adjustSeqTempo(d) {
-    seq.tempo = Math.max(40, Math.min(200, seq.tempo + d));
-    document.getElementById('seqTempoVal').textContent = seq.tempo;
-    if (seq.playing) { seqPause(); seqPlay(); }
-}
+            seq.playing = true;
+            seq.step = 0;
+            seq.nextNoteTime = ctx.currentTime;
+            seq.notesInQueue = [];
 
-function initPatternUI() {
-    const genres = ['All', ...new Set(patterns.map(p => p.genre))];
-    const pills = document.getElementById('genrePills');
-    genres.forEach(g => {
-        const el = document.createElement('div');
-        el.className = 'genre-pill' + (g === 'All' ? ' active' : '');
-        el.textContent = g;
-        el.onclick = () => { activeGenre = g; document.querySelectorAll('.genre-pill').forEach(p => p.classList.toggle('active', p.textContent === g)); renderPatterns(); };
-        pills.appendChild(el);
-    });
-    renderPatterns();
-}
+            document.getElementById('seqPlayBtn').textContent = '⏸ Pause';
 
-function renderPatterns() {
-    const search = (document.getElementById('patSearch').value || '').toLowerCase();
-    const filtered = patterns.filter(p => {
-        const gOk = activeGenre === 'All' || p.genre === activeGenre;
-        const sOk = p.name.toLowerCase().includes(search) || p.desc.toLowerCase().includes(search) || p.genre.toLowerCase().includes(search);
-        return gOk && sOk;
-    });
-    document.getElementById('patList').innerHTML = filtered.map(p => {
-        const active = seq.pattern && seq.pattern.name === p.name ? ' active' : '';
-        const idx = patterns.indexOf(p);
-        return `<div class="pattern-item${active}" onclick="loadPattern(patterns[${idx}])"><div class="pattern-item-name">${p.name}</div><div class="pattern-item-meta">${p.genre} · ${p.tempo} BPM</div></div>`;
-    }).join('');
-}
+            scheduler();
+            requestAnimationFrame(draw);
+        }
+
+        function nextNote() {
+            const secondsPerBeat = 60.0 / seq.tempo;
+            seq.nextNoteTime += 0.25 * secondsPerBeat;
+            seq.step = (seq.step + 1) % STEPS;
+        }
+
+        function scheduleNote(beatNumber, time) {
+            seq.notesInQueue.push({ note: beatNumber, time: time });
+
+            SEQ_INSTS.forEach(inst => {
+                if (seq.pattern && seq.pattern.p[inst][beatNumber]) {
+                    playSound(inst, time);
+                }
+            });
+        }
+
+        function scheduler() {
+            const ctx = getAudio();
+            while (seq.nextNoteTime < ctx.currentTime + scheduleAheadTime) {
+                scheduleNote(seq.step, seq.nextNoteTime);
+                nextNote();
+            }
+            seq.timerId = setTimeout(scheduler, lookahead);
+        }
+
+        let lastNoteDrawn = -1;
+        function draw() {
+            const ctx = getAudio();
+            const currentTime = ctx.currentTime;
+            let currentNote = lastNoteDrawn;
+
+            while (seq.notesInQueue.length && seq.notesInQueue[0].time < currentTime) {
+                currentNote = seq.notesInQueue[0].note;
+                seq.notesInQueue.shift();
+            }
+
+            if (lastNoteDrawn !== currentNote) {
+                document.querySelectorAll('.seq-step').forEach(s => s.classList.remove('playing'));
+                if (currentNote !== -1) {
+                    SEQ_INSTS.forEach(inst => {
+                        const el = document.querySelector(`.seq-step[data-inst="${inst}"][data-step="${currentNote}"]`);
+                        if (el) el.classList.add('playing');
+                    });
+                }
+                lastNoteDrawn = currentNote;
+            }
+
+            if (seq.playing) {
+                requestAnimationFrame(draw);
+            }
+        }
+
+        function seqPause() {
+            seq.playing = false;
+            clearTimeout(seq.timerId);
+            document.getElementById('seqPlayBtn').textContent = '▶ Play';
+        }
+
+        function seqStop() {
+            seqPause();
+            seq.step = 0;
+            lastNoteDrawn = -1;
+            document.querySelectorAll('.seq-step').forEach(s => s.classList.remove('playing'));
+        }
+
+        function seqClear() {
+            if (!seq.pattern) return;
+            SEQ_INSTS.forEach(inst => {
+                seq.pattern.p[inst].fill(0);
+                document.querySelectorAll(`.seq-step[data-inst="${inst}"]`).forEach(s => s.classList.remove('on'));
+            });
+        }
+
+        function adjustSeqTempo(d) {
+            seq.tempo = Math.max(40, Math.min(200, seq.tempo + d));
+            document.getElementById('seqTempoVal').textContent = seq.tempo;
+            if (seq.playing) { seqPause(); seqPlay(); }
+        }
+
+        function initPatternUI() {
+            const genres = ['All', ...new Set(patterns.map(p => p.genre))];
+            const pills = document.getElementById('genrePills');
+            genres.forEach(g => {
+                const el = document.createElement('div');
+                el.className = 'genre-pill' + (g === 'All' ? ' active' : '');
+                el.textContent = g;
+                el.onclick = () => { activeGenre = g; document.querySelectorAll('.genre-pill').forEach(p => p.classList.toggle('active', p.textContent === g)); renderPatterns(); };
+                pills.appendChild(el);
+            });
+            renderPatterns();
+        }
+
+        function renderPatterns() {
+            const search = (document.getElementById('patSearch').value || '').toLowerCase();
+            const filtered = patterns.filter(p => {
+                const gOk = activeGenre === 'All' || p.genre === activeGenre;
+                const sOk = p.name.toLowerCase().includes(search) || p.desc.toLowerCase().includes(search) || p.genre.toLowerCase().includes(search);
+                return gOk && sOk;
+            });
+            document.getElementById('patList').innerHTML = filtered.map(p => {
+                const active = seq.pattern && seq.pattern.name === p.name ? ' active' : '';
+                const idx = patterns.indexOf(p);
+                return `<div class="pattern-item${active}" onclick="loadPattern(patterns[${idx}])"><div class="pattern-item-name">${p.name}</div><div class="pattern-item-meta">${p.genre} · ${p.tempo} BPM</div></div>`;
+            }).join('');
+        }
 
 
-// ═══════════════════════════════════════════════════════
-// UTILITIES
-// ═══════════════════════════════════════════════════════
-function fmtTime(s) { return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); }
+        // ═══════════════════════════════════════════════════════
+        // UTILITIES
+        // ═══════════════════════════════════════════════════════
+        function fmtTime(s) { return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
 
-function toast(msg) {
-    const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), 3500);
-}
+        function toast(msg) {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 3500);
+        }
 
-// ═══════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════
-function init() {
-    buildSeqGrid();
-    initPatternUI();
-    loadPattern(patterns[0]);
-}
+        // ═══════════════════════════════════════════════════════
+        // INIT
+        // ═══════════════════════════════════════════════════════
+        function init() {
+            buildSeqGrid();
+            initPatternUI();
+            loadPattern(patterns[0]);
+        }
 
-init();
-</script>
+        init();
+    </script>
 </body>
+
 </html>
