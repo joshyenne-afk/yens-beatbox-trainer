@@ -799,10 +799,13 @@ function playAcoustic(ctx, inst, t) {
         }
         case 'openhat': {
             const noise = ctx.createBufferSource();
-            const buf = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
-            const data = buf.getChannelData(0);
-            for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
-            noise.buffer = buf;
+            if (!noiseBuffers.openhat) {
+                const buf = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
+                const data = buf.getChannelData(0);
+                for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
+                noiseBuffers.openhat = buf;
+            }
+            noise.buffer = noiseBuffers.openhat;
             const hp = ctx.createBiquadFilter();
             hp.type = 'highpass'; hp.frequency.value = 5000;
             const p1 = ctx.createBiquadFilter();
