@@ -1160,7 +1160,7 @@ function adjustP2Tempo(d) { p2.tempo = Math.max(40, Math.min(120, p2.tempo + d))
 // ═══════════════════════════════════════════════════════
 const STEPS = 16;
 const SEQ_INSTS = ['kick','snare','hihat','openhat'];
-let seq = { playing: false, step: 0, tempo: 90, timerId: null, pattern: null, nextNoteTime: 0.0, notesInQueue: [] };
+let seq = { playing: false, step: 0, tempo: 90, timerId: null, pattern: null, nextNoteTime: 0.0, notesInQueue: [], stepsCache: { all: [] } };
 const scheduleAheadTime = 0.1;
 const lookahead = 25.0;
 let activeGenre = 'All';
@@ -1189,6 +1189,7 @@ const patterns = [
 ];
 
 function buildSeqGrid() {
+    seq.stepsCache = { all: [] };
     SEQ_INSTS.forEach(inst => {
         const track = document.querySelector(`.seq-track[data-inst="${inst}"]`);
         for (let i = 0; i < STEPS; i++) {
@@ -1198,6 +1199,11 @@ function buildSeqGrid() {
             step.dataset.step = i;
             step.addEventListener('click', () => toggleSeqStep(inst, i, step));
             track.appendChild(step);
+
+            // Cache the element
+            const key = `${inst}-${i}`;
+            seq.stepsCache[key] = step;
+            seq.stepsCache.all.push(step);
         }
     });
 }
@@ -1218,8 +1224,8 @@ function loadPattern(pat) {
     document.getElementById('seqPhonetic').textContent = pat.phonetic;
     SEQ_INSTS.forEach(inst => {
         pat.p[inst].forEach((v, i) => {
-            const el = document.querySelector(`.seq-step[data-inst="${inst}"][data-step="${i}"]`);
-            el.classList.toggle('on', v === 1);
+            const el = seq.stepsCache[`${inst}-${i}`];
+            if (el) el.classList.toggle('on', v === 1);
         });
     });
     renderPatterns();
@@ -1283,10 +1289,10 @@ function draw() {
     }
 
     if (lastNoteDrawn !== currentNote) {
-        document.querySelectorAll('.seq-step').forEach(s => s.classList.remove('playing'));
+        seq.stepsCache.all.forEach(s => s.classList.remove('playing'));
         if (currentNote !== -1) {
             SEQ_INSTS.forEach(inst => {
-                const el = document.querySelector(`.seq-step[data-inst="${inst}"][data-step="${currentNote}"]`);
+                const el = seq.stepsCache[`${inst}-${currentNote}`];
                 if (el) el.classList.add('playing');
             });
         }
@@ -1308,14 +1314,17 @@ function seqStop() {
     seqPause();
     seq.step = 0;
     lastNoteDrawn = -1;
-    document.querySelectorAll('.seq-step').forEach(s => s.classList.remove('playing'));
+    seq.stepsCache.all.forEach(s => s.classList.remove('playing'));
 }
 
 function seqClear() {
     if (!seq.pattern) return;
     SEQ_INSTS.forEach(inst => {
         seq.pattern.p[inst].fill(0);
-        document.querySelectorAll(`.seq-step[data-inst="${inst}"]`).forEach(s => s.classList.remove('on'));
+        for (let i = 0; i < STEPS; i++) {
+            const el = seq.stepsCache[`${inst}-${i}`];
+            if (el) el.classList.remove('on');
+        }
     });
 }
 
