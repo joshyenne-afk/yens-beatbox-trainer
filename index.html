@@ -1848,7 +1848,7 @@
             'hihat-snare': { sounds: ['hihat', 'snare'], display: ['t', 'K'], name: 'Hi-Hat + Snare' },
             'kick-snare': { sounds: ['kick', 'snare'], display: ['B', 'K'], name: 'Kick + Snare' }
         };
-        let p2 = { combo: null, running: false, beat: 0, cycles: 0, streak: 0, bestStreak: 0, timeLeft: DRILL_SECS, tempo: 60, intId: null, timerId: null, dots: null };
+        let p2 = { combo: null, running: false, beat: 0, cycles: 0, streak: 0, bestStreak: 0, timeLeft: DRILL_SECS, tempo: 60, intId: null, timerId: null, dom: { dots: null, comboS1: null, comboS2: null, p2Cycles: null, p2Streak: null } };
 
         function selectCombo(id) {
             p2.combo = id;
@@ -1874,6 +1874,11 @@
         function startP2Drill() {
             getAudio();
             p2.running = true; p2.beat = 0; p2.cycles = 0; p2.streak = 0; p2.bestStreak = 0; p2.timeLeft = DRILL_SECS;
+            p2.dom.dots = document.querySelectorAll('#p2Beats .beat-dot');
+            p2.dom.comboS1 = document.getElementById('comboS1');
+            p2.dom.comboS2 = document.getElementById('comboS2');
+            p2.dom.p2Cycles = document.getElementById('p2Cycles');
+            p2.dom.p2Streak = document.getElementById('p2Streak');
             document.getElementById('p2StartBtn').style.display = 'none';
             document.getElementById('p2StopBtn').style.display = 'inline-flex';
             const ms = (60 / p2.tempo) * 1000;
@@ -1887,19 +1892,19 @@
         }
 
         function p2DrillBeat() {
-            const dots = document.querySelectorAll('#p2Beats .beat-dot');
-            dots.forEach(d => d.classList.remove('on'));
-            dots[p2.beat].classList.add('on');
+            if (!p2.dom.dots) return;
+            p2.dom.dots.forEach(d => d.classList.remove('on'));
+            p2.dom.dots[p2.beat].classList.add('on');
             const c = combos[p2.combo];
             const si = p2.beat % 2;
             playSound(c.sounds[si]);
-            document.getElementById('comboS1').classList.toggle('active', si === 0);
-            document.getElementById('comboS2').classList.toggle('active', si === 1);
+            p2.dom.comboS1.classList.toggle('active', si === 0);
+            p2.dom.comboS2.classList.toggle('active', si === 1);
             if (p2.beat % 2 === 1) {
                 p2.cycles++; p2.streak++;
                 if (p2.streak > p2.bestStreak) p2.bestStreak = p2.streak;
-                document.getElementById('p2Cycles').textContent = p2.cycles;
-                document.getElementById('p2Streak').textContent = p2.bestStreak;
+                p2.dom.p2Cycles.textContent = p2.cycles;
+                p2.dom.p2Streak.textContent = p2.bestStreak;
             }
             p2.beat = (p2.beat + 1) % 8;
         }
