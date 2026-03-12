@@ -1929,7 +1929,7 @@
         // ═══════════════════════════════════════════════════════
         const STEPS = 16;
         const SEQ_INSTS = ['kick', 'snare', 'hihat', 'openhat'];
-        let seq = { playing: false, step: 0, tempo: 90, timerId: null, pattern: null, nextNoteTime: 0.0, notesInQueue: [] };
+        let seq = { playing: false, step: 0, tempo: 90, timerId: null, pattern: null, nextNoteTime: 0.0, notesInQueue: [], stepsCache: { all: [] } };
         const scheduleAheadTime = 0.1;
         const lookahead = 25.0;
         let activeGenre = 'All';
@@ -1958,7 +1958,9 @@
         ];
 
         function buildSeqGrid() {
+            seq.stepsCache = { all: [] };
             SEQ_INSTS.forEach(inst => {
+                seq.stepsCache[inst] = [];
                 const track = document.querySelector(`.seq-track[data-inst="${inst}"]`);
                 for (let i = 0; i < STEPS; i++) {
                     const step = document.createElement('div');
@@ -1967,6 +1969,8 @@
                     step.dataset.step = i;
                     step.addEventListener('click', () => toggleSeqStep(inst, i, step));
                     track.appendChild(step);
+                    seq.stepsCache[inst][i] = step;
+                    seq.stepsCache.all.push(step);
                 }
             });
         }
@@ -2052,10 +2056,10 @@
             }
 
             if (lastNoteDrawn !== currentNote) {
-                document.querySelectorAll('.seq-step').forEach(s => s.classList.remove('playing'));
+                seq.stepsCache.all.forEach(s => s.classList.remove('playing'));
                 if (currentNote !== -1) {
                     SEQ_INSTS.forEach(inst => {
-                        const el = document.querySelector(`.seq-step[data-inst="${inst}"][data-step="${currentNote}"]`);
+                        const el = seq.stepsCache[inst][currentNote];
                         if (el) el.classList.add('playing');
                     });
                 }
