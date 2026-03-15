@@ -2121,16 +2121,23 @@
 
         function renderPatterns() {
             const search = (document.getElementById('patSearch').value || '').toLowerCase();
-            const filtered = patterns.filter(p => {
+            document.getElementById('patList').innerHTML = patterns.reduce((acc, p, idx) => {
                 const gOk = activeGenre === 'All' || p.genre === activeGenre;
-                const sOk = p.name.toLowerCase().includes(search) || p.desc.toLowerCase().includes(search) || p.genre.toLowerCase().includes(search);
-                return gOk && sOk;
-            });
-            document.getElementById('patList').innerHTML = filtered.map(p => {
-                const active = seq.pattern && seq.pattern.name === p.name ? ' active' : '';
-                const idx = patterns.indexOf(p);
-                return `<div class="pattern-item${active}" onclick="loadPattern(patterns[${idx}])"><div class="pattern-item-name">${p.name}</div><div class="pattern-item-meta">${p.genre} · ${p.tempo} BPM</div></div>`;
-            }).join('');
+
+                if (!p._nameLower) {
+                    p._nameLower = p.name.toLowerCase();
+                    p._descLower = p.desc.toLowerCase();
+                    p._genreLower = p.genre.toLowerCase();
+                }
+
+                const sOk = p._nameLower.includes(search) || p._descLower.includes(search) || p._genreLower.includes(search);
+
+                if (gOk && sOk) {
+                    const active = seq.pattern && seq.pattern.name === p.name ? ' active' : '';
+                    acc.push(`<div class="pattern-item${active}" onclick="loadPattern(patterns[${idx}])"><div class="pattern-item-name">${p.name}</div><div class="pattern-item-meta">${p.genre} · ${p.tempo} BPM</div></div>`);
+                }
+                return acc;
+            }, []).join('');
         }
 
 
