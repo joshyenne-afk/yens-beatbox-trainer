@@ -1,0 +1,3 @@
+I have optimized the `renderPatterns` function in `index.html`.
+It was previously using an O(N^2) `.indexOf` in a map operation over filtered arrays, which was slow since it was recalculating lowercase strings continuously.
+I combined `filter` and `map` into a single `reduce` pass, and cached lowercase string generation `p._nameLower`, `p._descLower`, and `p._genreLower` on the `p` objects directly.
