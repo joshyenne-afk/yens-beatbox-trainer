@@ -823,7 +823,6 @@
         .seq-step:nth-child(5n+2) {
             margin-left: 3px;
         }
-        }
 
         .pattern-sidebar {
             background: var(--bg-raised);
@@ -1120,6 +1119,357 @@
             }
         }
 
+        /* ═══════════ LEARN TAB ═══════════ */
+        .learn-steps {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .learn-step-pill {
+            padding: 8px 16px;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .learn-step-pill.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+
+        .learn-step-pill.completed {
+            background: var(--green-subtle);
+            border-color: var(--green);
+            color: var(--green);
+        }
+
+        .learn-step-pill .pill-check {
+            font-size: 14px;
+        }
+
+        .lesson-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .lesson-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .lesson-number {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        .lesson-title {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .lesson-subtitle {
+            font-size: 14px;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        .lesson-body {
+            padding: 24px;
+        }
+
+        .mouth-guide {
+            background: var(--bg-raised);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .mouth-guide-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mouth-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .mouth-step {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .mouth-step-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent-subtle);
+            border: 2px solid var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .mouth-step-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text);
+            padding-top: 3px;
+        }
+
+        .mouth-step-text strong {
+            color: var(--accent-bright);
+        }
+
+        .try-it-box {
+            background: linear-gradient(135deg, var(--green-subtle), rgba(94,194,105,0.02));
+            border: 2px solid var(--green);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin: 16px 0;
+            text-align: center;
+        }
+
+        .try-it-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .try-it-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--green);
+            margin-bottom: 4px;
+        }
+
+        .try-it-desc {
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+
+        .common-mistakes {
+            background: rgba(232,94,94,0.06);
+            border: 1px solid rgba(232,94,94,0.2);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            margin-top: 16px;
+        }
+
+        .common-mistakes-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--red);
+            margin-bottom: 8px;
+        }
+
+        .common-mistakes ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .common-mistakes li {
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.6;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .common-mistakes li::before {
+            content: '✗';
+            position: absolute;
+            left: 0;
+            color: var(--red);
+            font-weight: 700;
+        }
+
+        .lesson-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .milestone-banner {
+            background: linear-gradient(135deg, var(--accent-subtle), var(--green-subtle));
+            border: 1px solid var(--green);
+            border-radius: var(--radius);
+            padding: 24px;
+            text-align: center;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .milestone-banner.show {
+            display: block;
+            animation: fadeSlideIn 0.5s ease;
+        }
+
+        .milestone-emoji {
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+
+        .milestone-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--green);
+        }
+
+        .milestone-sub {
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        .phonetic-big-display {
+            text-align: center;
+            padding: 16px 0;
+        }
+
+        .phonetic-big-display .symbol {
+            font-family: 'DM Mono', monospace;
+            font-size: 64px;
+            font-weight: 500;
+            color: var(--accent);
+            text-shadow: 0 0 60px var(--accent-glow);
+        }
+
+        .phonetic-big-display .word {
+            font-size: 16px;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        .hear-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--accent-subtle);
+            border: 1px solid var(--accent);
+            border-radius: 24px;
+            color: var(--accent);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin: 8px auto;
+        }
+
+        .hear-btn:hover {
+            background: var(--accent);
+            color: #fff;
+            transform: scale(1.05);
+        }
+
+        .hear-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* ═══════════ ENHANCED TECHNIQUE CARDS ═══════════ */
+        .technique-steps-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        @media (max-width: 640px) {
+            .technique-steps-grid {
+                grid-template-columns: 1fr;
+            }
+            .lesson-footer {
+                flex-direction: column;
+                gap: 12px;
+            }
+        }
+
+        .technique-step-card {
+            background: var(--bg-raised);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+        }
+
+        .technique-step-card .step-icon {
+            font-size: 20px;
+            margin-bottom: 6px;
+        }
+
+        .technique-step-card .step-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        .technique-step-card .step-desc {
+            font-size: 13px;
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        /* Auto-tempo ramp indicator */
+        .tempo-ramp-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 10px 14px;
+            background: var(--bg-raised);
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        .tempo-ramp-indicator .ramp-icon {
+            color: var(--green);
+        }
+
         /* scrollbar */
         ::-webkit-scrollbar {
             width: 5px;
@@ -1144,7 +1494,8 @@
                 <div class="header-sub">Progressive Training System</div>
             </div>
             <div class="nav-tabs">
-                <button class="nav-tab active" data-section="breathing"
+                <button class="nav-tab active" data-section="learn" onclick="switchSection('learn')">Learn</button>
+                <button class="nav-tab" data-section="breathing"
                     onclick="switchSection('breathing')">Breathe</button>
                 <button class="nav-tab" data-section="phase1" onclick="switchSection('phase1')">Sounds</button>
                 <button class="nav-tab" data-section="phase2" onclick="switchSection('phase2')">Combos</button>
@@ -1152,8 +1503,32 @@
             </div>
         </div>
 
+        <!-- ═══════════ LEARN: YOUR FIRST BEAT ═══════════ -->
+        <div class="section active" id="sec-learn">
+            <div class="card">
+                <div class="section-label">Guided Lesson</div>
+                <div class="section-title">Your First Beat</div>
+                <div class="section-desc">Learn 3 sounds, combine them, and you'll be beatboxing "boots and cats" in minutes. Follow each step — don't skip ahead.</div>
+            </div>
+
+            <div class="learn-steps" id="learnSteps">
+                <button class="learn-step-pill active" data-learn="0" onclick="goLearnStep(0)">1. Hi-Hat { t }</button>
+                <button class="learn-step-pill" data-learn="1" onclick="goLearnStep(1)">2. Kick { B }</button>
+                <button class="learn-step-pill" data-learn="2" onclick="goLearnStep(2)">3. Snare { K }</button>
+                <button class="learn-step-pill" data-learn="3" onclick="goLearnStep(3)">4. Combine!</button>
+            </div>
+
+            <div id="learnContent"></div>
+
+            <div class="milestone-banner" id="learnMilestone">
+                <div class="milestone-emoji">🎉</div>
+                <div class="milestone-text">You just learned to beatbox!</div>
+                <div class="milestone-sub">Head to the Sounds tab to drill each sound, or Patterns to play with beats.</div>
+            </div>
+        </div>
+
         <!-- ═══════════ PHASE 0: BREATHING ═══════════ -->
-        <div class="section active" id="sec-breathing">
+        <div class="section" id="sec-breathing">
             <div class="card">
                 <div class="section-label">Phase 0 — Foundation</div>
                 <div class="section-title">Diaphragmatic Breathing</div>
@@ -2147,6 +2522,187 @@
 
 
         // ═══════════════════════════════════════════════════════
+        // LEARN TAB — GUIDED WALKTHROUGH
+        // ═══════════════════════════════════════════════════════
+        let learnState = { step: 0, completed: [false, false, false, false] };
+
+        const lessons = [
+            {
+                number: 'Lesson 1 of 4',
+                title: 'The Hi-Hat  { t }',
+                subtitle: 'The easiest sound — and the backbone of every beat.',
+                phonetic: '{ t }',
+                word: '"ts" — like the start of "tsunami"',
+                sound: 'hihat',
+                steps: [
+                    { text: '<strong>Teeth:</strong> Lightly close your teeth — not clenched, just touching. Like you\'re about to say "top."' },
+                    { text: '<strong>Tongue:</strong> Press the tip of your tongue against the ridge just behind your upper front teeth (the alveolar ridge).' },
+                    { text: '<strong>Air:</strong> Push a tiny, sharp burst of air out by quickly pulling your tongue down. It\'s a "t" sound with no voice — just air hitting teeth.' },
+                    { text: '<strong>Speed:</strong> It should be very short and crisp. Think of a real hi-hat cymbal getting tapped — a quick "tss."' }
+                ],
+                tryIt: 'Say "top" — now whisper just the "t" without the "op." That click is your hi-hat. Do it 10 times in a row: t, t, t, t...',
+                mistakes: [
+                    'Using your voice — this should be completely unvoiced, just air',
+                    'Making it too long — keep it short and sharp, not "tssssss"',
+                    'Tongue too far back — it should be right behind your front teeth'
+                ]
+            },
+            {
+                number: 'Lesson 2 of 4',
+                title: 'The Kick Drum  { B }',
+                subtitle: 'The deep bass that drives the beat. This is the "boots" in boots-and-cats.',
+                phonetic: '{ B }',
+                word: '"B" — like a punchy "buh"',
+                sound: 'kick',
+                steps: [
+                    { text: '<strong>Lips:</strong> Press your lips together firmly, like you\'re about to say "balloon." Build up pressure behind them.' },
+                    { text: '<strong>Cheeks:</strong> Keep your cheeks firm and tight — do NOT puff them out. The air comes from your diaphragm, not your cheeks.' },
+                    { text: '<strong>Release:</strong> Pop your lips open in one explosive burst. It should feel like a short, punchy "B" — not "buh," just the initial lip pop.' },
+                    { text: '<strong>No voice:</strong> This is the key — whisper it. Your vocal cords should NOT vibrate. Try saying "B" normally, then whisper it. The whispered version is your kick.' }
+                ],
+                tryIt: 'Say "boots" — now remove everything except the "B." Whisper it. Make it punchy and deep. Feel the air push from your belly, not your mouth.',
+                mistakes: [
+                    'Puffing cheeks — this means you\'re using mouth air instead of diaphragm air',
+                    'Adding voice — place a hand on your throat; you should feel NO vibration',
+                    'Too soft — really commit to the lip pop, build pressure before releasing'
+                ]
+            },
+            {
+                number: 'Lesson 3 of 4',
+                title: 'The K-Snare  { K }',
+                subtitle: 'The sharp crack. This is the "cats" in boots-and-cats.',
+                phonetic: '{ K }',
+                word: '"K" — a hard, dry click',
+                sound: 'snare',
+                steps: [
+                    { text: '<strong>Tongue:</strong> Press the BACK of your tongue up against your soft palate (the soft part of the roof of your mouth, near the back).' },
+                    { text: '<strong>Build pressure:</strong> With your tongue sealed against the soft palate, build up air pressure behind it.' },
+                    { text: '<strong>Release:</strong> Snap your tongue down sharply. The sound is a hard, percussive "K" — like the "c" in "cat" but much more aggressive.' },
+                    { text: '<strong>Add crispness:</strong> As you release, let a tiny bit of air hiss out. This gives it the "snare wire" quality. Think "Kh" rather than just "K."' }
+                ],
+                tryIt: 'Say "cat" — isolate the hard "c" sound. Now say it harder and drier, from the back of your throat. No voice. Short and punchy. That\'s your snare.',
+                mistakes: [
+                    'Using the front of the tongue — the K-snare uses the BACK of the tongue',
+                    'Making it too soft — really snap the tongue down with force',
+                    'Adding voice — like the kick, this is completely unvoiced'
+                ]
+            },
+            {
+                number: 'Lesson 4 of 4 — The Big Moment',
+                title: 'Boots and Cats',
+                subtitle: 'Put it all together. B, t, K, t — say it slowly, then speed up.',
+                phonetic: 'B t K t',
+                word: '"boots and cats and boots and cats"',
+                sound: null,
+                steps: [
+                    { text: '<strong>Start slow:</strong> Say each sound with a full pause between: B ... t ... K ... t ... over and over. Focus on getting each sound clean.' },
+                    { text: '<strong>Speed up gradually:</strong> Once it feels natural at a slow pace, remove the pauses. B-t-K-t-B-t-K-t...' },
+                    { text: '<strong>The secret:</strong> Literally say "boots and cats and" faster and faster. The "b" = kick, "ts" = hi-hat, "c" = snare. It works because those ARE the sounds.' },
+                    { text: '<strong>Lock the loop:</strong> Once you can do 8 cycles (B-t-K-t × 8) without stopping, you\'ve got it. That\'s a basic beat!' }
+                ],
+                tryIt: 'Slowly: "boots ... and ... cats ... and ..." Then faster: "boots-and-cats-and-boots-and-cats-and" — don\'t stop, just keep the loop going!',
+                mistakes: [
+                    'Trying to go fast too soon — slow and clean beats fast and sloppy',
+                    'Forgetting to breathe — sneak breaths in through your nose between sounds',
+                    'Not committing to each sound — every B, t, K should be distinct and punchy'
+                ],
+                isCombine: true
+            }
+        ];
+
+        function goLearnStep(idx) {
+            learnState.step = idx;
+            // Update step pills
+            document.querySelectorAll('.learn-step-pill').forEach((pill, i) => {
+                pill.classList.remove('active');
+                if (i === idx) pill.classList.add('active');
+                if (learnState.completed[i] && i !== idx) pill.classList.add('completed');
+            });
+
+            const lesson = lessons[idx];
+            const container = document.getElementById('learnContent');
+
+            let stepsHtml = lesson.steps.map((s, i) => `
+                <div class="mouth-step">
+                    <div class="mouth-step-num">${i + 1}</div>
+                    <div class="mouth-step-text">${s.text}</div>
+                </div>
+            `).join('');
+
+            let mistakesHtml = lesson.mistakes.map(m => `<li>${m}</li>`).join('');
+
+            let hearBtnHtml = '';
+            if (lesson.sound) {
+                hearBtnHtml = `<div style="text-align:center"><button class="hear-btn" onclick="playSound('${lesson.sound}')">🔊 Hear the target sound</button></div>`;
+            } else {
+                hearBtnHtml = `
+                    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+                        <button class="hear-btn" onclick="playSound('kick')">🔊 Kick { B }</button>
+                        <button class="hear-btn" onclick="playSound('hihat')">🔊 Hi-Hat { t }</button>
+                        <button class="hear-btn" onclick="playSound('snare')">🔊 Snare { K }</button>
+                    </div>`;
+            }
+
+            container.innerHTML = `
+                <div class="lesson-card">
+                    <div class="lesson-header">
+                        <div class="lesson-number">${lesson.number}</div>
+                        <div class="lesson-title">${lesson.title}</div>
+                        <div class="lesson-subtitle">${lesson.subtitle}</div>
+                    </div>
+                    <div class="lesson-body">
+                        <div class="phonetic-big-display">
+                            <div class="symbol">${lesson.phonetic}</div>
+                            <div class="word">${lesson.word}</div>
+                        </div>
+
+                        ${hearBtnHtml}
+
+                        <div class="mouth-guide">
+                            <div class="mouth-guide-title">👄 How to make this sound</div>
+                            <div class="mouth-steps">${stepsHtml}</div>
+                        </div>
+
+                        <div class="try-it-box">
+                            <div class="try-it-icon">🎯</div>
+                            <div class="try-it-title">Try it now!</div>
+                            <div class="try-it-desc">${lesson.tryIt}</div>
+                        </div>
+
+                        <div class="common-mistakes">
+                            <div class="common-mistakes-title">⚠ Common mistakes</div>
+                            <ul>${mistakesHtml}</ul>
+                        </div>
+                    </div>
+                    <div class="lesson-footer">
+                        ${idx > 0 ? `<button class="btn" onclick="goLearnStep(${idx - 1})">← Previous</button>` : '<div></div>'}
+                        <button class="btn btn-accent" onclick="completeLearnStep(${idx})">${idx < 3 ? 'Got it! Next →' : '🎉 I can do it!'}</button>
+                    </div>
+                </div>
+            `;
+
+            // Scroll to top of learn section
+            document.getElementById('sec-learn').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function completeLearnStep(idx) {
+            learnState.completed[idx] = true;
+            const pill = document.querySelector(`[data-learn="${idx}"]`);
+            if (pill) {
+                pill.innerHTML = `<span class="pill-check">✓</span> ${pill.textContent}`;
+                pill.classList.add('completed');
+            }
+            if (idx < 3) {
+                goLearnStep(idx + 1);
+            } else {
+                // All done!
+                document.getElementById('learnMilestone').classList.add('show');
+                document.getElementById('learnContent').innerHTML = '';
+                toast('🎉 You learned your first beat!');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
         // UTILITIES
         // ═══════════════════════════════════════════════════════
         function fmtTime(s) { return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
@@ -2165,6 +2721,7 @@
             buildSeqGrid();
             initPatternUI();
             loadPattern(patterns[0]);
+            goLearnStep(0);
         }
 
         init();
