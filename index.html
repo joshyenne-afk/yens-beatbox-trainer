@@ -2501,7 +2501,9 @@
 
         function renderPatterns() {
             const search = (document.getElementById('patSearch').value || '').toLowerCase();
-            document.getElementById('patList').innerHTML = patterns.reduce((acc, p, idx) => {
+            let html = '';
+            for (let i = 0; i < patterns.length; i++) {
+                const p = patterns[i];
                 const gOk = activeGenre === 'All' || p.genre === activeGenre;
 
                 if (!p._nameLower) {
@@ -2514,10 +2516,10 @@
 
                 if (gOk && sOk) {
                     const active = seq.pattern && seq.pattern.name === p.name ? ' active' : '';
-                    acc.push(`<div class="pattern-item${active}" onclick="loadPattern(patterns[${idx}])"><div class="pattern-item-name">${p.name}</div><div class="pattern-item-meta">${p.genre} · ${p.tempo} BPM</div></div>`);
+                    html += `<div class="pattern-item${active}" onclick="loadPattern(patterns[${i}])"><div class="pattern-item-name">${p.name}</div><div class="pattern-item-meta">${p.genre} · ${p.tempo} BPM</div></div>`;
                 }
-                return acc;
-            }, []).join('');
+            }
+            document.getElementById('patList').innerHTML = html;
         }
 
 
