@@ -758,10 +758,25 @@
 
         .seq-track {
             display: grid;
-            grid-template-columns: 80px repeat(16, minmax(40px, 1fr));
+            /* --steps is set per-pattern by loadPattern(). Multi-bar (32/64) and triplet
+               (12) patterns adapt. minmax(28px,1fr) keeps long patterns scrollable inside
+               .sequencer-grid which already has overflow-x:auto. */
+            grid-template-columns: 80px repeat(var(--steps, 16), minmax(28px, 1fr));
             gap: 3px;
             align-items: center;
             margin-bottom: 4px;
+        }
+
+        /* Bar-start separator on multi-bar patterns — left margin gives a visual gap
+           between bars without breaking the grid layout. */
+        .seq-step.seq-step-bar-start {
+            margin-left: 8px;
+        }
+
+        /* Triplet-mode tint for the track grid background — quick visual signal that
+           the grid divisions are triplets, not 16ths. */
+        .seq-track.seq-track-triplet .seq-step {
+            border-color: rgba(232, 121, 58, 0.25);
         }
 
         .seq-track:last-child {
@@ -2364,7 +2379,24 @@
         // ═══════════════════════════════════════════════════════
         // PATTERN SEQUENCER
         // ═══════════════════════════════════════════════════════
-        const STEPS = 16;
+        const STEPS = 16;  // legacy default; per-pattern step count is computed dynamically below
+
+        // Schema v2 helpers — patterns may declare bars (1|2|4) and subdivision
+        // ('sixteenth'|'triplet'). Old patterns without these fields default to
+        // 1 bar of 16th notes (16 steps) — fully backwards compatible.
+        function getStepsPerBar(pat) {
+            return (pat && pat.subdivision === 'triplet') ? 12 : 16;
+        }
+        function getPatternSteps(pat) {
+            const bars = (pat && pat.bars) || 1;
+            return bars * getStepsPerBar(pat);
+        }
+        function getStepDuration(pat, tempo) {
+            // Step duration in seconds. 4/4 time. Sixteenth grid: 4 steps per beat.
+            // Triplet grid: 3 triplet 8ths per beat.
+            const stepsPerBeat = (pat && pat.subdivision === 'triplet') ? 3 : 4;
+            return 60.0 / tempo / stepsPerBeat;
+        }
         const SEQ_INSTS = ['kick', 'snare', 'hihat', 'openhat'];
         let seq = { playing: false, step: 0, tempo: 80, timerId: null, pattern: null, nextNoteTime: 0.0, notesInQueue: [], stepsCache: { all: [] } };
         const scheduleAheadTime = 0.1;
@@ -2397,18 +2429,38 @@
             { name: "Ska", genre: "Reggae", tempo: 160, desc: "Ska is defined by the UPSTROKE — open hi-hat (and guitar/keys) hits ONLY on the 'and' of each beat, never the downbeat. That offbeat upstroke IS ska. Kick on 1 & 3, snare on 2 & 4. The Specials, Toots & the Maytals, Skatalites.", phonetic: "-ts-ts-ts-ts", p: { kick: [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], hihat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], openhat: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0] } },
             { name: "Polka", genre: "Polka", tempo: 130, desc: "2/4 oompah looped to 4/4. Heavy kick on every beat for the bass-drum drive, sharp snare on 2 & 4. Polka, schottische, and a lot of zydeco live here. Think 'Beer Barrel Polka.'", phonetic: "B-_-K-_-B-_-K-_-B-_-K-_-B-_-K-_", p: { kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0], snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], hihat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], openhat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] } },
             { name: "Motown", genre: "R&B", tempo: 115, desc: "Funk Brothers / Benny Benjamin / Pistol Allen secret weapon: snare on EVERY beat, not just 2 & 4. Kick on 1 & 3, hat 8ths. That four-on-the-snare gives Motown its insistent push — 'Ain't No Mountain High Enough,' 'You Can't Hurry Love,' 'I Heard It Through the Grapevine.'", phonetic: "Bk-K-Bk-K-Bk-K-Bk-K", p: { kick: [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], snare: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0], hihat: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], openhat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] } },
+
+            // --- Schema v2: triplet subdivision (12 steps/bar = 4 beats × 3 triplet 8ths) ---
+            { name: "Jazz Swing (triplet)", genre: "Jazz", tempo: 160, bars: 1, subdivision: "triplet", desc: "True jazz swing on a 12-step triplet grid — the feel you can't fake on a 16th grid. Ride plays 'ding ding-a ding ding-a' (1st + 3rd triplet of each beat, skip the middle). Hat foot 'chick' on 2 & 4. Kick feathers quarters softly. Snare comps off-pattern (not on the grid). Philly Joe Jones, Elvin Jones, Tony Williams.", phonetic: "ding-_-a | ding-_-a | ding-_-a | ding-_-a", p: { kick: [1,0,0, 0,0,0, 1,0,0, 0,0,0], snare: [0,0,0, 0,0,0, 0,0,0, 0,0,0], hihat: [1,0,1, 1,0,1, 1,0,1, 1,0,1], openhat: [0,0,0, 1,0,0, 0,0,0, 1,0,0] } },
+            { name: "Shuffle Blues (triplet)", genre: "Blues", tempo: 110, bars: 1, subdivision: "triplet", desc: "True 12/8 shuffle on a triplet grid. Hi-hat plays the 'long-short' shuffle (1st + 3rd triplet, skip the middle). Kick on 1 & 3, snare on 2 & 4. Foundation of every blues drummer — Levon Helm, Steve Jordan, Bernard Purdie.", phonetic: "B-_-t | _-K-t | B-_-t | _-K-t", p: { kick: [1,0,0, 0,0,0, 1,0,0, 0,0,0], snare: [0,0,0, 1,0,0, 0,0,0, 1,0,0], hihat: [1,0,1, 1,0,1, 1,0,1, 1,0,1], openhat: [0,0,0, 0,0,0, 0,0,0, 0,0,0] } },
+            { name: "Country 6/8 Ballad", genre: "Country", tempo: 75, bars: 1, subdivision: "triplet", desc: "Slow 6/8 country ballad on a triplet grid. Kick on 1 & 4 (the two main pulses), gentle rim/cross-stick on the offbeat 8ths (last triplet of each half), hat brushes on every triplet 8th for the lilting waltz roll. Hank Williams 'I'm So Lonesome I Could Cry,' early Patsy Cline.", phonetic: "B-_-t | _-K-t | B-_-t | _-K-t", p: { kick: [1,0,0, 0,0,0, 1,0,0, 0,0,0], snare: [0,0,0, 0,0,1, 0,0,0, 0,0,1], hihat: [1,1,1, 1,1,1, 1,1,1, 1,1,1], openhat: [0,0,0, 0,0,0, 0,0,0, 0,0,0] } },
+
+            // --- Schema v2: multi-bar sixteenth patterns ---
+            { name: "Bossa Nova (2-bar)", genre: "Latin", tempo: 120, bars: 2, subdivision: "sixteenth", desc: "Full 2-bar bossa with the surdo kick alternating (1, '&' of 2, 3, '&' of 4) and cross-stick playing the bossa clave (3-side bar 1, 2-side bar 2). This is the real bossa feel — you can't fit it in one bar without losing the clave. Hat 8ths throughout. Joao Gilberto, Stan Getz/Astrud Gilberto 'Girl from Ipanema.'", phonetic: "B-_-_-Bk-B-_-_-Bk | B-_-_-_-B-_-_-_", p: { kick: [1,0,0,0, 0,0,1,0, 1,0,0,0, 0,0,1,0,  1,0,0,0, 0,0,1,0, 1,0,0,0, 0,0,1,0], snare: [1,0,0,0, 0,0,1,0, 0,0,0,0, 1,0,0,0,  0,0,0,0, 1,0,0,0, 1,0,0,0, 0,0,0,0], hihat: [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0,  1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0], openhat: [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,  0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0] } },
+            { name: "Reggaeton (2-bar)", genre: "Latin", tempo: 95, bars: 2, subdivision: "sixteenth", desc: "Full 2-bar dembow. Bar 1 sets the boom-ch-boom-chick kick with snare on '&' of 3 and '&' of 4; bar 2 adds a clap variation on the '&' of 1 to show how the pattern develops across the loop. The full 2-bar phrase is what gives reggaeton its forward push that one bar can only hint at.", phonetic: "B-B-_-B-B-Bk-_-Bk | B-K-B-_-B-Bk-_-Bk", p: { kick: [1,0,1,0, 0,0,1,0, 1,0,1,0, 0,0,1,0,  1,0,1,0, 0,0,1,0, 1,0,1,0, 0,0,1,0], snare: [0,0,0,0, 0,0,0,0, 0,0,1,0, 0,0,1,0,  0,0,0,0, 1,0,0,0, 0,0,1,0, 0,0,1,0], hihat: [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0,  1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0], openhat: [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,  0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0] } },
+            { name: "Amen Break (4-bar)", genre: "Breakbeat", tempo: 138, bars: 4, subdivision: "sixteenth", desc: "Gregory C. Coleman's actual 4-bar drum solo from The Winstons' 'Amen, Brother' (1969). The most sampled break in history. Bars 1-2 are standard kick-1-3 / snare-2-4 (with a ghost snare on the 'ah' of 4 in bar 2). Bar 3 displaces the kick onto the '&' of 2. Bar 4 has the famous late-snare landing on the 'ah' of 4 — that's the iconic ending that gave drum-and-bass an entire genre.", phonetic: "B-_-K-_-B-_-K-_ | B-_-K-_-B-_-K-Ka | B-_-_K-_-_-_-K-_ | B-_-K-_-_-_-_-Ka", p: { kick: [1,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0,  1,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0,  1,0,0,0, 0,0,1,0, 0,0,0,0, 0,0,0,0,  1,0,0,0, 0,0,0,0, 0,0,1,0, 0,0,0,0], snare: [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0,  0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,1,  0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0,  0,0,0,0, 1,0,0,0, 0,0,0,0, 0,0,0,1], hihat: [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0,  1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0,  1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0,  1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0], openhat: [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,  0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,  0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,  0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,1,0] } },
         ];
 
-        function buildSeqGrid() {
+        function buildSeqGrid(numSteps, stepsPerBar, isTriplet) {
+            numSteps = numSteps || STEPS;
+            stepsPerBar = stepsPerBar || 16;
             seq.stepsCache = { all: [] };
             SEQ_INSTS.forEach(inst => {
                 seq.stepsCache[inst] = [];
                 const track = document.querySelector(`.seq-track[data-inst="${inst}"]`);
-                for (let i = 0; i < STEPS; i++) {
+                // Wipe existing step children (keep the .seq-label)
+                track.querySelectorAll('.seq-step').forEach(el => el.remove());
+                // Drive the CSS grid column count + triplet tint via class/var
+                track.style.setProperty('--steps', numSteps);
+                track.classList.toggle('seq-track-triplet', !!isTriplet);
+                for (let i = 0; i < numSteps; i++) {
                     const step = document.createElement('div');
                     step.className = 'seq-step';
                     step.dataset.inst = inst;
                     step.dataset.step = i;
+                    if (i > 0 && i % stepsPerBar === 0) {
+                        step.classList.add('seq-step-bar-start');
+                    }
                     step.addEventListener('click', () => toggleSeqStep(inst, i, step));
                     track.appendChild(step);
                     seq.stepsCache[inst][i] = step;
@@ -2427,14 +2479,21 @@
         function loadPattern(pat) {
             seq.pattern = pat;
             seq.tempo = pat.tempo;
+            // Cache the step count + duration so the scheduler doesn't recompute every tick.
+            seq.totalSteps = getPatternSteps(pat);
+            seq.stepsPerBar = getStepsPerBar(pat);
+            seq.isTriplet = pat.subdivision === 'triplet';
             document.getElementById('seqTempoVal').textContent = pat.tempo;
             document.getElementById('seqPatTitle').textContent = pat.name;
             document.getElementById('seqPatDesc').textContent = pat.desc;
             document.getElementById('seqPhonetic').textContent = pat.phonetic;
+            // Rebuild the grid for this pattern's specific step count (12/16/32/64).
+            buildSeqGrid(seq.totalSteps, seq.stepsPerBar, seq.isTriplet);
             SEQ_INSTS.forEach(inst => {
-                pat.p[inst].forEach((v, i) => {
-                    const el = document.querySelector(`.seq-step[data-inst="${inst}"][data-step="${i}"]`);
-                    el.classList.toggle('on', v === 1);
+                const arr = pat.p[inst] || [];
+                arr.forEach((v, i) => {
+                    const el = seq.stepsCache[inst] && seq.stepsCache[inst][i];
+                    if (el) el.classList.toggle('on', v === 1);
                 });
             });
             renderPatterns();
@@ -2462,9 +2521,10 @@
         }
 
         function nextNote() {
-            const secondsPerBeat = 60.0 / seq.tempo;
-            seq.nextNoteTime += 0.25 * secondsPerBeat;
-            seq.step = (seq.step + 1) % STEPS;
+            // Step duration depends on the active pattern's subdivision (sixteenth vs triplet).
+            seq.nextNoteTime += getStepDuration(seq.pattern, seq.tempo);
+            const total = seq.totalSteps || STEPS;
+            seq.step = (seq.step + 1) % total;
         }
 
         function scheduleNote(beatNumber, time) {
