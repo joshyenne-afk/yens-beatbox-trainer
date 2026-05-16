@@ -144,7 +144,7 @@
 
 <header>
   <div class="logo">YEN's <span>Beatbox</span></div>
-  <button class="menu-btn" id="btnGrooves">Grooves</button>
+  <button class="menu-btn" id="btnTeach">How&nbsp;To</button>
 </header>
 
 <main>
@@ -180,15 +180,6 @@
     </div>
   </div>
 </main>
-
-<!-- Grooves panel -->
-<div class="panel" id="panelG">
-  <header>
-    <div class="logo">Pick a Groove</div>
-    <button class="menu-btn" id="closeG">Done</button>
-  </header>
-  <div class="panel-body glist" id="glist"></div>
-</div>
 
 <!-- Teach / How-to panel -->
 <div class="panel" id="panelT">
@@ -547,30 +538,7 @@ document.getElementById('ramp').onclick=function(){
 document.querySelectorAll('#stages button').forEach(b=>
   b.onclick=()=> setStage(+b.dataset.st));
 
-// Grooves panel
-const pG=document.getElementById('panelG');
-function buildGList(){
-  const wrap=document.getElementById('glist'); wrap.innerHTML='';
-  let lastStyle='';
-  GROOVES.forEach((g,i)=>{
-    if(g.style!==lastStyle){
-      const h=document.createElement('div');
-      h.className='ghdr'; h.textContent=g.style; wrap.appendChild(h);
-      lastStyle=g.style;
-    }
-    const b=document.createElement('button');
-    if(i===st.gi) b.classList.add('sel');
-    b.innerHTML='<div class="gn">'+g.name+'</div><div class="gm">'+
-      g.start+'→'+g.target+' BPM  ·  '+(g.grid===12?'shuffle':'straight')+'</div>';
-    b.onclick=()=>{ const p=st.playing; stop(); setGroove(i);
-      buildGList(); pG.classList.remove('open'); if(p)play(); };
-    wrap.appendChild(b);
-  });
-}
-document.getElementById('btnGrooves').onclick=()=>{ buildGList(); pG.classList.add('open'); };
-document.getElementById('closeG').onclick=()=> pG.classList.remove('open');
-
-// Teach panel — opened by tapping the groove name
+// Teach panel — opened by tapping the groove name or the How-To button
 const pT=document.getElementById('panelT');
 function buildTeach(){
   const g=curG(), t=document.getElementById('teach');
@@ -585,7 +553,13 @@ function buildTeach(){
 }
 document.getElementById('gName').onclick=()=>{ buildTeach(); pT.classList.add('open'); };
 document.getElementById('gMeta').onclick=()=>{ buildTeach(); pT.classList.add('open'); };
+document.getElementById('btnTeach').onclick=()=>{ buildTeach(); pT.classList.add('open'); };
 document.getElementById('closeT').onclick=()=> pT.classList.remove('open');
+
+/* TODO (future, do NOT build yet): a "Sounds" reference surface —
+   one entry per mouth sound (kick/snare/hat/open + compounds) with an
+   embedded YouTube link demoing the technique. Single extra overlay,
+   same slide-over pattern as the How-To panel. Not in scope now. */
 
 // init
 setGroove(0);
