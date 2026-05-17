@@ -238,39 +238,40 @@ const GROOVES = [
   {
     name:"Basic Rock", style:"Rock", grid:16,
     start:88, target:124,
+    // textbook backbeat: kick 1&3, snare 2&4, hat on the &'s. nothing else.
     slots:[ S('kick','Boom'), _, S('hat','ts'), _,
             S('snare','Kah'), _, S('hat','ts'), _,
             S('kick','Boom'), _, S('hat','ts'), _,
-            S('snare','Kah'), _, S('hat','ts'), S('kick','d') ],
+            S('snare','Kah'), _, S('hat','ts'), _ ],
     teach:{
-      what:"Boots & Cats with harder articulation and a kick pickup on the last 16th (\"d\") that launches the next bar. The space between the two kicks is what makes it rock — fill that space with kicks and it turns into disco.",
-      how:"Get the backbeat solid first (ignore the pickup). Add the pickup kick last; it's the hardest part because it's a fast kick right before the downbeat kick. Slow it way down to wire that transition."
+      what:"The textbook rock backbeat — the full-kit version of Boots & Cats with hard articulation. Kick on 1 & 3, cracking snare on 2 & 4, nothing fancy. The SPACE between the two kicks is what makes it rock; fill it and it becomes disco. Half the records you've ever played live are this and only this.",
+      how:"Drill it dead clean and resist embellishing. Once it's locked, the one variation worth adding is a kick on the 'a of 4' (the very last 16th) to launch the next bar — but that's a fast double-kick into the downbeat, so add it only after the plain beat is automatic."
     }
   },
   {
-    name:"Country Two-Step", style:"Country", grid:16,
-    start:96, target:124,
-    // felt in 2: boom-chick. kick on beats, snare on backbeats, hat ghosts on &'s
-    slots:[ S('kick','Boom'), _, S('hat','t'), _,
-            S('snare','Chick'), _, S('hat','t'), _,
-            S('kick','Boom'), _, S('hat','t'), _,
-            S('snare','Chick'), _, S('hat','t'), _ ],
+    name:"Country Two-Step", style:"Country", grid:12,
+    start:104, target:140,
+    // SHUFFLED — Western swing / dancehall two-step rides a triplet, not straight
+    slots:[ S('kick','Boom'), _, S('hat','ka'),
+            S('snare','Chick'), _, S('hat','ka'),
+            S('kick','Boom'), _, S('hat','ka'),
+            S('snare','Chick'), _, S('hat','ka') ],
     teach:{
-      what:"The boom-chick that lives under most honky-tonk and Bakersfield songs. Feel it in 2, not 4 — \"Boom-Chick, Boom-Chick.\" It's the two-step stripped of the train roll.",
-      how:"This one is about the POCKET, not complexity. Lock the Boom-Chick to a click and resist rushing the Chick. Then add the ghost \"t\" hats between."
+      what:"The dancehall two-step — and here's the thing most people get wrong: it SHUFFLES. Western swing, Bob Wills, the floor at any honky-tonk — that two-step rides a triplet, not a straight 8th. \"Boom-ka Chick-ka.\" Same shuffle skeleton as the blues, just faster and brighter. Play it straight and the dancers feel it instantly.",
+      how:"If Shuffle Blues is solid, this is that gallop sped up and lightened. Lock the triplet first at a slow tempo, then ramp — the failure mode at speed is straightening into a polka. Keep the long-short alive all the way up."
     }
   },
   {
     name:"Country Train", style:"Country · advanced", grid:16,
     start:96, target:130,
-    // the locomotive: kick 1&3, continuous 16th snare roll voiced as a tongue roll
+    // kick 1&3, 16th snare roll, with the 2 & 4 BACKBEAT accented out of the roll
     slots:[ S('kick','B'), S('snare','d'), S('snare','g'), S('snare','d'),
-            S('snare','g'), S('snare','d'), S('snare','g'), S('snare','d'),
+            S('snare','KA'), S('snare','d'), S('snare','g'), S('snare','d'),
             S('kick','B'), S('snare','d'), S('snare','g'), S('snare','d'),
-            S('snare','g'), S('snare','d'), S('snare','g'), S('snare','d') ],
+            S('snare','KA'), S('snare','d'), S('snare','g'), S('snare','d') ],
     teach:{
-      what:"The Bakersfield train beat. The 16th-note snare roll IS the locomotive — without it this is just a two-step. In a mouth that roll is a fast alternating tongue articulation: \"d-g-d-g\" (front-of-tongue / back-of-tongue), like a drummer's double-stroke brush roll.",
-      how:"Forget the kick at first. Build the \"d-g-d-g\" roll alone, slow, until it's even and can run forever. Only then drop the kick onto beats 1 & 3 underneath it. This is a long-game pattern — weeks, not minutes."
+      what:"The Bakersfield train beat. Two things make it a train and not a buzz: the continuous 16th snare roll (the wheels) AND the backbeat punching OUT of that roll on 2 & 4 (the \"KA\"). Drop the accent and it's just noise; drop the roll and it's a two-step. In the mouth the roll is a fast alternating \"d-g-d-g\" (front/back of tongue) with a hard \"KA\" landing on 2 & 4.",
+      how:"Build the even \"d-g-d-g\" roll alone first, slow, until it runs forever. Then learn to pop the \"KA\" louder on 2 & 4 without breaking the roll's evenness — that's the real skill. Kick on 1 & 3 goes in last. Weeks, not minutes."
     }
   },
   {
@@ -315,14 +316,15 @@ const GROOVES = [
   {
     name:"Funk: On the One", style:"Funk", grid:16,
     start:84, target:112,
-    // James Brown: the 1 is king. busy 16th hat, kick on 1 & 3, snare 2&4
+    // JB minimal: ONE huge kick on 1, snare 2&4, 16th hats, lone anticipation
+    // kick on the 'a of 4' pulling back to the 1. no square beat-3 kick.
     slots:[ S('kick','BUMP'), S('hat','t'), S('hat','t'), S('hat','t'),
             S('snare','Kat'), S('hat','t'), S('hat','t'), S('hat','t'),
-            S('kick','Bump'), S('hat','t'), S('hat','t'), S('hat','t'),
-            S('snare','Kat'), S('hat','t'), S('hat','t'), S('kick','d') ],
+            S('hat','t'), S('hat','t'), S('hat','t'), S('hat','t'),
+            S('snare','Kat'), S('hat','t'), S('kick','d'), S('hat','t') ],
     teach:{
-      what:"James Brown's whole philosophy: the \"1\" is the heaviest thing in the bar and everything resolves to it. Hit the first kick (\"BUMP\") harder than anything else. The 16th hats are the chatter; the 1 is the law.",
-      how:"Accent practice: loop the full thing but consciously punch beat 1 and lay everything else back. The closing \"d\" kick pulls you into the next \"BUMP.\" Groove over speed — keep it nasty, not fast."
+      what:"James Brown stripped to the bone. The \"1\" is the heaviest thing in the bar and everything resolves to it — so there's only ONE real kick (\"BUMP\"), nothing square on beat 3 to dilute it. Snare on 2 & 4, 16th hats chattering underneath. The single \"d\" kick on the 'a of 4' is an anticipation that slingshots you back into the next BUMP. That tension is the whole groove.",
+      how:"Punch beat 1 harder than feels reasonable and lay everything else dead behind it. Practice the BUMP→(bar)→d→BUMP slingshot last; it's the part that makes it JB instead of rock. Nasty over fast — never rush it."
     }
   }
 ];
@@ -363,20 +365,20 @@ function kick(t, accent){
   o.connect(g); g.connect(ac.destination);
   env(g, t, 0.004, accent?1.0:0.7, 0.16); o.start(t); o.stop(t+0.22);
 }
-function snare(t, type){
-  const ac=audio();
+function snare(t, type, amp){
+  const ac=audio(); amp = amp || 1;
   // tonal body
   const o=ac.createOscillator(), og=ac.createGain();
   o.type='triangle'; o.frequency.value= type==='brush'?210:185;
   o.connect(og); og.connect(ac.destination);
-  env(og, t, 0.002, type==='brush'?0.18:0.32, type==='brush'?0.12:0.14);
+  env(og, t, 0.002, (type==='brush'?0.18:0.32)*amp, type==='brush'?0.12:0.14);
   o.start(t); o.stop(t+0.2);
   // noise crack / brush wash
   const n=ac.createBufferSource(), f=ac.createBiquadFilter(), ng=ac.createGain();
   n.buffer=noise(); f.type= type==='brush'?'lowpass':'highpass';
   f.frequency.value= type==='brush'?3800:1500;
   n.connect(f); f.connect(ng); ng.connect(ac.destination);
-  env(ng, t, 0.002, type==='brush'?0.34:0.6, type==='brush'?0.18:0.16);
+  env(ng, t, 0.002, (type==='brush'?0.34:0.6)*amp, type==='brush'?0.18:0.16);
   n.start(t); n.stop(t+0.25);
 }
 function hat(t, open){
@@ -391,7 +393,7 @@ function hat(t, open){
 }
 function voice(snd, t, accent){
   if(snd==='kick') kick(t,accent);
-  else if(snd==='snare') snare(t, accent==='brush'?'brush':'hard');
+  else if(snd==='snare') snare(t, accent==='brush'?'brush':'hard', accent===true?1.6:1);
   else if(snd==='hat') hat(t,false);
   else if(snd==='open') hat(t,true);
 }
@@ -478,6 +480,7 @@ function scheduler(){
     const aud=audibleAt(st.stage);
     if(s && aud.indexOf(s.snd)!==-1){
       const accent = (g.name==='Funk: On the One' && st.step===0) ? true :
+                     (g.name==='Country Train' && (st.step===4 || st.step===12)) ? true :
                      (g.name==='Folk Brush' && s.snd==='snare') ? 'brush' : false;
       voice(s.snd, st.nextTime, accent);
     }
