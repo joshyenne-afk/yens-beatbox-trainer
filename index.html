@@ -36,6 +36,21 @@
     min-width:118px;
   }
 
+  /* ---- Genre tab strip ---- */
+  .genres{
+    display:flex; gap:8px; overflow-x:auto; -webkit-overflow-scrolling:touch;
+    padding:10px 14px; flex:0 0 auto; border-bottom:1px solid var(--line);
+    scrollbar-width:none;
+  }
+  .genres::-webkit-scrollbar{display:none}
+  .genres button{
+    flex:0 0 auto; background:var(--panel2); border:1px solid var(--line);
+    color:var(--dim); font-size:16px; font-weight:800; padding:12px 18px;
+    border-radius:999px; white-space:nowrap; touch-action:manipulation;
+  }
+  .genres button.sel{background:var(--accent); color:#1a1206; border-color:transparent}
+  .genres button:active{transform:scale(.96)}
+
   /* ---- Main player ---- */
   main{flex:1 1 auto; display:flex; flex-direction:column; min-height:0}
   .now{
@@ -152,6 +167,8 @@
   <div class="logo">YEN's <span>Beatbox</span></div>
   <button class="menu-btn" id="btnTeach">How&nbsp;To</button>
 </header>
+
+<div class="genres" id="genres"></div>
 
 <main>
   <div class="now">
@@ -472,11 +489,45 @@ function refreshHeader(){
   hint.textContent = st.bpm<g.target ? ('build to '+g.target) :
                      (st.bpm>g.target ? 'above target' : 'at target');
 }
+// ---- Genre organization (derived from each groove's style field) ----
+function genreOf(g){ return (g.style||'').split('·')[0].trim(); }
+const GENRES = [...new Set(GROOVES.map(genreOf))];
+function genreIdx(gen){
+  const r=[]; GROOVES.forEach((g,i)=>{ if(genreOf(g)===gen) r.push(i); }); return r;
+}
+function refreshGenres(){
+  const wrap=document.getElementById('genres');
+  const cur=genreOf(curG());
+  wrap.querySelectorAll('button').forEach(b=>
+    b.classList.toggle('sel', b.dataset.gen===cur));
+  const sel=wrap.querySelector('button.sel');
+  if(sel) wrap.scrollLeft = sel.offsetLeft - wrap.clientWidth/2 + sel.offsetWidth/2;
+}
+function buildGenres(){
+  const wrap=document.getElementById('genres'); wrap.innerHTML='';
+  GENRES.forEach(gen=>{
+    const b=document.createElement('button');
+    b.textContent=gen; b.dataset.gen=gen;
+    b.onclick=()=>{
+      const idxs=genreIdx(gen); if(!idxs.length) return;
+      const p=st.playing; stop(); setGroove(idxs[0]); if(p)play();
+    };
+    wrap.appendChild(b);
+  });
+}
+// Prev/Next cycle WITHIN the active genre only
+function stepGroove(d){
+  const idxs=genreIdx(genreOf(curG()));
+  let p=idxs.indexOf(st.gi); if(p<0) p=0;
+  p=(p+d+idxs.length)%idxs.length;
+  const wasP=st.playing; stop(); setGroove(idxs[p]); if(wasP)play();
+}
+
 function setGroove(i){
   st.gi=(i+GROOVES.length)%GROOVES.length;
   st.bpm=curG().start;
   st.step=0;
-  refreshHeader(); buildLine();
+  refreshHeader(); buildLine(); refreshGenres();
 }
 function setStage(s){
   st.stage=s;
@@ -553,8 +604,8 @@ function stop(){
 document.getElementById('play').onclick=()=> st.playing?stop():play();
 document.getElementById('tDown').onclick=()=>{ st.bpm=Math.max(40,st.bpm-2); refreshHeader(); };
 document.getElementById('tUp').onclick=()=>{ st.bpm=Math.min(220,st.bpm+2); refreshHeader(); };
-document.getElementById('prevG').onclick=()=>{ const p=st.playing; stop(); setGroove(st.gi-1); if(p)play(); };
-document.getElementById('nextG').onclick=()=>{ const p=st.playing; stop(); setGroove(st.gi+1); if(p)play(); };
+document.getElementById('prevG').onclick=()=>stepGroove(-1);
+document.getElementById('nextG').onclick=()=>stepGroove(1);
 document.getElementById('ramp').onclick=function(){
   st.ramp=!st.ramp; this.textContent='Ramp: '+(st.ramp?'On':'Off');
   this.style.background = st.ramp ? 'var(--accent)' : '';
@@ -587,6 +638,7 @@ document.getElementById('closeT').onclick=()=> pT.classList.remove('open');
    same slide-over pattern as the How-To panel. Not in scope now. */
 
 // init
+buildGenres();
 setGroove(0);
 </script>
 </body>
