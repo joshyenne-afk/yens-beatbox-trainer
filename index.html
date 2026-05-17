@@ -47,24 +47,27 @@
   /* ---- The karaoke sentence (the product) ---- */
   .stage{
     flex:1 1 auto; display:flex; align-items:center; justify-content:center;
-    padding:8px 14px; min-height:0; overflow:hidden;
+    padding:10px 12px; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
   }
   .line{
-    display:flex; flex-wrap:wrap; gap:8px 10px; align-items:center;
-    justify-content:center; max-width:760px;
+    display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+    align-content:center; justify-content:center; max-width:760px;
   }
+  /* UNIFORM box across every state — same padding/min-width/line-height so
+     wrapped rows never collide. Velocity reads via weight + opacity and
+     only a hair of size (≈93% / 107%), never enough to break the grid. */
   .syl{
-    font-size:34px; font-weight:800; padding:14px 16px; border-radius:14px;
+    font-size:27px; font-weight:800; padding:13px 14px; border-radius:14px;
     background:var(--panel); border:2px solid var(--line); color:var(--dim);
     transition:transform .04s ease, background .04s ease, color .04s ease, border-color .04s ease;
-    line-height:1; min-width:54px; text-align:center;
+    line-height:1.15; min-width:50px; text-align:center;
   }
   .syl.k{border-color:var(--kick)} .syl.s{border-color:var(--snare)}
   .syl.h{border-color:var(--hat)} .syl.o{border-color:var(--open)}
-  .syl.rest{opacity:.32; font-size:24px; min-width:30px; padding:14px 8px}
-  /* velocity: ghost notes shrink + fade, accents stay big & bold */
-  .syl.v1{font-size:21px; font-weight:600; opacity:.5; padding:10px 12px; min-width:40px}
-  .syl.v2{font-size:36px; font-weight:900}
+  .syl.rest{opacity:.3; min-width:24px; padding:13px 6px; font-weight:600}
+  /* velocity cue: ghost = faint + light, accent = bold. tiny size delta. */
+  .syl.v1{font-size:25px; font-weight:500; opacity:.5}
+  .syl.v2{font-size:29px; font-weight:900; opacity:1}
   .syl.on{
     color:#0a0a0c; transform:scale(1.16); border-color:transparent;
   }
