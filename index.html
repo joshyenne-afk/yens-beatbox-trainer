@@ -102,13 +102,12 @@
   }
   .play.playing{background:var(--stop); color:#1a0606}
   .play:active{transform:scale(.98); filter:brightness(1.08)}
-  .row{display:flex; gap:12px; margin-top:12px}
-  .row > *{flex:1}
   .bigbtn{
     height:78px; border:1px solid var(--line); background:var(--panel2);
     color:var(--txt); font-size:20px; font-weight:800; border-radius:18px;
   }
   .bigbtn:active{background:var(--panel)}
+  .bigbtn.ramp{width:100%; margin-top:12px}
   .tempo{
     display:flex; align-items:center; gap:12px; margin-top:12px;
   }
@@ -203,11 +202,7 @@
       <button class="tbtn" id="tUp">+</button>
     </div>
 
-    <div class="row">
-      <button class="bigbtn" id="prevG">◀ Prev</button>
-      <button class="bigbtn" id="ramp">Ramp: Off</button>
-      <button class="bigbtn" id="nextG">Next ▶</button>
-    </div>
+    <button class="bigbtn ramp" id="ramp">Ramp: Off</button>
   </div>
 </main>
 
@@ -522,14 +517,6 @@ function buildGenres(){
     wrap.appendChild(b);
   });
 }
-// Prev/Next cycle WITHIN the active genre only
-function stepGroove(d){
-  const idxs=genreIdx(genreOf(curG()));
-  let p=idxs.indexOf(st.gi); if(p<0) p=0;
-  p=(p+d+idxs.length)%idxs.length;
-  const wasP=st.playing; stop(); setGroove(idxs[p]); if(wasP)play();
-}
-
 function setGroove(i){
   st.gi=(i+GROOVES.length)%GROOVES.length;
   st.bpm=curG().start;
@@ -611,8 +598,6 @@ function stop(){
 document.getElementById('play').onclick=()=> st.playing?stop():play();
 document.getElementById('tDown').onclick=()=>{ st.bpm=Math.max(40,st.bpm-2); refreshHeader(); };
 document.getElementById('tUp').onclick=()=>{ st.bpm=Math.min(220,st.bpm+2); refreshHeader(); };
-document.getElementById('prevG').onclick=()=>stepGroove(-1);
-document.getElementById('nextG').onclick=()=>stepGroove(1);
 document.getElementById('ramp').onclick=function(){
   st.ramp=!st.ramp; this.textContent='Ramp: '+(st.ramp?'On':'Off');
   this.style.background = st.ramp ? 'var(--accent)' : '';
