@@ -465,7 +465,7 @@ function click(t, hi){
    SCHEDULER + STATE
    ============================================================ */
 const st = {
-  gi:0, bpm:90, stage:3, playing:false, ramp:false,
+  gi:0, bpm:90, stage:3, playing:false, ramp:false, rampRound:0,
   step:0, nextTime:0, timer:null, countIn:false, countStep:0,
   q:[]
 };
@@ -504,8 +504,20 @@ function refreshHeader(){
      '  ·  target '+g.target;
   document.getElementById('bpm').textContent=st.bpm;
   const hint=document.getElementById('tHint');
+  if(st.ramp){ updateRampUI(); return; }
   hint.textContent = st.bpm<g.target ? ('build to '+g.target) :
                      (st.bpm>g.target ? 'above target' : 'at target');
+}
+// Ramp drill readout + completion
+function updateRampUI(){
+  if(!st.ramp) return;
+  document.getElementById('tHint').textContent =
+    'Round '+Math.min(st.rampRound+1,10)+' of 10 · target '+curG().target;
+}
+function rampDone(){
+  const r=document.getElementById('ramp');
+  r.textContent='Ramp: Done ✓'; r.style.background=''; r.style.color='';
+  document.getElementById('tHint').textContent='Done — at target tempo!';
 }
 // ---- Genre organization (derived from each groove's style field) ----
 function genreOf(g){ return (g.style||'').split('·')[0].trim(); }
@@ -559,7 +571,12 @@ document.getElementById('closeG').onclick=()=> pG.classList.remove('open');
 function setGroove(i){
   st.gi=(i+GROOVES.length)%GROOVES.length;
   st.bpm=curG().start;
-  st.step=0;
+  st.step=0; st.rampRound=0;
+  // clear a stale "Done ✓" label when ramp isn't active anymore
+  if(!st.ramp){
+    const rb=document.getElementById('ramp');
+    rb.textContent='Ramp: Off'; rb.style.background=''; rb.style.color='';
+  }
   refreshHeader(); buildLine(); refreshGenres();
 }
 function setStage(s){
@@ -594,10 +611,21 @@ function scheduler(){
     const prev=st.step;
     st.step=(st.step+1) % g.slots.length;
     st.nextTime += stepDur();
-    if(prev === g.slots.length-1 && st.ramp && st.bpm < g.target){
-      st.bpm=Math.min(g.target, st.bpm+2);
-      document.getElementById('bpm').textContent=st.bpm;
-      refreshHeader();
+    // RAMP DRILL: 10 loops at tempo → +2 BPM with a fresh count-off →
+    // repeat until target reached, then complete (playback continues).
+    if(prev === g.slots.length-1 && st.ramp){
+      st.rampRound++;
+      if(st.rampRound >= 10){
+        if(st.bpm >= g.target){
+          st.ramp=false; rampDone();
+        } else {
+          st.bpm=Math.min(g.target, st.bpm+2);
+          st.rampRound=0;
+          st.countIn=true; st.countStep=0;   // pause + count off at new tempo
+          document.getElementById('bpm').textContent=st.bpm;
+        }
+      }
+      updateRampUI();
     }
   }
 }
@@ -618,6 +646,7 @@ function visual(){
 function play(){
   audio();
   st.playing=true; st.countIn=true; st.countStep=0; st.step=0; st.q=[];
+  st.rampRound=0; if(st.ramp) updateRampUI();
   st.nextTime=audio().currentTime+0.1;
   const b=document.getElementById('play');
   b.classList.add('playing'); b.innerHTML='■ &nbsp;STOP';
@@ -641,6 +670,8 @@ document.getElementById('ramp').onclick=function(){
   st.ramp=!st.ramp; this.textContent='Ramp: '+(st.ramp?'On':'Off');
   this.style.background = st.ramp ? 'var(--accent)' : '';
   this.style.color = st.ramp ? '#1a1206' : '';
+  st.rampRound=0;
+  if(st.ramp) updateRampUI(); else refreshHeader();
 };
 document.querySelectorAll('#stages button').forEach(b=>
   b.onclick=()=> setStage(+b.dataset.st));
