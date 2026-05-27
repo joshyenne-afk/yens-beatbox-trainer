@@ -149,8 +149,12 @@
     color:var(--txt); border-radius:16px; padding:20px; margin-bottom:12px;
   }
   .glist button.sel{border-color:var(--accent)}
-  .glist .gn{font-size:21px; font-weight:800}
-  .glist .gm{font-size:15px; color:var(--dim); margin-top:5px; font-weight:600}
+  .glist button.sel .gn{color:var(--accent)}
+  .glist .gn{font-size:22px; font-weight:800}
+  .glist .gm{font-size:14px; color:var(--accent); margin-top:5px; font-weight:700;
+    text-transform:uppercase; letter-spacing:.5px}
+  .glist .gd{font-size:15px; color:var(--dim); margin-top:7px; font-weight:500;
+    line-height:1.4}
   .ghdr{font-size:14px; font-weight:800; color:var(--accent); text-transform:uppercase;
         letter-spacing:1.5px; margin:18px 4px 10px}
   .teach h3{font-size:17px; color:var(--accent); margin:20px 0 8px; font-weight:800}
@@ -208,6 +212,15 @@
     <button class="bigbtn ramp" id="ramp">Ramp: Off</button>
   </div>
 </main>
+
+<!-- Groove picker sheet -->
+<div class="panel" id="panelG">
+  <header>
+    <div class="logo" id="gpTitle">Pick a Groove</div>
+    <button class="menu-btn" id="closeG">Close</button>
+  </header>
+  <div class="panel-body glist" id="glist"></div>
+</div>
 
 <!-- Teach / How-to panel -->
 <div class="panel" id="panelT">
@@ -513,13 +526,36 @@ function buildGenres(){
   GENRES.forEach(gen=>{
     const b=document.createElement('button');
     b.textContent=gen; b.dataset.gen=gen;
-    b.onclick=()=>{
-      const idxs=genreIdx(gen); if(!idxs.length) return;
-      const p=st.playing; stop(); setGroove(idxs[0]); if(p)play();
-    };
+    b.onclick=()=> openPicker(gen);
     wrap.appendChild(b);
   });
 }
+// Two-tap navigation: tap genre (or the title) → sheet of that
+// genre's grooves → tap a groove → loads it and dismisses.
+const pG=document.getElementById('panelG');
+function openPicker(gen){
+  const idxs=genreIdx(gen); if(!idxs.length) return;
+  document.getElementById('gpTitle').textContent=gen+' grooves';
+  const wrap=document.getElementById('glist'); wrap.innerHTML='';
+  idxs.forEach(i=>{
+    const g=GROOVES[i];
+    const one=(g.teach&&g.teach.what?g.teach.what:'').split(/(?<=[.!?])\s/)[0];
+    const b=document.createElement('button');
+    if(i===st.gi) b.classList.add('sel');
+    b.innerHTML='<div class="gn">'+g.name+'</div>'+
+      '<div class="gm">'+g.start+'–'+g.target+' BPM · '+
+      (g.grid===12?'shuffle':'straight')+'</div>'+
+      '<div class="gd">'+one+'</div>';
+    b.onclick=()=>{
+      const wasP=st.playing; stop(); setGroove(i);
+      pG.classList.remove('open'); if(wasP)play();
+    };
+    wrap.appendChild(b);
+  });
+  pG.classList.add('open');
+}
+document.getElementById('closeG').onclick=()=> pG.classList.remove('open');
+
 function setGroove(i){
   st.gi=(i+GROOVES.length)%GROOVES.length;
   st.bpm=curG().start;
@@ -622,8 +658,9 @@ function buildTeach(){
     '<h3>How to learn it</h3><p>'+g.teach.how+'</p>'+
     '<h3>The build-up</h3><p>Use the stage buttons: loop <b>Kick</b> alone until it\'s strong, then <b>+Snare</b>, then <b>+Hat</b>, then <b>Full</b>. Start at '+g.start+', flip <b>Ramp</b> on, and it walks you to '+g.target+'.</p>';
 }
-document.getElementById('gName').onclick=()=>{ buildTeach(); pT.classList.add('open'); };
-document.getElementById('gMeta').onclick=()=>{ buildTeach(); pT.classList.add('open'); };
+// tapping the title/genre in the practice view re-opens the picker
+document.getElementById('gName').onclick=()=> openPicker(genreOf(curG()));
+document.getElementById('gMeta').onclick=()=> openPicker(genreOf(curG()));
 document.getElementById('btnTeach').onclick=()=>{ buildTeach(); pT.classList.add('open'); };
 document.getElementById('closeT').onclick=()=> pT.classList.remove('open');
 
