@@ -63,6 +63,11 @@
   }
   .now .name{font-size:26px; font-weight:800; line-height:1.05}
   .now .meta{font-size:14px; color:var(--dim); margin-top:4px; font-weight:600}
+  /* Trade-mode phase flag — glanceable while driving */
+  .phase{margin-top:6px; font-size:20px; font-weight:900; letter-spacing:2px;
+    color:var(--dim)}
+  .phase.you{color:var(--go)}
+  .stage.you{box-shadow:inset 0 0 0 3px var(--go); border-radius:20px}
 
   /* ---- The karaoke sentence (the product) ---- */
   /* the karaoke is THE element — it gets the space and never gets buried */
@@ -112,7 +117,8 @@
     color:var(--txt); font-size:19px; font-weight:800; border-radius:16px;
   }
   .bigbtn:active{background:var(--panel)}
-  .bigbtn.ramp{width:100%; margin-top:10px}
+  .brow{display:flex; gap:10px; margin-top:10px}
+  .brow .bigbtn{flex:1}
   .tempo{
     display:flex; align-items:center; gap:12px; margin-top:10px;
   }
@@ -189,6 +195,7 @@
   <div class="now">
     <div class="name" id="gName">—</div>
     <div class="meta" id="gMeta"></div>
+    <div class="phase hide" id="phase">LISTEN</div>
   </div>
 
   <div class="stage">
@@ -211,7 +218,10 @@
       <button class="tbtn" id="tUp">+</button>
     </div>
 
-    <button class="bigbtn ramp" id="ramp">Ramp: Off</button>
+    <div class="brow">
+      <button class="bigbtn" id="ramp">Ramp: Off</button>
+      <button class="bigbtn" id="trade">Trade: Off</button>
+    </div>
   </div>
 </main>
 
@@ -587,6 +597,7 @@ function click(t, hi){
    ============================================================ */
 const st = {
   gi:0, bpm:90, stage:3, playing:false, ramp:false, rampRound:0,
+  trade:false, tradePass:0, tradePhase:'app',
   step:0, nextTime:0, timer:null, countIn:false, countStep:0,
   q:[]
 };
@@ -639,6 +650,17 @@ function rampDone(){
   const r=document.getElementById('ramp');
   r.textContent='Ramp: Done ✓'; r.style.background=''; r.style.color='';
   document.getElementById('tHint').textContent='Done — at target tempo!';
+}
+// Trade phase flag: LISTEN (app plays) vs YOU — GO (click only, you perform)
+function updateTradeUI(){
+  const p=document.getElementById('phase');
+  const stg=document.querySelector('.stage');
+  if(!st.trade){ p.classList.add('hide'); stg.classList.remove('you'); return; }
+  p.classList.remove('hide');
+  const you = st.tradePhase==='you';
+  p.textContent = you ? 'YOU — GO' : 'LISTEN';
+  p.classList.toggle('you', you);
+  stg.classList.toggle('you', you);
 }
 // ---- Genre organization (derived from each groove's style field) ----
 function genreOf(g){ return (g.style||'').split('·')[0].trim(); }
@@ -693,6 +715,7 @@ function setGroove(i){
   st.gi=(i+GROOVES.length)%GROOVES.length;
   st.bpm=curG().start;
   st.step=0; st.rampRound=0;
+  st.tradePass=0; st.tradePhase='app'; updateTradeUI();
   // clear a stale "Done ✓" label when ramp isn't active anymore
   if(!st.ramp){
     const rb=document.getElementById('ramp');
@@ -722,16 +745,32 @@ function scheduler(){
     }
     const s=g.slots[st.step];
     const aud=audibleAt(st.stage);
-    if(s && aud.indexOf(s.snd)!==-1){
+    // TRADE: during the 'you' phase the app goes silent (Josh performs);
+    // a quarter-note click keeps time and the karaoke keeps prompting.
+    const yourTurn = st.trade && st.tradePhase==='you';
+    if(s && aud.indexOf(s.snd)!==-1 && !yourTurn){
       // velocity comes from the slot now: ghost(1)≈0.36, accent(2)=1.0
       const v = (s.vel===1) ? 0.36 : 1.0;
       const brush = (g.name==='Folk Brush' && s.snd==='snare');
       voice(s.snd, st.nextTime, v, brush);
     }
+    if(yourTurn && st.step % (g.grid===12?3:4) === 0)
+      click(st.nextTime, st.step % g.grid === 0);
     st.q.push({t:st.nextTime, i:st.step});
     const prev=st.step;
     st.step=(st.step+1) % g.slots.length;
     st.nextTime += stepDur();
+    // TRADE: flip APP↔YOU every 2 passes (1 pass for multi-bar grooves,
+    // so each side always gets ~2 bars).
+    if(prev === g.slots.length-1 && st.trade){
+      st.tradePass++;
+      const passes = g.slots.length > 16 ? 1 : 2;
+      if(st.tradePass >= passes){
+        st.tradePass = 0;
+        st.tradePhase = st.tradePhase==='app' ? 'you' : 'app';
+        updateTradeUI();
+      }
+    }
     // RAMP DRILL: 10 loops at tempo → +2 BPM with a fresh count-off →
     // repeat until target reached, then complete (playback continues).
     if(prev === g.slots.length-1 && st.ramp){
@@ -768,6 +807,7 @@ function play(){
   audio();
   st.playing=true; st.countIn=true; st.countStep=0; st.step=0; st.q=[];
   st.rampRound=0; if(st.ramp) updateRampUI();
+  st.tradePass=0; st.tradePhase='app'; updateTradeUI();
   st.nextTime=audio().currentTime+0.1;
   const b=document.getElementById('play');
   b.classList.add('playing'); b.innerHTML='■ &nbsp;STOP';
@@ -793,6 +833,12 @@ document.getElementById('ramp').onclick=function(){
   this.style.color = st.ramp ? '#1a1206' : '';
   st.rampRound=0;
   if(st.ramp) updateRampUI(); else refreshHeader();
+};
+document.getElementById('trade').onclick=function(){
+  st.trade=!st.trade; this.textContent='Trade: '+(st.trade?'On':'Off');
+  this.style.background = st.trade ? 'var(--go)' : '';
+  this.style.color = st.trade ? '#06120c' : '';
+  st.tradePass=0; st.tradePhase='app'; updateTradeUI();
 };
 document.querySelectorAll('#stages button').forEach(b=>
   b.onclick=()=> setStage(+b.dataset.st));
