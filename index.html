@@ -381,6 +381,125 @@ const GROOVES = [
       what:"James Brown stripped to the bone. The \"1\" is the heaviest thing in the bar and everything resolves to it — so there's only ONE real kick (\"BUMP\"), nothing square on beat 3 to dilute it. Snare on 2 & 4, 16th hats chattering underneath. The single \"d\" kick on the 'a of 4' is an anticipation that slingshots you back into the next BUMP. That tension is the whole groove.",
       how:"Punch beat 1 harder than feels reasonable and lay everything else dead behind it — the hats and the little ghost snares (\"k\") feeding into each backbeat are barely-there, almost felt not heard. That loud/quiet spread IS the funk. Practice the ghost-snare-into-loud-Kat move and the BUMP→d→BUMP slingshot last. Nasty over fast — never rush it."
     }
+  },
+  {
+    name:"Funky Drummer", style:"Funk · the break", grid:16,
+    start:84, target:100,
+    // Clyde Stubblefield linearized: kick 1 + & of 2, loud snare 2 & 4,
+    // GHOST snares tucked into the e's/a's, open hat on the 'a of 4'
+    slots:[ S('kick','Bum'), G('hat','t'), G('hat','t'), G('hat','t'),
+            S('snare','Kat'), G('hat','t'), S('kick','B'), G('snare','k'),
+            G('hat','t'), G('snare','k'), G('hat','t'), G('snare','k'),
+            S('snare','Kat'), G('hat','t'), G('hat','t'), S('open','tss') ],
+    teach:{
+      what:"Clyde Stubblefield's break from 'Funky Drummer' — the most sampled groove in hip-hop history. The loud parts are ordinary: kick on 1, snare 2 & 4. The GHOSTS are the break: the little \"k\" snares tucked between the backbeats, barely audible, plus the open-hat sigh on the 'a of 4'. Take the ghosts away and it's a rock beat; that's how important they are.",
+      how:"Learn it loud-parts-only first (it's just a backbeat with an extra kick). Then add ONE ghost at a time, quieter than feels useful — if someone across the room can hear your ghosts, they're too loud. The open 'tss' at the end is the exhale before the next 1."
+    }
+  },
+  {
+    name:"Cissy Strut", style:"Funk · the break", grid:16,
+    start:78, target:92,
+    // Zigaboo/Meters, 2 bars: sparse syncopated kicks, cracking answers, SPACE
+    slots:[ S('kick','Dum'), _, _, G('kick','d'),
+            S('snare','Ka'), _, S('kick','Dum'), _,
+            _, _, S('snare','Ka'), _,
+            _, _, G('hat','t'), _,
+            S('kick','Dum'), _, _, _,
+            S('snare','Ka'), _, G('snare','k'), _,
+            S('kick','Dum'), _, S('snare','Ka'), _,
+            _, _, G('hat','t'), _ ],
+    teach:{
+      what:"The Meters' 'Cissy Strut' — Zigaboo Modeliste and the sound of New Orleans funk. Two bars, and the whole point is the SPACE: this groove has more silence than notes. Bar 1 asks, bar 2 answers. Every rest is load-bearing — fill them and you've killed it.",
+      how:"Count out loud through the rests at first; the silences are where you'll rush. Practice at the slow end until the gaps feel comfortable instead of nervous. Under a guitar loop this groove is gold precisely because it leaves so much room."
+    }
+  },
+  {
+    name:"Cold Sweat", style:"Funk · the break", grid:16,
+    start:90, target:108,
+    // the 1967 blueprint: kick 1 + & of 2, snare 2 & 4, the '& of 3' stab
+    slots:[ S('kick','Bum'), _, G('hat','t'), _,
+            S('snare','Kat'), _, S('kick','B'), _,
+            G('hat','t'), _, S('snare','KA'), _,
+            S('snare','Kat'), _, G('hat','t'), _ ],
+    teach:{
+      what:"'Cold Sweat' (1967) — the record where funk officially split from soul. Almost a plain backbeat, except for one thing: the snare stab on the '& of 3' (the loud 'KA' between the backbeats). That single displaced accent is the moment funk was invented. Everything else stays deliberately flat so the stab pops.",
+      how:"Play it WITHOUT the KA first — boring on purpose. Then drop the stab in and feel how it tilts the whole bar forward. The discipline is keeping everything else level so that one hit does all the work."
+    }
+  },
+  {
+    name:"Superstition 16ths", style:"Funk · the break", grid:16,
+    start:82, target:100,
+    // relentless ghost 16th hats; kick 1 & 3 with an 'a of 2' push
+    slots:[ S('kick','Bum'), G('hat','t'), G('hat','t'), G('hat','t'),
+            S('snare','Kah'), G('hat','t'), G('hat','t'), G('kick','d'),
+            S('kick','Bum'), G('hat','t'), G('hat','t'), G('hat','t'),
+            S('snare','Kah'), G('hat','t'), G('hat','t'), G('hat','t') ],
+    teach:{
+      what:"The 'Superstition' engine — a wall of ghost 16th hats that never stops, with kick 1 & 3, snare 2 & 4, and a little 'd' kick push on the 'a of 2' pulling into beat 3. The funk here isn't syncopation, it's RELENTLESSNESS: the hats are a conveyor belt and the accents ride on top.",
+      how:"This is an endurance groove — the 16th 't' chatter has to stay even and QUIET for the whole loop, which is harder than it sounds. Accent by relaxing the ghosts, not by pushing the accents. If your hats get louder as you tire, slow down."
+    }
+  },
+  {
+    name:"Purdie Half-Time Shuffle", style:"Blues · half-time", grid:12,
+    start:58, target:72,
+    // shuffled ghosts everywhere, but the backbeat lands ONCE — on beat 3
+    slots:[ S('kick','Boom'), _, G('snare','k'),
+            G('hat','t'), _, G('snare','k'),
+            S('snare','KAT'), _, G('snare','k'),
+            G('kick','d'), _, G('snare','k') ],
+    teach:{
+      what:"The Purdie Shuffle — Bernard Purdie's half-time shuffle, the groove behind 'Babylon Sisters' and 'Fool in the Rain.' It's a 12/8 shuffle where the ghost snares fill every triplet skip ('k'), but the loud backbeat lands only ONCE per bar, on beat 3. Half the backbeats, twice the depth.",
+      how:"You already have the shuffle from Shuffle Blues — same triplet gallop. The new skill is the dynamic split: ghosts whispering constantly, then ONE fat 'KAT' on 3. Practice ghosts-only until they swing by themselves, then drop the backbeat in like a stone in a pond."
+    }
+  },
+  {
+    name:"Second-Line", style:"New Orleans", grid:16,
+    start:80, target:96,
+    // 2-bar street beat: snare leads the phrase, kick punctuates,
+    // the 'big four' kick lands on beat 4 of bar 2
+    slots:[ S('kick','Dum'), _, G('snare','d'), G('snare','g'),
+            S('snare','KA'), _, S('snare','Ka'), _,
+            G('snare','d'), G('snare','g'), S('snare','KA'), _,
+            S('kick','Dum'), _, G('snare','d'), _,
+            S('kick','Dum'), _, G('snare','d'), G('snare','g'),
+            S('snare','KA'), _, G('snare','d'), S('snare','Ka'),
+            _, G('snare','d'), S('snare','KA'), _,
+            S('kick','DUM'), _, G('snare','d'), _ ],
+    teach:{
+      what:"New Orleans second-line — the parade beat. The snare LEADS (it's a marching drummer improvising over two bars) and the kick punctuates. The anchor is the 'big four': the accented kick on beat 4 of bar 2 ('DUM'), the hit the whole parade leans on. Rolls ('d-g') stitch the accents together.",
+      how:"Learn the loud skeleton first: the KA accents plus the two Dum kicks and the big-four DUM. Then lace the ghost 'd-g' roll fragments between them — they're brush strokes, not hits. It should feel like strutting, not marching."
+    }
+  },
+  {
+    name:"Bo Diddley", style:"Roots", grid:16,
+    start:88, target:104,
+    // 2-bar 3-2 clave on the low drum; maraca-like ghost hats on the 8ths.
+    // clave hits: 1, & of 2, 4 (bar 1) | 2, 3 (bar 2). NO backbeat anywhere.
+    slots:[ S('kick','BOM'), _, G('hat','ch'), _,
+            G('hat','ch'), _, S('kick','BOM'), _,
+            G('hat','ch'), _, G('hat','ch'), _,
+            S('kick','BOM'), _, G('hat','ch'), _,
+            G('hat','ch'), _, G('hat','ch'), _,
+            S('kick','BOM'), _, G('hat','ch'), _,
+            S('kick','BOM'), _, G('hat','ch'), _,
+            G('hat','ch'), _, G('hat','ch'), _ ],
+    teach:{
+      what:"The Bo Diddley beat — the 3-2 son clave dressed up as rock and roll. Five low 'BOM' hits across two bars (1, '& of 2', 4 — then 2, 3) with maraca-like 'ch' ghosts filling the 8ths. There is NO snare backbeat anywhere: that absence is what makes it a clave and not a rock beat. 'Not Fade Away,' 'Willie and the Hand Jive,' 'Magic Bus.'",
+      how:"Chant the clave first: 'BOM… BOM-BOM… BOM… BOM' until it loops in your head without counting. The trap is letting 2 & 4 creep back in — your backbeat instinct will fight you. The 'ch' shaker layer goes in last, dead even, like maracas."
+    }
+  },
+  {
+    name:"Reggae One Drop", style:"Reggae", grid:16,
+    start:64, target:76,
+    // NOTHING on beat 1 — that's the drop. Kick+rim as one compound 'DUM' on 3.
+    slots:[ _, _, G('hat','ch'), _,
+            G('hat','ch'), _, G('hat','ch'), _,
+            S('kick','DUM'), _, G('hat','ch'), _,
+            G('hat','ch'), _, G('hat','ch'), _ ],
+    teach:{
+      what:"The one drop — Carlton Barrett, every Bob Marley record. Beat 1 is EMPTY (that's the 'drop'), and the whole bar gravitates to beat 3, where kick and rim-click land together — in your mouth that's one compound 'DUM.' Whisper 'ch' hats keep the 8ths ticking around it. The silence on 1 is the identity of the groove.",
+      how:"Your ear will scream to put something on 1 — don't. Count in, stay silent through the downbeat, and land the DUM fat on 3. Under a guitar skank (your upstrokes on the &'s) this is instant reggae with almost nothing to do — the hardest part is trusting the space."
+    }
   }
 ];
 
