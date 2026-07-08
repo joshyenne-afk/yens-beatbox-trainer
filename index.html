@@ -105,6 +105,8 @@
   .syl.on.k{background:var(--kick)} .syl.on.s{background:var(--snare)}
   .syl.on.h{background:var(--hat)} .syl.on.o{background:var(--open)}
   .syl.muted{opacity:.16}
+  /* dimmed half-loop slots (still visible for context, clearly inactive) */
+  .syl.outside{opacity:.12}
 
   /* ---- Transport ---- */
   .transport{flex:0 0 auto; padding:4px 16px 12px}
@@ -209,10 +211,9 @@
     <button class="play" id="play">▶ &nbsp;PLAY</button>
 
     <div class="stages" id="stages">
-      <button data-st="0">Kick</button>
-      <button data-st="1">+ Snare</button>
-      <button data-st="2">+ Hat</button>
-      <button data-st="3" class="sel">Full</button>
+      <button class="sel" data-v="kick">Kick</button>
+      <button class="sel" data-v="snare">Snare</button>
+      <button class="sel" data-v="hat">Hat</button>
     </div>
 
     <div class="tempo">
@@ -222,6 +223,7 @@
     </div>
 
     <div class="brow">
+      <button class="bigbtn" id="half">Half: Off</button>
       <button class="bigbtn" id="ramp">Ramp: Off</button>
       <button class="bigbtn" id="trade">Trade: Off</button>
     </div>
@@ -599,15 +601,29 @@ function click(t, hi){
    SCHEDULER + STATE
    ============================================================ */
 const st = {
-  gi:0, bpm:90, stage:3, playing:false, ramp:false, rampRound:0,
+  gi:0, bpm:90, playing:false, ramp:false, rampRound:0,
+  on:{kick:true, snare:true, hat:true}, half:0,
   trade:false, tradePass:0, tradePhase:'app',
   step:0, nextTime:0, timer:null, countIn:false, countStep:0,
   q:[]
 };
-const STAGE_SND = [ ['kick'], ['kick','snare'], ['kick','snare','hat','open'],
-                    ['kick','snare','hat','open'] ];
-function audibleAt(stage){
-  return stage===2 ? ['kick','snare','hat','open'] : STAGE_SND[stage];
+// Which sounds are audible, derived from independent voice toggles.
+// The Hat toggle governs both closed and open hat.
+function audible(){
+  const a=[];
+  if(st.on.kick) a.push('kick');
+  if(st.on.snare) a.push('snare');
+  if(st.on.hat){ a.push('hat'); a.push('open'); }
+  return a;
+}
+// The active loop window for half-loop practice.
+// half 0 = full bar(s), 1 = first half, 2 = second half.
+function halfWindow(){
+  const len=curG().slots.length;
+  const h=Math.floor(len/2);
+  if(st.half===1) return [0, h];
+  if(st.half===2) return [h, len];
+  return [0, len];
 }
 function curG(){ return GROOVES[st.gi]; }
 function stepDur(){
@@ -618,7 +634,8 @@ function stepDur(){
 function buildLine(){
   const g=curG(), line=document.getElementById('line');
   line.innerHTML='';
-  const aud = audibleAt(st.stage);
+  const aud = audible();
+  const [lo,hi] = halfWindow();
   g.slots.forEach((s,i)=>{
     const d=document.createElement('div');
     if(!s){ d.className='syl rest'; d.textContent='·'; }
@@ -627,6 +644,7 @@ function buildLine(){
       d.textContent=s.syl;
       if(aud.indexOf(s.snd)===-1) d.classList.add('muted');
     }
+    if(i<lo || i>=hi) d.classList.add('outside');   // dimmed half
     d.dataset.i=i;
     line.appendChild(d);
   });
@@ -726,28 +744,43 @@ function setGroove(i){
   }
   refreshHeader(); buildLine(); refreshGenres();
 }
-function setStage(s){
-  st.stage=s;
-  document.querySelectorAll('#stages button').forEach(b=>
-    b.classList.toggle('sel', +b.dataset.st===s));
+function toggleVoice(v){
+  st.on[v]=!st.on[v];
+  // never allow all three off — nothing to practice
+  if(!st.on.kick && !st.on.snare && !st.on.hat) st.on[v]=true;
+  document.querySelector('#stages button[data-v="'+v+'"]')
+    .classList.toggle('sel', st.on[v]);
   buildLine();
 }
+function setHalf(h){
+  st.half=h;
+  const [lo]=halfWindow();
+  if(st.step<lo || st.step>=halfWindow()[1]) st.step=lo;
+  document.getElementById('half').textContent =
+    'Half: '+(h===0?'Off':h===1?'1st':'2nd');
+  const hb=document.getElementById('half');
+  hb.style.background = h ? 'var(--hat)' : '';
+  hb.style.color = h ? '#04222b' : '';
+  buildLine();
+}
+function cycleHalf(){ setHalf((st.half+1)%3); }
 
 function scheduler(){
   const ac=audio();
   while(st.nextTime < ac.currentTime + 0.12){
     const g=curG();
+    const [lo,hi]=halfWindow();
     if(st.countIn){
       const beats = g.grid===12?4:4;
       click(st.nextTime, st.countStep===0);
       st.q.push({t:st.nextTime, count:st.countStep});
       st.countStep++;
       st.nextTime += 60/st.bpm; // count-in in quarter notes
-      if(st.countStep>=beats){ st.countIn=false; st.countStep=0; st.step=0; }
+      if(st.countStep>=beats){ st.countIn=false; st.countStep=0; st.step=lo; }
       continue;
     }
     const s=g.slots[st.step];
-    const aud=audibleAt(st.stage);
+    const aud=audible();
     // TRADE: during the 'you' phase the app goes silent (Josh performs);
     // a quarter-note click keeps time and the karaoke keeps prompting.
     const yourTurn = st.trade && st.tradePhase==='you';
@@ -761,11 +794,12 @@ function scheduler(){
       click(st.nextTime, st.step % g.grid === 0);
     st.q.push({t:st.nextTime, i:st.step});
     const prev=st.step;
-    st.step=(st.step+1) % g.slots.length;
+    // advance within the active window (full bar, or a practiced half)
+    st.step = (st.step+1 >= hi) ? lo : st.step+1;
     st.nextTime += stepDur();
     // TRADE: flip APP↔YOU every 2 passes (1 pass for multi-bar grooves,
     // so each side always gets ~2 bars).
-    if(prev === g.slots.length-1 && st.trade){
+    if(prev === hi-1 && st.trade){
       st.tradePass++;
       const passes = g.slots.length > 16 ? 1 : 2;
       if(st.tradePass >= passes){
@@ -776,7 +810,7 @@ function scheduler(){
     }
     // RAMP DRILL: 10 loops at tempo → +2 BPM with a fresh count-off →
     // repeat until target reached, then complete (playback continues).
-    if(prev === g.slots.length-1 && st.ramp){
+    if(prev === hi-1 && st.ramp){
       st.rampRound++;
       if(st.rampRound >= 10){
         if(st.bpm >= g.target){
@@ -844,7 +878,8 @@ document.getElementById('trade').onclick=function(){
   st.tradePass=0; st.tradePhase='app'; updateTradeUI();
 };
 document.querySelectorAll('#stages button').forEach(b=>
-  b.onclick=()=> setStage(+b.dataset.st));
+  b.onclick=()=> toggleVoice(b.dataset.v));
+document.getElementById('half').onclick=cycleHalf;
 
 // Teach panel — opened by tapping the groove name or the How-To button
 const pT=document.getElementById('panelT');
