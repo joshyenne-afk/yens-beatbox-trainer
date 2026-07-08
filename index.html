@@ -16,8 +16,11 @@
     touch-action:manipulation}
   button{-webkit-appearance:none;appearance:none;cursor:pointer;font-family:inherit;
     touch-action:manipulation;color:inherit}
-  html,body{height:100%}
+  /* 100dvh = the VISIBLE viewport on iOS (excludes Safari's toolbars),
+     so the bottom transport never hides behind the browser chrome */
+  html{height:100%}
   body{
+    height:100vh; height:100dvh; max-height:100dvh;
     background:var(--bg); color:var(--txt);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
     overflow:hidden; user-select:none; -webkit-user-select:none;
@@ -73,7 +76,7 @@
   /* the karaoke is THE element — it gets the space and never gets buried */
   .stage{
     flex:1 1 auto; display:flex; align-items:center; justify-content:center;
-    padding:10px 12px; min-height:40vh; overflow-y:auto; -webkit-overflow-scrolling:touch;
+    padding:10px 12px; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
   }
   .line{
     display:flex; flex-wrap:wrap; gap:10px; align-items:center;
