@@ -636,6 +636,7 @@ function buildLine(){
   line.innerHTML='';
   const aud = audible();
   const [lo,hi] = halfWindow();
+  const frag = document.createDocumentFragment();
   g.slots.forEach((s,i)=>{
     const d=document.createElement('div');
     if(!s){ d.className='syl rest'; d.textContent='·'; }
@@ -646,8 +647,9 @@ function buildLine(){
     }
     if(i<lo || i>=hi) d.classList.add('outside');   // dimmed half
     d.dataset.i=i;
-    line.appendChild(d);
+    frag.appendChild(d);
   });
+  line.appendChild(frag);
 }
 function refreshHeader(){
   const g=curG();
