@@ -10,7 +10,7 @@
     --bg:#0a0a0c; --panel:#15151a; --panel2:#1f1f27;
     --txt:#f4f4f6; --dim:#8a8a96; --line:#2c2c36;
     --kick:#ff5b3a; --snare:#ffd23a; --hat:#3ad6ff; --open:#9b8cff; --rest:#3a3a44;
-    --go:#27d07a; --stop:#ff4d4d; --accent:#ffb43a;
+    --go:#27d07a; --stop:#ff4d4d; --accent:#ffb43a; --breath:#5ce1c6;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;
     touch-action:manipulation}
@@ -94,6 +94,7 @@
   }
   .syl.k{border-color:var(--kick)} .syl.s{border-color:var(--snare)}
   .syl.h{border-color:var(--hat)} .syl.o{border-color:var(--open)}
+  .syl.b{border-color:var(--breath)}
   .syl.rest{opacity:.3; min-width:24px; padding:13px 6px; font-weight:600}
   /* velocity cue is weight + opacity only (no size delta) so the
      responsive clamp stays intact and rows never shift */
@@ -104,6 +105,7 @@
   }
   .syl.on.k{background:var(--kick)} .syl.on.s{background:var(--snare)}
   .syl.on.h{background:var(--hat)} .syl.on.o{background:var(--open)}
+  .syl.on.b{background:var(--breath)}
   .syl.muted{opacity:.16}
   /* dimmed half-loop slots (still visible for context, clearly inactive) */
   .syl.outside{opacity:.12}
@@ -136,6 +138,19 @@
     border:1px solid var(--line); background:var(--panel2); color:var(--txt); border-radius:16px;
   }
   .tbtn:active{background:var(--panel)}
+
+  /* ---- Drill stage readout ---- */
+  .drillinfo{
+    margin-top:10px; padding:14px 16px; border-radius:16px;
+    background:var(--panel); border:1px solid var(--line); text-align:center;
+  }
+  .drillinfo .dstage{font-size:20px; font-weight:900; color:var(--breath)}
+  .drillinfo .dprog{font-size:14px; color:var(--dim); font-weight:700; margin-top:4px}
+  .drillinfo .dbar{height:6px; border-radius:3px; background:var(--panel2); margin-top:10px;
+                   overflow:hidden}
+  .drillinfo .dbar i{display:block; height:100%; background:var(--breath); width:0%;
+                     transition:width .12s linear}
+  .drillinfo.done .dstage{color:var(--go)}
 
   /* ---- Stage (build-up) selector ---- */
   .stages{display:flex; gap:8px; margin-top:10px}
@@ -177,6 +192,9 @@
              background:var(--panel); border:1px solid var(--line)}
   .lg.k{border-color:var(--kick)} .lg.s{border-color:var(--snare)}
   .lg.h{border-color:var(--hat)} .lg.o{border-color:var(--open)}
+  .lg.b{border-color:var(--breath)}
+  .teach .stlist{margin:8px 0 14px 22px}
+  .teach .stlist li{font-size:16px; line-height:1.6; color:var(--txt)}
   .toggle{display:flex; align-items:center; justify-content:space-between;
           padding:18px; background:var(--panel); border:1px solid var(--line);
           border-radius:14px; margin-bottom:12px; font-size:18px; font-weight:700}
@@ -190,7 +208,7 @@
 <body>
 
 <header>
-  <div class="logo">YEN's <span>Beatbox</span> <small class="ver">v3</small></div>
+  <div class="logo">YEN's <span>Beatbox</span> <small class="ver">v4</small></div>
   <button class="menu-btn" id="btnTeach">How&nbsp;To</button>
 </header>
 
@@ -209,6 +227,12 @@
 
   <div class="transport">
     <button class="play" id="play">▶ &nbsp;PLAY</button>
+
+    <div class="drillinfo hide" id="drillInfo">
+      <div class="dstage" id="dStage">—</div>
+      <div class="dprog" id="dProg"></div>
+      <div class="dbar"><i id="dBar"></i></div>
+    </div>
 
     <div class="stages" id="stages">
       <button class="sel" data-v="kick">Kick</button>
@@ -262,7 +286,7 @@
    Build-up stages filter by sound, not by re-authoring.
    ============================================================ */
 
-const SND = { kick:'k', snare:'s', hat:'h', open:'o' };
+const SND = { kick:'k', snare:'s', hat:'h', open:'o', breath:'b' };
 
 /* VELOCITY (tri-state per slot):
    null = off / silence / breath
@@ -276,7 +300,119 @@ function S(snd, syl, vel){ return { snd, syl, vel: vel || 2 }; }
 function G(snd, syl){ return { snd, syl, vel: 1 }; }
 const _ = null; // silence / breath
 
-const GROOVES = [
+/* ============================================================
+   DRILLS — first-class, generated, staged.
+   A drill is a groove whose slots are PRODUCED per stage instead of
+   authored once. Stages auto-advance after N passes with a count-off,
+   so a drill trains a SKILL over time rather than replaying a pattern.
+   Every drill declares: stages[{ label, grid, passes, gen() }]
+   ============================================================ */
+const SYL = { kick:{loud:'B',soft:'b'}, snare:{loud:'K',soft:'k'},
+              hat:{loud:'T',soft:'t'} };
+
+/* D1 — ISOLATION (Wawad): one sound, one subdivision, climb the ladder.
+   grid 4/8/12/16 = quarters / 8ths / triplets / 16ths at the same tempo. */
+function isoStages(snd){
+  const fill=(n)=>{ const a=[]; for(let i=0;i<n;i++) a.push(S(snd,SYL[snd].loud)); return a; };
+  return [
+    {label:'Quarters', grid:4,  passes:8, gen:()=>fill(4)},
+    {label:'8ths',     grid:8,  passes:8, gen:()=>fill(8)},
+    {label:'Triplets', grid:12, passes:8, gen:()=>fill(12)},
+    {label:'16ths',    grid:16, passes:8, gen:()=>fill(16)}
+  ];
+}
+
+/* D2 — ACCENT WALK: one loud hit in a field of ghosts, moving one 16th
+   per stage through the whole bar. This is the dynamic-control skill that
+   Country Train / Funky Drummer / Superstition / Purdie all depend on. */
+const POSNAME=['1','e','&','a','2','e','&','a','3','e','&','a','4','e','&','a'];
+function walkStages(snd){
+  const out=[];
+  for(let p=0;p<16;p++){
+    out.push({ label:'Accent on '+POSNAME[p], grid:16, passes:2,
+      gen:()=>{ const a=[]; for(let i=0;i<16;i++)
+          a.push(i===p ? S(snd,SYL[snd].loud) : G(snd,SYL[snd].soft));
+        return a; } });
+  }
+  return out;
+}
+
+/* D4 — INDEPENDENCE: a continuous ghost roll with a backbeat punching OUT
+   of it without the roll flinching. Densify the roll before you add the kick. */
+function indepStages(){
+  const roll16=(i)=> G('snare', i%2 ? 'g' : 'd');
+  return [
+    {label:'Roll · 8ths', grid:16, passes:8, gen:()=>{
+      const a=[]; for(let i=0;i<16;i++)
+        a.push((i===4||i===12) ? S('snare','KA') : (i%2===0 ? roll16(i) : null));
+      return a; }},
+    {label:'Roll · 16ths', grid:16, passes:8, gen:()=>{
+      const a=[]; for(let i=0;i<16;i++)
+        a.push((i===4||i===12) ? S('snare','KA') : roll16(i));
+      return a; }},
+    {label:'Roll + Kick 1&3', grid:16, passes:8, gen:()=>{
+      const a=[]; for(let i=0;i<16;i++)
+        a.push((i===4||i===12) ? S('snare','KA')
+             : (i===0||i===8)  ? S('kick','B')
+             : roll16(i));
+      return a; }}
+  ];
+}
+
+/* D5 — PHASE 0 BREATH. Box 4·4·4·4 at 60 BPM = one second per count.
+   Non-negotiable, ungated, and first in the list. */
+function breathStages(){
+  const ph=(w)=>[S('breath',w), G('breath','2'), G('breath','3'), G('breath','4')];
+  return [{ label:'Box 4·4·4·4', grid:4, passes:6,
+    gen:()=>[].concat(ph('IN'), ph('HOLD'), ph('OUT'), ph('HOLD')) }];
+}
+
+const DRILLS = [
+  { name:"Breath · Box 4×4", style:"Drills · phase 0", start:60, target:60,
+    drill:{stages:breathStages()},
+    teach:{
+      what:"Phase 0. Diaphragmatic breathing is the floor under every other thing in this app — it's what stops a take from dying at bar 9. One second per count at 60 BPM: four in, four hold, four out, four hold. Six cycles, about a minute and a half.",
+      how:"Hand above the chest, hand below the ribs. Breathe so the TOP hand stays still — if your shoulders rise you're breathing into the chest and you'll run out of air under a groove. Do this before you drill anything else."
+    }},
+  { name:"Isolation · Kick", style:"Drills · isolation", start:60, target:96,
+    drill:{stages:isoStages('kick')},
+    teach:{
+      what:"The Wawad discipline: ONE sound, on every click, for eight bars — then double it, then triplet it, then 16ths, all at the same tempo. Four stages, auto-advancing with a count-off between.",
+      how:"Voiceless B — whisper \"boo\" and keep only the consonant. Cheeks firm, no puffing. Evenness beats speed: if the 16ths turn ragged, drop the tempo rather than muscling through. This is bodybuilding, not performance."
+    }},
+  { name:"Isolation · Snare", style:"Drills · isolation", start:60, target:96,
+    drill:{stages:isoStages('snare')},
+    teach:{
+      what:"Same ladder on the snare. Quarters → 8ths → triplets → 16ths, eight bars each, one tempo throughout.",
+      how:"Pick ONE snare and stay with it for the whole ladder — K-snare or Pf, not a mix. The triplet stage is the one that exposes you; most people's snare gets thinner as it gets faster. Keep the weight identical from the first hit to the last."
+    }},
+  { name:"Isolation · Hat", style:"Drills · isolation", start:60, target:120,
+    drill:{stages:isoStages('hat')},
+    teach:{
+      what:"The hi-hat ladder — the endurance sound. 16ths on the hat are the conveyor belt under Superstition and Funky Drummer, and they have to stay even for minutes, not bars.",
+      how:"Tongue tip on the ridge behind the top teeth, minimal air. The failure mode is getting LOUDER as you tire — if that happens, stop and restart slower. Quiet and even is the whole target."
+    }},
+  { name:"Accent Walk · Snare", style:"Drills · dynamics", start:70, target:96,
+    drill:{stages:walkStages('snare')},
+    teach:{
+      what:"The single highest-leverage drill here. Ghost 16ths across the whole bar with exactly ONE loud hit, and that hit moves one 16th every two bars until it has visited all sixteen positions. Thirty-two bars total.",
+      how:"Do not push the accent — RELAX the ghosts. If someone across the room can hear your ghosts they're too loud. When the accent lands on an 'e' or an 'a' your body will want to shift the whole bar with it; don't let it. Five of the grooves in this app are gated behind this skill."
+    }},
+  { name:"Accent Walk · Kick", style:"Drills · dynamics", start:70, target:92,
+    drill:{stages:walkStages('kick')},
+    teach:{
+      what:"The same accent walk on the kick. Harder than the snare version because a ghost kick is nearly pure thump with no click to hide behind.",
+      how:"Ghost kicks come from the mouth, not the lungs — almost no air. The loud one gets the full glottal push. This is the move behind the Funk: On the One slingshot and the Superstition 'a of 2' push."
+    }},
+  { name:"Independence · Train Roll", style:"Drills · independence", start:64, target:100,
+    drill:{stages:indepStages()},
+    teach:{
+      what:"Build the Bakersfield train beat properly, in three stages: an 8th-note ghost roll with the backbeat on 2 & 4, then the same at 16ths, then add the kick on 1 & 3. Eight bars each.",
+      how:"The roll is an alternating front/back tongue \"d-g-d-g\". The skill is popping the KA out of it WITHOUT the roll hiccuping around the accent — record yourself and listen specifically to the two 16ths on either side of the backbeat. That's where it breaks. Weeks, not minutes."
+    }}
+];
+
+const CANON = [
   {
     name:"Boots & Cats", style:"Foundation", grid:16,
     start:80, target:104,
@@ -518,15 +654,38 @@ const GROOVES = [
   }
 ];
 
+/* Drills lead the list so "Drills" is the first genre tab and Breath sits
+   at the top of it. Nothing is gated — the app still OPENS on Boots & Cats. */
+const GROOVES = DRILLS.concat(CANON);
+function isDrill(g){ return !!(g && g.drill); }
+function applyStage(g, si){
+  const s = g.drill.stages[si];
+  g.grid = s.grid; g.slots = s.gen(); g._stageLabel = s.label; g._passes = s.passes;
+}
+
 /* ============================================================
    AUDIO ENGINE — acoustic-leaning synthesis, tuned soft for car
    ============================================================ */
-let AC = null;
+let AC = null, BUS = null;
+/* MASTER BUS. Every voice routes here — never straight to destination.
+   Dense 16th grooves (Superstition, Country Train, the isolation ladders)
+   sum well past 1.0 and clip hard on a phone speaker without this. */
 function audio(){
-  if(!AC){ AC = new (window.AudioContext||window.webkitAudioContext)(); }
+  if(!AC){
+    AC = new (window.AudioContext||window.webkitAudioContext)();
+    const comp = AC.createDynamicsCompressor();
+    comp.threshold.value = -15;   // catch the peaks, not the body
+    comp.knee.value      = 14;
+    comp.ratio.value     = 4;
+    comp.attack.value    = 0.003;
+    comp.release.value   = 0.18;
+    BUS = AC.createGain(); BUS.gain.value = 0.8;
+    BUS.connect(comp); comp.connect(AC.destination);
+  }
   if(AC.state === 'suspended') AC.resume();
   return AC;
 }
+function bus(){ audio(); return BUS; }
 let noiseBuf = null;
 function noise(){
   if(noiseBuf) return noiseBuf;
@@ -551,9 +710,16 @@ function kick(t, v){
   // beater click scales with v^2 — a ghost kick is almost pure thump
   const c=ac.createBufferSource(), cf=ac.createBiquadFilter(), cg=ac.createGain();
   c.buffer=noise(); cf.type='bandpass'; cf.frequency.value=1800;
-  c.connect(cf); cf.connect(cg); cg.connect(ac.destination);
+  c.connect(cf); cf.connect(cg); cg.connect(bus());
   env(cg, t, 0.001, 0.17*v*v + 0.005, 0.02); c.start(t); c.stop(t+0.05);
-  o.connect(g); g.connect(ac.destination);
+  // HF click layer (~3.4k). A phone speaker reproduces nothing near 48Hz,
+  // so without this the kick is inaudible on the device you actually practice
+  // with. The ear infers the fundamental from the transient.
+  const h=ac.createBufferSource(), hf=ac.createBiquadFilter(), hg=ac.createGain();
+  h.buffer=noise(); hf.type='bandpass'; hf.frequency.value=3400; hf.Q.value=1.1;
+  h.connect(hf); hf.connect(hg); hg.connect(bus());
+  env(hg, t, 0.0008, 0.12*v*v + 0.004, 0.014); h.start(t); h.stop(t+0.04);
+  o.connect(g); g.connect(bus());
   env(g, t, 0.004, 0.95*v + 0.04, 0.16); o.start(t); o.stop(t+0.22);
 }
 function snare(t, v, brush){
@@ -561,14 +727,14 @@ function snare(t, v, brush){
   // tonal body — present even on ghosts (the "thump")
   const o=ac.createOscillator(), og=ac.createGain();
   o.type='triangle'; o.frequency.value= brush?210:185;
-  o.connect(og); og.connect(ac.destination);
+  o.connect(og); og.connect(bus());
   env(og, t, 0.002, (brush?0.2:0.34)*v + 0.01, brush?0.12:0.14);
   o.start(t); o.stop(t+0.2);
   // crack/wash scales v^1.8 — ghost snares are thump with little crack
   const n=ac.createBufferSource(), f=ac.createBiquadFilter(), ng=ac.createGain();
   n.buffer=noise(); f.type= brush?'lowpass':'highpass';
   f.frequency.value= brush?3800:1500;
-  n.connect(f); f.connect(ng); ng.connect(ac.destination);
+  n.connect(f); f.connect(ng); ng.connect(bus());
   env(ng, t, 0.002, (brush?0.34:0.62)*Math.pow(v,1.8) + 0.004, brush?0.18:0.16);
   n.start(t); n.stop(t+0.25);
 }
@@ -578,22 +744,30 @@ function hat(t, v, open){
   n.buffer=noise(); f.type='highpass'; f.frequency.value=8200;
   // gentle lowpass shelf so it isn't an ice-pick in a car
   const lp=ac.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=15000;
-  n.connect(f); f.connect(lp); lp.connect(g); g.connect(ac.destination);
+  n.connect(f); f.connect(lp); lp.connect(g); g.connect(bus());
   // ghost closed-hat decays faster — a stick barely grazing the metal
   const dec = open ? 0.28*(0.5+0.5*v) : 0.045*(0.3+0.7*v);
   env(g, t, 0.001, (open?0.4:0.34)*v + 0.004, dec);
   n.start(t); n.stop(t+(open ? 0.4*v+0.05 : 0.09));
+}
+// Soft pitched tone for the breath pacer — phase changes ring higher.
+function tone(t, v){
+  const ac=audio(); const o=ac.createOscillator(), g=ac.createGain();
+  o.type='sine'; o.frequency.value = v>0.5 ? 784 : 523;
+  o.connect(g); g.connect(bus());
+  env(g, t, 0.006, 0.10*v + 0.03, 0.22); o.start(t); o.stop(t+0.30);
 }
 function voice(snd, t, v, brush){
   if(snd==='kick') kick(t,v);
   else if(snd==='snare') snare(t, v, brush);
   else if(snd==='hat') hat(t,v,false);
   else if(snd==='open') hat(t,v,true);
+  else if(snd==='breath') tone(t,v);
 }
 function click(t, hi){
   const ac=audio(); const o=ac.createOscillator(), g=ac.createGain();
   o.type='square'; o.frequency.value= hi?2000:1200;
-  o.connect(g); g.connect(ac.destination);
+  o.connect(g); g.connect(bus());
   env(g,t,0.001,0.25,0.04); o.start(t); o.stop(t+0.06);
 }
 
@@ -604,12 +778,31 @@ const st = {
   gi:0, bpm:90, playing:false, ramp:false, rampRound:0,
   on:{kick:true, snare:true, hat:true}, half:0,
   trade:false, tradePass:0, tradePhase:'app',
+  drill:false, drillStage:0, drillPass:0, drillDone:false,
   step:0, nextTime:0, timer:null, countIn:false, countStep:0,
   q:[]
 };
+/* Lookahead. 0.12s was too tight: browsers throttle background intervals to
+   ~1s, so a dimming screen mid-loop caused audible dropouts. */
+const LOOKAHEAD = 0.25;
+
+/* Keep the screen awake while practicing — you can't tap it, your mouth is busy. */
+let wakeLock = null;
+async function screenOn(){
+  try{ if('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); }
+  catch(e){ /* denied or unsupported — non-fatal */ }
+}
+function screenOff(){
+  try{ if(wakeLock){ wakeLock.release(); wakeLock=null; } }catch(e){}
+}
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState==='visible' && st.playing && !wakeLock) screenOn();
+});
 // Which sounds are audible, derived from independent voice toggles.
 // The Hat toggle governs both closed and open hat.
 function audible(){
+  // Drills are authored as a whole — voice toggles don't apply to them.
+  if(st.drill) return ['kick','snare','hat','open','breath'];
   const a=[];
   if(st.on.kick) a.push('kick');
   if(st.on.snare) a.push('snare');
@@ -626,10 +819,10 @@ function halfWindow(){
   return [0, len];
 }
 function curG(){ return GROOVES[st.gi]; }
-function stepDur(){
-  const g=curG();
-  return g.grid===12 ? (60/st.bpm/3) : (60/st.bpm/4);
-}
+/* Generalized for any grid that divides a 4/4 bar: 4=quarters, 8=8ths,
+   12=triplets, 16=16ths. (Was hard-coded to 12-vs-16 only.) */
+function stepDur(){ return 60/st.bpm/(curG().grid/4); }
+function stepsPerBeat(){ return curG().grid/4; }
 
 function buildLine(){
   const g=curG(), line=document.getElementById('line');
@@ -652,11 +845,13 @@ function buildLine(){
 function refreshHeader(){
   const g=curG();
   document.getElementById('gName').textContent=g.name;
-  document.getElementById('gMeta').textContent =
-     g.style+'  ·  '+(g.grid===12?'shuffle/triplet':'straight')+
-     '  ·  target '+g.target;
+  document.getElementById('gMeta').textContent = st.drill
+     ? g.style+'  ·  '+g.drill.stages.length+' stage'+(g.drill.stages.length>1?'s':'')
+     : g.style+'  ·  '+(g.grid===12?'shuffle/triplet':'straight')+
+       '  ·  target '+g.target;
   document.getElementById('bpm').textContent=st.bpm;
   const hint=document.getElementById('tHint');
+  if(st.drill){ hint.textContent='drill tempo'; return; }
   if(st.ramp){ updateRampUI(); return; }
   hint.textContent = st.bpm<g.target ? ('build to '+g.target) :
                      (st.bpm>g.target ? 'above target' : 'at target');
@@ -671,6 +866,30 @@ function rampDone(){
   const r=document.getElementById('ramp');
   r.textContent='Ramp: Done ✓'; r.style.background=''; r.style.color='';
   document.getElementById('tHint').textContent='Done — at target tempo!';
+}
+/* Drill readout: which stage, how far through it, and a progress bar. */
+function updateDrillUI(){
+  const box=document.getElementById('drillInfo');
+  if(!st.drill){ box.classList.add('hide'); return; }
+  const g=curG(), n=g.drill.stages.length, s=g.drill.stages[st.drillStage];
+  box.classList.remove('hide');
+  box.classList.toggle('done', st.drillDone);
+  document.getElementById('dStage').textContent =
+    st.drillDone ? 'Complete ✓' : s.label;
+  document.getElementById('dProg').textContent = st.drillDone
+    ? 'All '+n+' stages done — still looping'
+    : 'Stage '+(st.drillStage+1)+' of '+n+'  ·  pass '+
+      Math.min(st.drillPass+1, s.passes)+' of '+s.passes;
+  const frac = st.drillDone ? 1 :
+    (st.drillStage + st.drillPass/s.passes) / n;
+  document.getElementById('dBar').style.width = Math.round(frac*100)+'%';
+}
+/* Show only the controls that mean something for the current mode. */
+function refreshMode(){
+  const d=st.drill;
+  document.getElementById('stages').classList.toggle('hide', d);
+  document.querySelector('.brow').classList.toggle('hide', d);
+  updateDrillUI();
 }
 // Trade phase flag: LISTEN (app plays) vs YOU — GO (click only, you perform)
 function updateTradeUI(){
@@ -718,9 +937,12 @@ function openPicker(gen){
     const one=(g.teach&&g.teach.what?g.teach.what:'').split(/(?<=[.!?])\s/)[0];
     const b=document.createElement('button');
     if(i===st.gi) b.classList.add('sel');
+    const meta = isDrill(g)
+      ? g.start+' BPM · '+g.drill.stages.length+' stage'+
+        (g.drill.stages.length>1?'s':'')+' · auto-advancing'
+      : g.start+'–'+g.target+' BPM · '+(g.grid===12?'shuffle':'straight');
     b.innerHTML='<div class="gn">'+g.name+'</div>'+
-      '<div class="gm">'+g.start+'–'+g.target+' BPM · '+
-      (g.grid===12?'shuffle':'straight')+'</div>'+
+      '<div class="gm">'+meta+'</div>'+
       '<div class="gd">'+one+'</div>';
     b.onclick=()=>{
       const wasP=st.playing; stop(); setGroove(i);
@@ -736,13 +958,22 @@ function setGroove(i){
   st.gi=(i+GROOVES.length)%GROOVES.length;
   st.bpm=curG().start;
   st.step=0; st.rampRound=0;
+  st.drill=isDrill(curG());
+  if(st.drill){
+    // A drill owns the whole transport — ramp/trade/half would fight its stages.
+    st.drillStage=0; st.drillPass=0; st.drillDone=false;
+    applyStage(curG(), 0);
+    if(st.half) setHalf(0);
+    if(st.ramp) document.getElementById('ramp').click();
+    if(st.trade) document.getElementById('trade').click();
+  }
   st.tradePass=0; st.tradePhase='app'; updateTradeUI();
   // clear a stale "Done ✓" label when ramp isn't active anymore
   if(!st.ramp){
     const rb=document.getElementById('ramp');
     rb.textContent='Ramp: Off'; rb.style.background=''; rb.style.color='';
   }
-  refreshHeader(); buildLine(); refreshGenres();
+  refreshHeader(); buildLine(); refreshGenres(); refreshMode();
 }
 function toggleVoice(v){
   st.on[v]=!st.on[v];
@@ -767,7 +998,7 @@ function cycleHalf(){ setHalf((st.half+1)%3); }
 
 function scheduler(){
   const ac=audio();
-  while(st.nextTime < ac.currentTime + 0.12){
+  while(st.nextTime < ac.currentTime + LOOKAHEAD){
     const g=curG();
     const [lo,hi]=halfWindow();
     if(st.countIn){
@@ -790,7 +1021,7 @@ function scheduler(){
       const brush = (g.name==='Folk Brush' && s.snd==='snare');
       voice(s.snd, st.nextTime, v, brush);
     }
-    if(yourTurn && st.step % (g.grid===12?3:4) === 0)
+    if(yourTurn && st.step % stepsPerBeat() === 0)
       click(st.nextTime, st.step % g.grid === 0);
     st.q.push({t:st.nextTime, i:st.step});
     const prev=st.step;
@@ -807,6 +1038,26 @@ function scheduler(){
         st.tradePhase = st.tradePhase==='app' ? 'you' : 'app';
         updateTradeUI();
       }
+    }
+    // DRILL STAGES: after N passes, advance to the next stage, regenerate the
+    // slots, and count off at the new subdivision. The DOM rebuild is queued as
+    // a marker so it lands with the audio instead of ahead of it.
+    if(prev === hi-1 && st.drill && !st.drillDone){
+      st.drillPass++;
+      const dg=curG(), stage=dg.drill.stages[st.drillStage];
+      if(st.drillPass >= stage.passes){
+        st.drillPass=0;
+        if(st.drillStage+1 < dg.drill.stages.length){
+          st.drillStage++;
+          applyStage(dg, st.drillStage);
+          st.q.push({t:st.nextTime, rebuild:1});
+          st.countIn=true; st.countStep=0; st.step=0;
+          updateDrillUI();
+          continue;
+        }
+        st.drillDone=true;
+      }
+      updateDrillUI();
     }
     // RAMP DRILL: 10 loops at tempo → +2 BPM with a fresh count-off →
     // repeat until target reached, then complete (playback continues).
@@ -831,6 +1082,7 @@ function visual(){
   const ac=audio();
   while(st.q.length && st.q[0].t <= ac.currentTime){
     const e=st.q.shift();
+    if(e.rebuild){ buildLine(); continue; }
     if(e.i!==undefined){
       document.querySelectorAll('.syl.on').forEach(x=>x.classList.remove('on'));
       const el=document.querySelector('.syl[data-i="'+e.i+'"]');
@@ -845,14 +1097,21 @@ function play(){
   st.playing=true; st.countIn=true; st.countStep=0; st.step=0; st.q=[];
   st.rampRound=0; if(st.ramp) updateRampUI();
   st.tradePass=0; st.tradePhase='app'; updateTradeUI();
+  // Restart a drill from stage 1 every time you hit play.
+  if(st.drill){
+    st.drillStage=0; st.drillPass=0; st.drillDone=false;
+    applyStage(curG(), 0); buildLine(); updateDrillUI();
+  }
   st.nextTime=audio().currentTime+0.1;
   const b=document.getElementById('play');
   b.classList.add('playing'); b.innerHTML='■ &nbsp;STOP';
   st.timer=setInterval(scheduler,25);
   requestAnimationFrame(visual);
+  screenOn();
 }
 function stop(){
   st.playing=false; clearInterval(st.timer); st.timer=null;
+  screenOff();
   const b=document.getElementById('play');
   b.classList.remove('playing'); b.innerHTML='▶ &nbsp;PLAY';
   document.querySelectorAll('.syl.on').forEach(x=>x.classList.remove('on'));
@@ -886,13 +1145,21 @@ const pT=document.getElementById('panelT');
 function buildTeach(){
   const g=curG(), t=document.getElementById('teach');
   const used=[...new Set(g.slots.filter(Boolean).map(s=>s.snd))];
-  const lbl={kick:'Kick',snare:'Snare',hat:'Hi-Hat',open:'Open Hat'};
+  const lbl={kick:'Kick',snare:'Snare',hat:'Hi-Hat',open:'Open Hat',breath:'Breath'};
+  const tail = isDrill(g)
+    ? '<h3>The stages</h3><p>Hit play and it runs itself — each stage advances '+
+      'automatically with a count-off between. Tempo is yours to set; the stages '+
+      'are the drill.</p><ol class="stlist">'+
+      g.drill.stages.map(s=>'<li><b>'+s.label+'</b> — '+s.passes+
+        ' pass'+(s.passes>1?'es':'')+'</li>').join('')+'</ol>'
+    : '<h3>The build-up</h3><p>Use the voice buttons: loop <b>Kick</b> alone until '+
+      'it\'s strong, then add <b>Snare</b>, then <b>Hat</b>. Start at '+g.start+
+      ', flip <b>Ramp</b> on, and it walks you to '+g.target+'.</p>';
   t.innerHTML =
     '<h3>'+g.name+'</h3>'+
     '<div class="legend">'+used.map(s=>'<span class="lg '+SND[s]+'">'+lbl[s]+'</span>').join('')+'</div>'+
     '<h3>What it is</h3><p>'+g.teach.what+'</p>'+
-    '<h3>How to learn it</h3><p>'+g.teach.how+'</p>'+
-    '<h3>The build-up</h3><p>Use the stage buttons: loop <b>Kick</b> alone until it\'s strong, then <b>+Snare</b>, then <b>+Hat</b>, then <b>Full</b>. Start at '+g.start+', flip <b>Ramp</b> on, and it walks you to '+g.target+'.</p>';
+    '<h3>How to learn it</h3><p>'+g.teach.how+'</p>'+ tail;
 }
 // tapping the title/genre in the practice view re-opens the picker
 document.getElementById('gName').onclick=()=> openPicker(genreOf(curG()));
@@ -905,9 +1172,9 @@ document.getElementById('closeT').onclick=()=> pT.classList.remove('open');
    embedded YouTube link demoing the technique. Single extra overlay,
    same slide-over pattern as the How-To panel. Not in scope now. */
 
-// init
+// init — drills lead the array, but the app still opens on Boots & Cats.
 buildGenres();
-setGroove(0);
+setGroove(DRILLS.length);
 </script>
 </body>
 </html>
