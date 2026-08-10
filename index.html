@@ -43,6 +43,7 @@
     font-size:17px; font-weight:700; padding:14px 20px; border-radius:14px;
     min-width:118px;
   }
+  .menu-btn.narrow{min-width:0; padding:14px 16px; font-size:16px}
 
   /* ---- Genre tab strip ---- */
   .genres{
@@ -139,6 +140,35 @@
   }
   .tbtn:active{background:var(--panel)}
 
+  /* ---- Take (record one pass, like a looper) ---- */
+  .takebar{margin-top:10px; display:flex; gap:10px; align-items:stretch}
+  .takebar .bigbtn{flex:1}
+  .rec{
+    margin-top:10px; padding:14px 16px; border-radius:16px; text-align:center;
+    background:var(--panel); border:1px solid var(--line);
+  }
+  .rec.live{border-color:var(--stop); background:#2a1013}
+  .rec .rlabel{font-size:19px; font-weight:900; letter-spacing:1px}
+  .rec.live .rlabel{color:var(--stop)}
+  .rec .rsub{font-size:14px; color:var(--dim); font-weight:700; margin-top:4px}
+  .takes{display:flex; gap:8px; margin-top:10px}
+  .takes button{
+    flex:1; height:56px; border:1px solid var(--line); background:var(--panel2);
+    color:var(--txt); font-size:15px; font-weight:800; border-radius:14px;
+  }
+  .takes button.playing{background:var(--go); color:#06120c; border-color:transparent}
+
+  /* ---- Practice log ---- */
+  .logrow{
+    display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+    padding:16px; background:var(--panel); border:1px solid var(--line);
+    border-radius:14px; margin-bottom:10px;
+  }
+  .logrow .ln{font-size:17px; font-weight:800}
+  .logrow .lm{font-size:13px; color:var(--dim); font-weight:700; margin-top:3px}
+  .logrow .lt{font-size:13px; color:var(--accent); font-weight:800; white-space:nowrap}
+  .logtot{font-size:15px; color:var(--dim); font-weight:700; margin:4px 4px 16px}
+
   /* ---- Drill stage readout ---- */
   .drillinfo{
     margin-top:10px; padding:14px 16px; border-radius:16px;
@@ -208,8 +238,11 @@
 <body>
 
 <header>
-  <div class="logo">YEN's <span>Beatbox</span> <small class="ver">v4</small></div>
-  <button class="menu-btn" id="btnTeach">How&nbsp;To</button>
+  <div class="logo">YEN's <span>Beatbox</span> <small class="ver">v5</small></div>
+  <div style="display:flex;gap:8px">
+    <button class="menu-btn narrow" id="btnLog">Log</button>
+    <button class="menu-btn narrow" id="btnTeach">How&nbsp;To</button>
+  </div>
 </header>
 
 <div class="genres" id="genres"></div>
@@ -251,6 +284,15 @@
       <button class="bigbtn" id="ramp">Ramp: Off</button>
       <button class="bigbtn" id="trade">Trade: Off</button>
     </div>
+
+    <div class="takebar" id="takeBar">
+      <button class="bigbtn" id="take">Take: Off</button>
+    </div>
+    <div class="rec hide" id="recBox">
+      <div class="rlabel" id="recLabel">—</div>
+      <div class="rsub" id="recSub"></div>
+      <div class="takes hide" id="takeList"></div>
+    </div>
   </div>
 </main>
 
@@ -261,6 +303,15 @@
     <button class="menu-btn" id="closeG">Close</button>
   </header>
   <div class="panel-body glist" id="glist"></div>
+</div>
+
+<!-- Practice log -->
+<div class="panel" id="panelL">
+  <header>
+    <div class="logo">Practice Log</div>
+    <button class="menu-btn narrow" id="closeL">Done</button>
+  </header>
+  <div class="panel-body" id="loglist"></div>
 </div>
 
 <!-- Teach / How-to panel -->
@@ -772,13 +823,167 @@ function click(t, hi){
 }
 
 /* ============================================================
+   TAKE — record one pass, like a looper.
+   A looper gets take one; there is no second chance and no punch-in.
+   Count off, play exactly N bars, then hear it back with a freshly
+   generated click over it. The click is regenerated rather than reused
+   from the recording, so drift shows up as your take walking away from
+   a grid that didn't move.
+
+   Recording and playback both live on the AudioContext clock (the blob
+   is decoded to an AudioBuffer, not handed to an <audio> element), so
+   take and click are sample-locked on replay.
+   ============================================================ */
+const TAKE_BARS = [0, 1, 2, 4];   // Off / 1 / 2 / 4 bars
+const rec = {
+  stream:null, mr:null, chunks:[], armed:false, live:false,
+  startedAt:0,        // AC.currentTime when the recorder actually fired
+  downbeatAt:0,       // AC.currentTime of bar 1 beat 1
+  barsLeft:0, takes:[], playingIdx:-1, srcNode:null, clickTimers:[]
+};
+async function micReady(){
+  if(rec.stream) return true;
+  try{
+    // Every bit of browser DSP mangles beatbox transients — turn it all off.
+    rec.stream = await navigator.mediaDevices.getUserMedia({audio:{
+      echoCancellation:false, noiseSuppression:false, autoGainControl:false
+    }});
+    return true;
+  }catch(e){ return false; }
+}
+function mrMime(){
+  const want=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'];
+  for(const m of want) if(window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m;
+  return '';
+}
+function recStart(){
+  if(!rec.stream || !window.MediaRecorder) return;
+  rec.chunks=[]; rec.live=true;
+  const mime=mrMime();
+  try{ rec.mr = mime ? new MediaRecorder(rec.stream,{mimeType:mime})
+                     : new MediaRecorder(rec.stream); }
+  catch(e){ rec.live=false; return; }
+  rec.mr.ondataavailable = e=>{ if(e.data && e.data.size) rec.chunks.push(e.data); };
+  rec.mr.onstart = ()=>{ rec.startedAt = audio().currentTime; };
+  rec.mr.onstop  = ()=> recFinish();
+  rec.mr.start();
+}
+function recStop(){
+  if(rec.mr && rec.mr.state !== 'inactive'){ try{ rec.mr.stop(); }catch(e){} }
+  rec.live=false;
+}
+async function recFinish(){
+  if(!rec.chunks.length){ updateTakeUI(); return; }
+  const blob=new Blob(rec.chunks,{type:rec.chunks[0].type||'audio/webm'});
+  try{
+    const buf = await audio().decodeAudioData(await blob.arrayBuffer());
+    rec.takes.unshift({
+      buf,
+      // seconds from the top of the recording to bar 1 beat 1
+      offset: Math.max(0, rec.downbeatAt - rec.startedAt),
+      bars: rec.tookBars, bpm: rec.tookBpm, grid: rec.tookGrid,
+      name: rec.tookName, at: Date.now()
+    });
+    rec.takes = rec.takes.slice(0,3);
+    logAdd('take', rec.tookName+' · '+rec.tookBars+' bar'+(rec.tookBars>1?'s':''), rec.tookBpm);
+  }catch(e){ /* undecodable — drop it rather than surface a broken take */ }
+  updateTakeUI();
+}
+function stopTakePlayback(){
+  if(rec.srcNode){ try{ rec.srcNode.stop(); }catch(e){} rec.srcNode=null; }
+  rec.clickTimers.forEach(clearTimeout); rec.clickTimers=[];
+  rec.playingIdx=-1;
+}
+function playTake(i){
+  const t=rec.takes[i]; if(!t) return;
+  if(rec.playingIdx===i){ stopTakePlayback(); updateTakeUI(); return; }
+  stopTakePlayback();
+  const ac=audio(), t0=ac.currentTime+0.08;
+  const src=ac.createBufferSource(); src.buffer=t.buf;
+  src.connect(bus()); src.start(t0); rec.srcNode=src;
+  rec.playingIdx=i;
+  // Regenerate the grid rather than trusting whatever bled into the mic.
+  const beat=60/t.bpm, beats=t.bars*4;
+  for(let b=0;b<=beats;b++) click(t0 + t.offset + b*beat, b%4===0);
+  src.onended=()=>{ if(rec.playingIdx===i){ rec.playingIdx=-1; updateTakeUI(); } };
+  updateTakeUI();
+}
+function updateTakeUI(){
+  const box=document.getElementById('recBox'),
+        list=document.getElementById('takeList');
+  const showBar = !st.drill;
+  document.getElementById('takeBar').classList.toggle('hide', !showBar);
+  // Arming a take collapses the other modes — a take is one clean pass,
+  // and half-loop / ramp / trade all reshape the bar under it.
+  document.querySelector('.brow').classList.toggle('hide', st.drill || st.takeBars>0);
+  if(!showBar || (!st.takeBars && !rec.takes.length)){ box.classList.add('hide'); return; }
+  box.classList.remove('hide');
+  box.classList.toggle('live', rec.live);
+  document.getElementById('recLabel').textContent =
+    rec.live ? '● RECORDING' : (st.takeBars ? 'Armed — '+st.takeBars+' bar'+(st.takeBars>1?'s':'') : 'Takes');
+  document.getElementById('recSub').textContent =
+    rec.live ? (rec.barsLeft+' bar'+(rec.barsLeft===1?'':'s')+' left')
+             : (st.takeBars ? 'Hit play: 4-count, then it\'s on you.' : '');
+  list.classList.toggle('hide', !rec.takes.length);
+  list.innerHTML='';
+  rec.takes.forEach((t,i)=>{
+    const b=document.createElement('button');
+    b.className = rec.playingIdx===i ? 'playing' : '';
+    b.textContent = (rec.playingIdx===i?'■ ':'▶ ')+t.bars+' bar · '+t.bpm;
+    b.onclick=()=>playTake(i);
+    list.appendChild(b);
+  });
+}
+
+/* ============================================================
+   PRACTICE LOG — a record, not a gate. What you drilled, how fast,
+   how long. Local only; nothing is unlocked or withheld by it.
+   ============================================================ */
+const LOGKEY='ybt.log.v1';
+function logRead(){
+  try{ return JSON.parse(localStorage.getItem(LOGKEY)||'[]'); }catch(e){ return []; }
+}
+function logAdd(kind, label, bpm, secs){
+  try{
+    const l=logRead();
+    l.unshift({kind,label,bpm,secs:secs||0,at:Date.now()});
+    localStorage.setItem(LOGKEY, JSON.stringify(l.slice(0,200)));
+  }catch(e){ /* private mode — silently skip */ }
+}
+function buildLog(){
+  const l=logRead(), wrap=document.getElementById('loglist');
+  if(!l.length){ wrap.innerHTML='<p class="logtot">Nothing logged yet. '+
+    'Finish a drill, a tempo ramp, or a take and it lands here.</p>'; return; }
+  const day=86400000, now=Date.now();
+  const today=l.filter(e=>new Date(e.at).toDateString()===new Date().toDateString());
+  const week=l.filter(e=>now-e.at < 7*day);
+  const mins=(a)=>Math.round(a.reduce((s,e)=>s+(e.secs||0),0)/60);
+  wrap.innerHTML='<p class="logtot">Today: '+today.length+' item'+(today.length===1?'':'s')+
+    (mins(today)?' · '+mins(today)+' min':'')+
+    '  ·  Last 7 days: '+week.length+(mins(week)?' · '+mins(week)+' min':'')+'</p>'+
+    l.slice(0,60).map(e=>{
+      const d=new Date(e.at);
+      const when=d.toDateString()===new Date().toDateString()
+        ? d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})
+        : d.toLocaleDateString([], {month:'short',day:'numeric'});
+      const tag={drill:'DRILL',ramp:'RAMP',take:'TAKE',session:'SESSION'}[e.kind]||'';
+      return '<div class="logrow"><div><div class="ln">'+e.label+'</div>'+
+        '<div class="lm">'+tag+(e.bpm?' · '+e.bpm+' BPM':'')+
+        (e.secs?' · '+Math.round(e.secs/60)+' min':'')+'</div></div>'+
+        '<div class="lt">'+when+'</div></div>';
+    }).join('');
+}
+
+/* ============================================================
    SCHEDULER + STATE
    ============================================================ */
 const st = {
   gi:0, bpm:90, playing:false, ramp:false, rampRound:0,
   on:{kick:true, snare:true, hat:true}, half:0,
   trade:false, tradePass:0, tradePhase:'app',
-  drill:false, drillStage:0, drillPass:0, drillDone:false,
+  drill:false, drillStage:0, drillPass:0, drillDone:false, startedAt:0,
+  takeBars:0, takeLive:false,
+  session:null, sessionI:0,
   step:0, nextTime:0, timer:null, countIn:false, countStep:0,
   q:[]
 };
@@ -889,7 +1094,7 @@ function refreshMode(){
   const d=st.drill;
   document.getElementById('stages').classList.toggle('hide', d);
   document.querySelector('.brow').classList.toggle('hide', d);
-  updateDrillUI();
+  updateDrillUI(); updateTakeUI();
 }
 // Trade phase flag: LISTEN (app plays) vs YOU — GO (click only, you perform)
 function updateTradeUI(){
@@ -932,6 +1137,16 @@ function openPicker(gen){
   const idxs=genreIdx(gen); if(!idxs.length) return;
   document.getElementById('gpTitle').textContent=gen+' grooves';
   const wrap=document.getElementById('glist'); wrap.innerHTML='';
+  // One-tap run of the whole drill set, hands free.
+  if(gen==='Drills'){
+    const sb=document.createElement('button');
+    sb.innerHTML='<div class="gn">▶ Run the full session</div>'+
+      '<div class="gm">~9 min · 5 drills · hands free</div>'+
+      '<div class="gd">Breath, both isolation ladders, the accent walk, then the '+
+      'train roll — back to back with no decisions to make.</div>';
+    sb.onclick=()=>{ pG.classList.remove('open'); startSession(); };
+    wrap.appendChild(sb);
+  }
   idxs.forEach(i=>{
     const g=GROOVES[i];
     const one=(g.teach&&g.teach.what?g.teach.what:'').split(/(?<=[.!?])\s/)[0];
@@ -945,7 +1160,7 @@ function openPicker(gen){
       '<div class="gm">'+meta+'</div>'+
       '<div class="gd">'+one+'</div>';
     b.onclick=()=>{
-      const wasP=st.playing; stop(); setGroove(i);
+      const wasP=st.playing; endSession(); stop(); setGroove(i);
       pG.classList.remove('open'); if(wasP)play();
     };
     wrap.appendChild(b);
@@ -1002,26 +1217,42 @@ function scheduler(){
     const g=curG();
     const [lo,hi]=halfWindow();
     if(st.countIn){
-      const beats = g.grid===12?4:4;
+      const beats = 4;
+      // Arm the recorder on the first count so it's already rolling by the
+      // downbeat; MediaRecorder.start() is not instantaneous.
+      if(st.countStep===0 && st.takeBars && !rec.live) recStart();
       click(st.nextTime, st.countStep===0);
       st.q.push({t:st.nextTime, count:st.countStep});
       st.countStep++;
       st.nextTime += 60/st.bpm; // count-in in quarter notes
-      if(st.countStep>=beats){ st.countIn=false; st.countStep=0; st.step=lo; }
+      if(st.countStep>=beats){
+        st.countIn=false; st.countStep=0; st.step=lo;
+        if(st.takeBars && rec.live){
+          rec.downbeatAt = st.nextTime;   // bar 1, beat 1
+          rec.barsLeft = st.takeBars;
+          rec.tookBars = st.takeBars; rec.tookBpm = st.bpm;
+          rec.tookGrid = g.grid;      rec.tookName = g.name;
+          st.takeLive = true;
+          st.q.push({t:st.nextTime, take:1});
+        }
+      }
       continue;
     }
     const s=g.slots[st.step];
     const aud=audible();
     // TRADE: during the 'you' phase the app goes silent (Josh performs);
     // a quarter-note click keeps time and the karaoke keeps prompting.
-    const yourTurn = st.trade && st.tradePhase==='you';
+    // TAKE: the app is completely silent for the length of the take — no
+    // groove, no click. That's the looper condition. The grid comes back
+    // on playback, so drift has something honest to be measured against.
+    const yourTurn = (st.trade && st.tradePhase==='you') || st.takeLive;
     if(s && aud.indexOf(s.snd)!==-1 && !yourTurn){
       // velocity comes from the slot now: ghost(1)≈0.36, accent(2)=1.0
       const v = (s.vel===1) ? 0.36 : 1.0;
       const brush = (g.name==='Folk Brush' && s.snd==='snare');
       voice(s.snd, st.nextTime, v, brush);
     }
-    if(yourTurn && st.step % stepsPerBeat() === 0)
+    if(yourTurn && !st.takeLive && st.step % stepsPerBeat() === 0)
       click(st.nextTime, st.step % g.grid === 0);
     st.q.push({t:st.nextTime, i:st.step});
     const prev=st.step;
@@ -1037,6 +1268,18 @@ function scheduler(){
         st.tradePass = 0;
         st.tradePhase = st.tradePhase==='app' ? 'you' : 'app';
         updateTradeUI();
+      }
+    }
+    // TAKE: count down whole bars, then stop the transport and the recorder
+    // a beat after the last hit so the tail isn't clipped.
+    if(st.takeLive && (prev+1) % g.grid === 0){
+      rec.barsLeft--;
+      st.q.push({t:st.nextTime, take:1});
+      if(rec.barsLeft <= 0){
+        const endAt = st.nextTime;
+        st.takeLive = false;
+        setTimeout(()=>{ recStop(); stop(); },
+          Math.max(0,(endAt - ac.currentTime))*1000 + 350);
       }
     }
     // DRILL STAGES: after N passes, advance to the next stage, regenerate the
@@ -1056,6 +1299,13 @@ function scheduler(){
           continue;
         }
         st.drillDone=true;
+        logAdd('drill', dg.name, st.bpm, (Date.now()-st.startedAt)/1000);
+        // In a session, roll straight into the next drill once this one's
+        // final pass has actually sounded.
+        if(st.session){
+          const endAt=st.nextTime;
+          setTimeout(nextSessionStep, Math.max(0,(endAt-ac.currentTime))*1000 + 400);
+        }
       }
       updateDrillUI();
     }
@@ -1066,6 +1316,7 @@ function scheduler(){
       if(st.rampRound >= 10){
         if(st.bpm >= g.target){
           st.ramp=false; rampDone();
+          logAdd('ramp', g.name+' → '+g.target, st.bpm, (Date.now()-st.startedAt)/1000);
         } else {
           st.bpm=Math.min(g.target, st.bpm+2);
           st.rampRound=0;
@@ -1083,6 +1334,7 @@ function visual(){
   while(st.q.length && st.q[0].t <= ac.currentTime){
     const e=st.q.shift();
     if(e.rebuild){ buildLine(); continue; }
+    if(e.take){ updateTakeUI(); continue; }
     if(e.i!==undefined){
       document.querySelectorAll('.syl.on').forEach(x=>x.classList.remove('on'));
       const el=document.querySelector('.syl[data-i="'+e.i+'"]');
@@ -1102,9 +1354,11 @@ function play(){
     st.drillStage=0; st.drillPass=0; st.drillDone=false;
     applyStage(curG(), 0); buildLine(); updateDrillUI();
   }
+  st.takeLive=false; stopTakePlayback(); st.startedAt=Date.now();
   st.nextTime=audio().currentTime+0.1;
   const b=document.getElementById('play');
   b.classList.add('playing'); b.innerHTML='■ &nbsp;STOP';
+  updateTakeUI();
   st.timer=setInterval(scheduler,25);
   requestAnimationFrame(visual);
   screenOn();
@@ -1112,15 +1366,72 @@ function play(){
 function stop(){
   st.playing=false; clearInterval(st.timer); st.timer=null;
   screenOff();
+  if(st.takeLive){ st.takeLive=false; recStop(); }
   const b=document.getElementById('play');
   b.classList.remove('playing'); b.innerHTML='▶ &nbsp;PLAY';
   document.querySelectorAll('.syl.on').forEach(x=>x.classList.remove('on'));
+  updateTakeUI();
 }
+
+/* ============================================================
+   SESSION — the five drills back to back, ~9 minutes, hands free.
+   Not a gate and not a curriculum: just the order that works when you
+   don't want to decide anything. Breath, then the two isolation ladders,
+   then dynamics, then independence.
+   ============================================================ */
+const SESSION_ORDER = ['Breath · Box 4×4','Isolation · Kick','Isolation · Snare',
+                       'Accent Walk · Snare','Independence · Train Roll'];
+function sessionIdxs(){
+  return SESSION_ORDER.map(n=>GROOVES.findIndex(g=>g.name===n)).filter(i=>i>=0);
+}
+function startSession(){
+  st.session = sessionIdxs();
+  if(!st.session.length){ st.session=null; return; }
+  st.sessionI = 0; st.sessionStart = Date.now();
+  stop(); setGroove(st.session[0]); play();
+}
+function nextSessionStep(){
+  if(!st.session) return;
+  st.sessionI++;
+  if(st.sessionI < st.session.length){
+    stop(); setGroove(st.session[st.sessionI]); play();
+  } else {
+    const secs=(Date.now()-st.sessionStart)/1000;
+    logAdd('session','Full session · '+st.session.length+' drills', 0, secs);
+    st.session=null; stop();
+    document.getElementById('dStage').textContent='Session complete ✓';
+    document.getElementById('dProg').textContent=
+      Math.round(secs/60)+' minutes · logged';
+  }
+}
+function endSession(){ st.session=null; }
 
 /* ============================================================
    UI WIRING
    ============================================================ */
-document.getElementById('play').onclick=()=> st.playing?stop():play();
+document.getElementById('play').onclick=()=>{
+  if(st.playing){ endSession(); recStop(); stop(); } else play();
+};
+// TAKE: cycles Off → 1 → 2 → 4 bars. Needs the mic, so it asks on arm.
+document.getElementById('take').onclick=async function(){
+  const next = TAKE_BARS[(TAKE_BARS.indexOf(st.takeBars)+1) % TAKE_BARS.length];
+  if(next && !(await micReady())){
+    this.textContent='Take: no mic';
+    setTimeout(()=>{ this.textContent='Take: Off'; }, 1800);
+    st.takeBars=0; updateTakeUI(); return;
+  }
+  st.takeBars=next;
+  this.textContent='Take: '+(next?next+' bar'+(next>1?'s':''):'Off');
+  this.style.background = next ? 'var(--stop)' : '';
+  this.style.color      = next ? '#1a0606' : '';
+  // A take is one clean pass — the other modes all fight that.
+  if(next){
+    if(st.half) setHalf(0);
+    if(st.ramp) document.getElementById('ramp').click();
+    if(st.trade) document.getElementById('trade').click();
+  }
+  updateTakeUI();
+};
 document.getElementById('tDown').onclick=()=>{ st.bpm=Math.max(40,st.bpm-2); refreshHeader(); };
 document.getElementById('tUp').onclick=()=>{ st.bpm=Math.min(220,st.bpm+2); refreshHeader(); };
 document.getElementById('ramp').onclick=function(){
@@ -1166,6 +1477,11 @@ document.getElementById('gName').onclick=()=> openPicker(genreOf(curG()));
 document.getElementById('gMeta').onclick=()=> openPicker(genreOf(curG()));
 document.getElementById('btnTeach').onclick=()=>{ buildTeach(); pT.classList.add('open'); };
 document.getElementById('closeT').onclick=()=> pT.classList.remove('open');
+
+// Practice log
+const pL=document.getElementById('panelL');
+document.getElementById('btnLog').onclick=()=>{ buildLog(); pL.classList.add('open'); };
+document.getElementById('closeL').onclick=()=> pL.classList.remove('open');
 
 /* TODO (future, do NOT build yet): a "Sounds" reference surface —
    one entry per mouth sound (kick/snare/hat/open + compounds) with an

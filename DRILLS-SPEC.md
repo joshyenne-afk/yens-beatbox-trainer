@@ -1,6 +1,10 @@
-# YEN's Beatbox Trainer — Drill System Spec (v4)
+# YEN's Beatbox Trainer — Drill System Spec
 
-Written against `index.html` @ `cccafbd`. This is the handoff doc for Claude Code.
+Written against `index.html` @ `cccafbd` (v3). **Sections 1–4 are the original
+diagnosis, kept as written.** Section 5 tracks what has since shipped.
+
+**Status:** D1, D2, D4, D5, D6 and the session engine are live in v5. D3 and D7,
+the sound reference surface, and the Worker clock are still open.
 
 ---
 
@@ -196,15 +200,42 @@ is enough.
 
 ## 5. Order of work
 
-1. Master bus + compressor + kick HF click *(one hour, audible immediately)*
-2. Repo cleanup — kill `Untitled`, cruft, decide on `api/chat.js`
-3. D2 Dynamic Split + D1 Isolation as real drill data
-4. D5 Breath, restored to the top of the app and never removed again
-5. Session engine + log
-6. D6 Take (MediaRecorder)
-7. D3, D4, D7
-8. Sound reference surface
-9. Wake lock + Worker clock
+| # | Item | Status |
+|---|---|---|
+| 1 | Master bus + compressor + kick HF click | **done** — v4 |
+| 2 | Repo cleanup (`Untitled` gitlink, root cruft) | **done** — v4 |
+| 3 | D2 Accent Walk + D1 Isolation ladders | **done** — v4 |
+| 4 | D5 Breath, restored to the top and never removed again | **done** — v4 |
+| 5 | D4 Independence (train roll) | **done** — v4 |
+| 6 | Wake lock, 0.25 s lookahead, generalized `stepDur` | **done** — v4 |
+| 7 | D6 Take (MediaRecorder, one clean pass) | **done** — v5 |
+| 8 | Session engine (5 drills, ~9 min, hands free) | **done** — v5 |
+| 9 | Practice log (localStorage, ungated) | **done** — v5 |
+| 10 | D3 Subdivision Ladder as a standalone flip drill | open |
+| 11 | D7 Cold Recall | open |
+| 12 | Sound reference surface (the `TODO` in the source) | open |
+| 13 | Worker-based clock | open |
+| 14 | iOS mute-switch workaround | open |
+
+### Notes on what shipped
+
+**Take** is a transport mode, not a drill entry — it layers over *any* groove,
+which is the point: you record a take of the thing you're actually going to
+loop. Arming it collapses Half/Ramp/Trade, because a take is one clean pass and
+those three all reshape the bar underneath it. The app goes **completely silent**
+for the length of the take — no groove, no click, just the four-count and then
+you. Playback decodes the blob to an `AudioBuffer` and plays it on the
+`AudioContext` clock with a **freshly generated** click grid on top, so drift
+shows up as your take walking away from a grid that never moved. Mic capture
+requests `echoCancellation`, `noiseSuppression` and `autoGainControl` all off —
+every one of them mangles beatbox transients.
+
+**Session** reuses the drill machinery rather than introducing a parallel
+scheduler: it's an ordered list of groove indices that advances on
+`drillDone`. Roughly 9 minutes.
+
+**Log** is deliberately inert — it records, it never gates. Wrapped in
+try/catch so private-mode Safari degrades to a no-op instead of throwing.
 
 Nothing above requires Gemini, Magenta, or a backend. Do those after the drills
 work — a coaching layer over a trainer with no drills is decoration.
