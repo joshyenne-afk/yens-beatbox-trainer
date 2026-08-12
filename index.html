@@ -45,28 +45,19 @@
   }
   .menu-btn.narrow{min-width:0; padding:14px 16px; font-size:16px}
 
-  /* ---- Genre tab strip ---- */
-  .genres{
-    display:flex; gap:8px; overflow-x:auto; -webkit-overflow-scrolling:touch;
-    padding:10px 14px; flex:0 0 auto; border-bottom:1px solid var(--line);
-    scrollbar-width:none;
-  }
-  .genres::-webkit-scrollbar{display:none}
-  .genres button{
-    flex:0 0 auto; background:var(--panel2); border:1px solid var(--line);
-    color:var(--dim); font-size:16px; font-weight:800; padding:12px 18px;
-    border-radius:999px; white-space:nowrap; touch-action:manipulation;
-  }
-  .genres button.sel{background:var(--accent); color:#1a1206; border-color:transparent}
-  .genres button:active{transform:scale(.96)}
-
   /* ---- Main player ---- */
   main{flex:1 1 auto; display:flex; flex-direction:column; min-height:0}
+  /* The whole title block is the groove picker — no permanent tab strip.
+     58px of chrome that was on screen 100% of the time to be used ~1% of it. */
   .now{
-    padding:10px 18px 4px; text-align:center; flex:0 0 auto;
+    display:block; width:100%; padding:10px 18px 6px; text-align:center;
+    flex:0 0 auto; background:transparent; border:none;
   }
-  .now .name{font-size:26px; font-weight:800; line-height:1.05}
-  .now .meta{font-size:14px; color:var(--dim); margin-top:4px; font-weight:600}
+  .now:active{opacity:.6}
+  .now .name{font-size:25px; font-weight:800; line-height:1.05}
+  .now .name .chev{color:var(--accent); font-size:17px; margin-left:5px;
+                   vertical-align:middle}
+  .now .meta{font-size:13px; color:var(--dim); margin-top:4px; font-weight:600}
   /* Trade-mode phase flag — glanceable while driving */
   .phase{margin-top:6px; font-size:20px; font-weight:900; letter-spacing:2px;
     color:var(--dim)}
@@ -107,6 +98,16 @@
   .syl.on.k{background:var(--kick)} .syl.on.s{background:var(--snare)}
   .syl.on.h{background:var(--hat)} .syl.on.o{background:var(--open)}
   .syl.on.b{background:var(--breath)}
+  /* Long (2-bar) grooves get smaller chips so the bar still fits without
+     scrolling — 32 chips at full size needed 6+ rows and got clipped. */
+  .line.dense .syl{
+    font-size:clamp(16px,4.6vw,23px); padding:9px 9px; min-width:34px;
+    border-radius:11px;
+  }
+  .line.dense{gap:7px}
+  .line.dense .syl.rest{min-width:18px; padding:10px 5px}
+  /* A little air at each beat so you can SEE where the beats are */
+  .syl.bt{margin-left:9px}
   .syl.muted{opacity:.16}
   /* dimmed half-loop slots (still visible for context, clearly inactive) */
   .syl.outside{opacity:.12}
@@ -125,8 +126,8 @@
     color:var(--txt); font-size:19px; font-weight:800; border-radius:16px;
   }
   .bigbtn:active{background:var(--panel)}
-  .brow{display:flex; gap:10px; margin-top:10px}
-  .brow .bigbtn{flex:1}
+  .bigbtn.wide{width:100%; margin-top:10px; height:58px}
+  .bigbtn.wide.armed{background:var(--accent); color:#1a1206; border-color:transparent}
   .tempo{
     display:flex; align-items:center; gap:12px; margin-top:10px;
   }
@@ -141,10 +142,8 @@
   .tbtn:active{background:var(--panel)}
 
   /* ---- Take (record one pass, like a looper) ---- */
-  .takebar{margin-top:10px; display:flex; gap:10px; align-items:stretch}
-  .takebar .bigbtn{flex:1}
   .rec{
-    margin-top:10px; padding:14px 16px; border-radius:16px; text-align:center;
+    margin-bottom:10px; padding:14px 16px; border-radius:16px; text-align:center;
     background:var(--panel); border:1px solid var(--line);
   }
   .rec.live{border-color:var(--stop); background:#2a1013}
@@ -171,7 +170,7 @@
 
   /* ---- Drill stage readout ---- */
   .drillinfo{
-    margin-top:10px; padding:14px 16px; border-radius:16px;
+    margin-bottom:10px; padding:14px 16px; border-radius:16px;
     background:var(--panel); border:1px solid var(--line); text-align:center;
   }
   .drillinfo .dstage{font-size:20px; font-weight:900; color:var(--breath)}
@@ -182,22 +181,19 @@
                      transition:width .12s linear}
   .drillinfo.done .dstage{color:var(--go)}
 
-  /* ---- Stage (build-up) selector ---- */
-  .stages{display:flex; gap:8px; margin-top:10px}
-  .stages button{
-    flex:1; height:54px; border:1px solid var(--line); background:var(--panel);
-    color:var(--dim); font-size:15px; font-weight:800; border-radius:14px;
-  }
-  .stages button.sel{background:var(--accent); color:#1a1206; border-color:transparent}
-  .stages button:active{filter:brightness(1.2)}
   .menu-btn:active{background:var(--panel)}
 
   /* ---- Slide-over panels ---- */
+  /* position:fixed escapes <body>'s safe-area padding, so a panel's header —
+     including its only way out — was sliding under the notch / status bar.
+     Every panel has to re-apply the insets itself. */
   .panel{
     position:fixed; inset:0; background:var(--bg); z-index:50;
     display:flex; flex-direction:column;
     transform:translateX(100%); transition:transform .22s ease;
     pointer-events:none;  /* closed panel can't intercept taps */
+    padding:env(safe-area-inset-top) env(safe-area-inset-right)
+            env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
   .panel.open{transform:translateX(0); pointer-events:auto}
   .panel header .menu-btn{min-width:96px}
@@ -227,7 +223,17 @@
   .teach .stlist li{font-size:16px; line-height:1.6; color:var(--txt)}
   .toggle{display:flex; align-items:center; justify-content:space-between;
           padding:18px; background:var(--panel); border:1px solid var(--line);
-          border-radius:14px; margin-bottom:12px; font-size:18px; font-weight:700}
+          border-radius:14px; margin-bottom:6px; font-size:18px; font-weight:700;
+          width:100%; text-align:left; gap:14px}
+  .toggle .tl{font-size:18px; font-weight:800}
+  .toggle .tv{font-size:15px; color:var(--accent); font-weight:800; margin-top:3px}
+  .modehelp{font-size:14px; color:var(--dim); line-height:1.45; font-weight:500;
+            margin:0 6px 18px}
+  .voicerow{display:flex; gap:10px; margin-bottom:6px}
+  .voicerow button{flex:1; height:58px; border-radius:14px; font-size:17px;
+    font-weight:800; border:1px solid var(--line); background:var(--panel);
+    color:var(--dim)}
+  .voicerow button.sel{background:var(--accent); color:#1a1206; border-color:transparent}
   .sw{width:64px; height:38px; border-radius:20px; background:var(--panel2);
       border:1px solid var(--line); position:relative; flex:0 0 auto}
   .sw::after{content:""; position:absolute; width:30px; height:30px; border-radius:50%;
@@ -238,28 +244,30 @@
 <body>
 
 <header>
-  <div class="logo">YEN's <span>Beatbox</span> <small class="ver">v5</small></div>
+  <div class="logo">YEN's <span>Beatbox</span> <small class="ver">v6</small></div>
   <div style="display:flex;gap:8px">
     <button class="menu-btn narrow" id="btnLog">Log</button>
     <button class="menu-btn narrow" id="btnTeach">How&nbsp;To</button>
   </div>
 </header>
 
-<div class="genres" id="genres"></div>
-
 <main>
-  <div class="now">
-    <div class="name" id="gName">—</div>
+  <button class="now" id="nowBar">
+    <div class="name"><span id="gName">—</span><span class="chev">▾</span></div>
     <div class="meta" id="gMeta"></div>
     <div class="phase hide" id="phase">LISTEN</div>
-  </div>
+  </button>
 
   <div class="stage">
     <div class="line" id="line"></div>
   </div>
 
   <div class="transport">
-    <button class="play" id="play">▶ &nbsp;PLAY</button>
+    <div class="rec hide" id="recBox">
+      <div class="rlabel" id="recLabel">—</div>
+      <div class="rsub" id="recSub"></div>
+      <div class="takes hide" id="takeList"></div>
+    </div>
 
     <div class="drillinfo hide" id="drillInfo">
       <div class="dstage" id="dStage">—</div>
@@ -267,11 +275,7 @@
       <div class="dbar"><i id="dBar"></i></div>
     </div>
 
-    <div class="stages" id="stages">
-      <button class="sel" data-v="kick">Kick</button>
-      <button class="sel" data-v="snare">Snare</button>
-      <button class="sel" data-v="hat">Hat</button>
-    </div>
+    <button class="play" id="play">▶ &nbsp;PLAY</button>
 
     <div class="tempo">
       <button class="tbtn" id="tDown">−</button>
@@ -279,27 +283,68 @@
       <button class="tbtn" id="tUp">+</button>
     </div>
 
-    <div class="brow">
-      <button class="bigbtn" id="half">Half: Off</button>
-      <button class="bigbtn" id="ramp">Ramp: Off</button>
-      <button class="bigbtn" id="trade">Trade: Off</button>
-    </div>
-
-    <div class="takebar" id="takeBar">
-      <button class="bigbtn" id="take">Take: Off</button>
-    </div>
-    <div class="rec hide" id="recBox">
-      <div class="rlabel" id="recLabel">—</div>
-      <div class="rsub" id="recSub"></div>
-      <div class="takes hide" id="takeList"></div>
-    </div>
+    <button class="bigbtn wide" id="btnModes">Practice modes</button>
   </div>
 </main>
+
+<!-- Practice modes sheet — everything that used to live permanently on screen -->
+<div class="panel" id="panelM">
+  <header>
+    <div class="logo">Practice Modes</div>
+    <button class="menu-btn narrow" id="closeM">Done</button>
+  </header>
+  <div class="panel-body" id="modeBody">
+    <div class="ghdr">Record</div>
+    <button class="toggle" id="mTake">
+      <div><div class="tl">Take</div><div class="tv" id="mTakeV">Off</div></div>
+      <div class="sw" id="mTakeS"></div>
+    </button>
+    <p class="modehelp">Four-count, then the app goes completely silent and records
+      you. Play one clean pass — that's the looper condition. Hear it back against a
+      freshly generated click, so drift shows up as your take walking away from a
+      grid that never moved. Tap to cycle 1 / 2 / 4 bars.</p>
+
+    <div class="ghdr">Tempo</div>
+    <button class="toggle" id="mRamp">
+      <div><div class="tl">Ramp</div><div class="tv" id="mRampV">Off</div></div>
+      <div class="sw" id="mRampS"></div>
+    </button>
+    <p class="modehelp">Ten clean loops, then +2 BPM with a fresh count-off, repeating
+      until you hit the groove's target tempo.</p>
+
+    <div class="ghdr">Time</div>
+    <button class="toggle" id="mTrade">
+      <div><div class="tl">Trade</div><div class="tv" id="mTradeV">Off</div></div>
+      <div class="sw" id="mTradeS"></div>
+    </button>
+    <p class="modehelp">Call and response. The app plays two bars, then hands you two
+      bars with only a click. Your job is to come back in on the downbeat.</p>
+
+    <button class="toggle" id="mHalf">
+      <div><div class="tl">Half loop</div><div class="tv" id="mHalfV">Off</div></div>
+      <div class="sw" id="mHalfS"></div>
+    </button>
+    <p class="modehelp">Loop one half of the pattern at a time. Useful when one
+      specific move is the thing breaking — drill that half until it isn't.</p>
+
+    <div class="ghdr">Build-up</div>
+    <div class="voicerow" id="voiceRow">
+      <button data-v="kick">Kick</button>
+      <button data-v="snare">Snare</button>
+      <button data-v="hat">Hat</button>
+    </div>
+    <p class="modehelp">Mute voices to layer the groove up instead of swallowing it
+      whole: kick alone until it's solid, then kick + snare, then add the hat. It's
+      the same logic as learning a drum part limb by limb — each layer has to be
+      automatic before the next one goes on top, or the new one drags the old one
+      out of time.</p>
+  </div>
+</div>
 
 <!-- Groove picker sheet -->
 <div class="panel" id="panelG">
   <header>
-    <div class="logo" id="gpTitle">Pick a Groove</div>
+    <div class="logo">Grooves &amp; Drills</div>
     <button class="menu-btn" id="closeG">Close</button>
   </header>
   <div class="panel-body glist" id="glist"></div>
@@ -911,12 +956,7 @@ function playTake(i){
 function updateTakeUI(){
   const box=document.getElementById('recBox'),
         list=document.getElementById('takeList');
-  const showBar = !st.drill;
-  document.getElementById('takeBar').classList.toggle('hide', !showBar);
-  // Arming a take collapses the other modes — a take is one clean pass,
-  // and half-loop / ramp / trade all reshape the bar under it.
-  document.querySelector('.brow').classList.toggle('hide', st.drill || st.takeBars>0);
-  if(!showBar || (!st.takeBars && !rec.takes.length)){ box.classList.add('hide'); return; }
+  if(st.drill || (!st.takeBars && !rec.takes.length)){ box.classList.add('hide'); return; }
   box.classList.remove('hide');
   box.classList.toggle('live', rec.live);
   document.getElementById('recLabel').textContent =
@@ -1032,8 +1072,11 @@ function stepsPerBeat(){ return curG().grid/4; }
 function buildLine(){
   const g=curG(), line=document.getElementById('line');
   line.innerHTML='';
+  // 2-bar grooves get the compact chip so the whole bar fits on screen
+  line.classList.toggle('dense', g.slots.length > 16);
   const aud = audible();
   const [lo,hi] = halfWindow();
+  const spb = g.grid/4;
   g.slots.forEach((s,i)=>{
     const d=document.createElement('div');
     if(!s){ d.className='syl rest'; d.textContent='·'; }
@@ -1042,6 +1085,7 @@ function buildLine(){
       d.textContent=s.syl;
       if(aud.indexOf(s.snd)===-1) d.classList.add('muted');
     }
+    if(i>0 && i%spb===0) d.classList.add('bt');     // a beat starts here
     if(i<lo || i>=hi) d.classList.add('outside');   // dimmed half
     d.dataset.i=i;
     line.appendChild(d);
@@ -1068,9 +1112,8 @@ function updateRampUI(){
     'Round '+Math.min(st.rampRound+1,10)+' of 10 · target '+curG().target;
 }
 function rampDone(){
-  const r=document.getElementById('ramp');
-  r.textContent='Ramp: Done ✓'; r.style.background=''; r.style.color='';
-  document.getElementById('tHint').textContent='Done — at target tempo!';
+  st.ramp=false; syncModes();
+  document.getElementById('tHint').textContent='ramp done — at target';
 }
 /* Drill readout: which stage, how far through it, and a progress bar. */
 function updateDrillUI(){
@@ -1091,10 +1134,9 @@ function updateDrillUI(){
 }
 /* Show only the controls that mean something for the current mode. */
 function refreshMode(){
-  const d=st.drill;
-  document.getElementById('stages').classList.toggle('hide', d);
-  document.querySelector('.brow').classList.toggle('hide', d);
-  updateDrillUI(); updateTakeUI();
+  // A drill owns the transport; the modes sheet doesn't apply to it.
+  document.getElementById('btnModes').classList.toggle('hide', st.drill);
+  updateDrillUI(); updateTakeUI(); syncModes();
 }
 // Trade phase flag: LISTEN (app plays) vs YOU — GO (click only, you perform)
 function updateTradeUI(){
@@ -1110,62 +1152,47 @@ function updateTradeUI(){
 // ---- Genre organization (derived from each groove's style field) ----
 function genreOf(g){ return (g.style||'').split('·')[0].trim(); }
 const GENRES = [...new Set(GROOVES.map(genreOf))];
-function genreIdx(gen){
-  const r=[]; GROOVES.forEach((g,i)=>{ if(genreOf(g)===gen) r.push(i); }); return r;
-}
-function refreshGenres(){
-  const wrap=document.getElementById('genres');
-  const cur=genreOf(curG());
-  wrap.querySelectorAll('button').forEach(b=>
-    b.classList.toggle('sel', b.dataset.gen===cur));
-  const sel=wrap.querySelector('button.sel');
-  if(sel) wrap.scrollLeft = sel.offsetLeft - wrap.clientWidth/2 + sel.offsetWidth/2;
-}
-function buildGenres(){
-  const wrap=document.getElementById('genres'); wrap.innerHTML='';
-  GENRES.forEach(gen=>{
-    const b=document.createElement('button');
-    b.textContent=gen; b.dataset.gen=gen;
-    b.onclick=()=> openPicker(gen);
-    wrap.appendChild(b);
-  });
-}
-// Two-tap navigation: tap genre (or the title) → sheet of that
-// genre's grooves → tap a groove → loads it and dismisses.
+
+/* ONE picker for everything, grouped under genre headers and scrolled to
+   where you already are. The permanent tab strip it replaces cost 58px of
+   every screen to save one tap. */
 const pG=document.getElementById('panelG');
-function openPicker(gen){
-  const idxs=genreIdx(gen); if(!idxs.length) return;
-  document.getElementById('gpTitle').textContent=gen+' grooves';
+function openPicker(){
   const wrap=document.getElementById('glist'); wrap.innerHTML='';
-  // One-tap run of the whole drill set, hands free.
-  if(gen==='Drills'){
-    const sb=document.createElement('button');
-    sb.innerHTML='<div class="gn">▶ Run the full session</div>'+
-      '<div class="gm">~9 min · 5 drills · hands free</div>'+
-      '<div class="gd">Breath, both isolation ladders, the accent walk, then the '+
-      'train roll — back to back with no decisions to make.</div>';
-    sb.onclick=()=>{ pG.classList.remove('open'); startSession(); };
-    wrap.appendChild(sb);
-  }
-  idxs.forEach(i=>{
-    const g=GROOVES[i];
-    const one=(g.teach&&g.teach.what?g.teach.what:'').split(/(?<=[.!?])\s/)[0];
-    const b=document.createElement('button');
-    if(i===st.gi) b.classList.add('sel');
-    const meta = isDrill(g)
-      ? g.start+' BPM · '+g.drill.stages.length+' stage'+
-        (g.drill.stages.length>1?'s':'')+' · auto-advancing'
-      : g.start+'–'+g.target+' BPM · '+(g.grid===12?'shuffle':'straight');
-    b.innerHTML='<div class="gn">'+g.name+'</div>'+
-      '<div class="gm">'+meta+'</div>'+
-      '<div class="gd">'+one+'</div>';
-    b.onclick=()=>{
-      const wasP=st.playing; endSession(); stop(); setGroove(i);
-      pG.classList.remove('open'); if(wasP)play();
-    };
-    wrap.appendChild(b);
+  let curBtn=null;
+  GENRES.forEach(gen=>{
+    const h=document.createElement('div');
+    h.className='ghdr'; h.textContent=gen; wrap.appendChild(h);
+    if(gen==='Drills'){
+      const sb=document.createElement('button');
+      sb.innerHTML='<div class="gn">▶ Run the full session</div>'+
+        '<div class="gm">~9 min · 5 drills · hands free</div>'+
+        '<div class="gd">Breath, both isolation ladders, the accent walk, then '+
+        'the train roll — back to back, no decisions to make.</div>';
+      sb.onclick=()=>{ pG.classList.remove('open'); startSession(); };
+      wrap.appendChild(sb);
+    }
+    GROOVES.forEach((g,i)=>{
+      if(genreOf(g)!==gen) return;
+      const one=(g.teach&&g.teach.what?g.teach.what:'').split(/(?<=[.!?])\s/)[0];
+      const b=document.createElement('button');
+      if(i===st.gi){ b.classList.add('sel'); curBtn=b; }
+      const meta = isDrill(g)
+        ? g.start+' BPM · '+g.drill.stages.length+' stage'+
+          (g.drill.stages.length>1?'s':'')+' · auto-advancing'
+        : g.start+'–'+g.target+' BPM · '+(g.grid===12?'shuffle':'straight');
+      b.innerHTML='<div class="gn">'+g.name+'</div>'+
+        '<div class="gm">'+meta+'</div>'+
+        '<div class="gd">'+one+'</div>';
+      b.onclick=()=>{
+        const wasP=st.playing; endSession(); stop(); setGroove(i);
+        pG.classList.remove('open'); if(wasP)play();
+      };
+      wrap.appendChild(b);
+    });
   });
   pG.classList.add('open');
+  if(curBtn) curBtn.scrollIntoView({block:'center'});
 }
 document.getElementById('closeG').onclick=()=> pG.classList.remove('open');
 
@@ -1178,38 +1205,59 @@ function setGroove(i){
     // A drill owns the whole transport — ramp/trade/half would fight its stages.
     st.drillStage=0; st.drillPass=0; st.drillDone=false;
     applyStage(curG(), 0);
-    if(st.half) setHalf(0);
-    if(st.ramp) document.getElementById('ramp').click();
-    if(st.trade) document.getElementById('trade').click();
+    st.half=0; st.ramp=false; st.trade=false; st.takeBars=0;
   }
   st.tradePass=0; st.tradePhase='app'; updateTradeUI();
-  // clear a stale "Done ✓" label when ramp isn't active anymore
-  if(!st.ramp){
-    const rb=document.getElementById('ramp');
-    rb.textContent='Ramp: Off'; rb.style.background=''; rb.style.color='';
-  }
-  refreshHeader(); buildLine(); refreshGenres(); refreshMode();
+  refreshHeader(); buildLine(); refreshMode();
 }
 function toggleVoice(v){
   st.on[v]=!st.on[v];
   // never allow all three off — nothing to practice
   if(!st.on.kick && !st.on.snare && !st.on.hat) st.on[v]=true;
-  document.querySelector('#stages button[data-v="'+v+'"]')
-    .classList.toggle('sel', st.on[v]);
-  buildLine();
+  buildLine(); syncModes();
 }
 function setHalf(h){
   st.half=h;
-  const [lo]=halfWindow();
-  if(st.step<lo || st.step>=halfWindow()[1]) st.step=lo;
-  document.getElementById('half').textContent =
-    'Half: '+(h===0?'Off':h===1?'1st':'2nd');
-  const hb=document.getElementById('half');
-  hb.style.background = h ? 'var(--hat)' : '';
-  hb.style.color = h ? '#04222b' : '';
-  buildLine();
+  const [lo,hi]=halfWindow();
+  if(st.step<lo || st.step>=hi) st.step=lo;
+  buildLine(); syncModes();
 }
-function cycleHalf(){ setHalf((st.half+1)%3); }
+
+/* ---- Practice modes: one sheet, one summary line on the transport ----
+   Everything here used to be permanently on screen as unlabeled toggles
+   ("Trade: Off" tells you nothing). Now each has a name, a value and a
+   sentence saying what it's for. */
+const HALFLBL=['Off','1st half','2nd half'];
+function setTake(n){
+  st.takeBars=n;
+  // A take is one clean pass — the others all reshape the bar under it.
+  if(n){ st.half=0; st.ramp=false; st.trade=false; }
+  buildLine(); syncModes(); updateTakeUI();
+}
+function syncModes(){
+  const sw=(id,on)=> document.getElementById(id).classList.toggle('on', on);
+  const tx=(id,s)=> document.getElementById(id).textContent=s;
+  tx('mTakeV',  st.takeBars ? st.takeBars+' bar'+(st.takeBars>1?'s':'') : 'Off');
+  tx('mRampV',  st.ramp  ? 'On' : 'Off');
+  tx('mTradeV', st.trade ? 'On' : 'Off');
+  tx('mHalfV',  HALFLBL[st.half]);
+  sw('mTakeS',  !!st.takeBars); sw('mRampS', st.ramp);
+  sw('mTradeS', st.trade);      sw('mHalfS', !!st.half);
+  document.querySelectorAll('#voiceRow button').forEach(b=>
+    b.classList.toggle('sel', st.on[b.dataset.v]));
+  // Transport summary — you can read the active state without opening the sheet
+  const on=[];
+  if(st.takeBars) on.push('Take '+st.takeBars);
+  if(st.ramp)  on.push('Ramp');
+  if(st.trade) on.push('Trade');
+  if(st.half)  on.push(HALFLBL[st.half]);
+  const muted=['kick','snare','hat'].filter(v=>!st.on[v])
+    .map(v=>v[0].toUpperCase());
+  if(muted.length) on.push('mute '+muted.join(''));
+  const btn=document.getElementById('btnModes');
+  btn.textContent = on.length ? on.join('  ·  ') : 'Practice modes';
+  btn.classList.toggle('armed', on.length>0);
+}
 
 function scheduler(){
   const ac=audio();
@@ -1338,8 +1386,15 @@ function visual(){
     if(e.i!==undefined){
       document.querySelectorAll('.syl.on').forEach(x=>x.classList.remove('on'));
       const el=document.querySelector('.syl[data-i="'+e.i+'"]');
-      if(el && !el.classList.contains('rest') && !el.classList.contains('muted'))
+      if(el && !el.classList.contains('rest') && !el.classList.contains('muted')){
         el.classList.add('on');
+        // Keep the moving chip on screen for long grooves that still wrap
+        // past the visible area.
+        const sc=el.parentElement.parentElement;
+        if(el.offsetTop < sc.scrollTop ||
+           el.offsetTop + el.offsetHeight > sc.scrollTop + sc.clientHeight)
+          el.scrollIntoView({block:'nearest'});
+      }
     }
   }
   requestAnimationFrame(visual);
@@ -1412,44 +1467,39 @@ function endSession(){ st.session=null; }
 document.getElementById('play').onclick=()=>{
   if(st.playing){ endSession(); recStop(); stop(); } else play();
 };
-// TAKE: cycles Off → 1 → 2 → 4 bars. Needs the mic, so it asks on arm.
-document.getElementById('take').onclick=async function(){
-  const next = TAKE_BARS[(TAKE_BARS.indexOf(st.takeBars)+1) % TAKE_BARS.length];
-  if(next && !(await micReady())){
-    this.textContent='Take: no mic';
-    setTimeout(()=>{ this.textContent='Take: Off'; }, 1800);
-    st.takeBars=0; updateTakeUI(); return;
-  }
-  st.takeBars=next;
-  this.textContent='Take: '+(next?next+' bar'+(next>1?'s':''):'Off');
-  this.style.background = next ? 'var(--stop)' : '';
-  this.style.color      = next ? '#1a0606' : '';
-  // A take is one clean pass — the other modes all fight that.
-  if(next){
-    if(st.half) setHalf(0);
-    if(st.ramp) document.getElementById('ramp').click();
-    if(st.trade) document.getElementById('trade').click();
-  }
-  updateTakeUI();
-};
 document.getElementById('tDown').onclick=()=>{ st.bpm=Math.max(40,st.bpm-2); refreshHeader(); };
 document.getElementById('tUp').onclick=()=>{ st.bpm=Math.min(220,st.bpm+2); refreshHeader(); };
-document.getElementById('ramp').onclick=function(){
-  st.ramp=!st.ramp; this.textContent='Ramp: '+(st.ramp?'On':'Off');
-  this.style.background = st.ramp ? 'var(--accent)' : '';
-  this.style.color = st.ramp ? '#1a1206' : '';
-  st.rampRound=0;
-  if(st.ramp) updateRampUI(); else refreshHeader();
+
+// ---- Practice modes sheet ----
+const pM=document.getElementById('panelM');
+document.getElementById('btnModes').onclick=()=>{ syncModes(); pM.classList.add('open'); };
+document.getElementById('closeM').onclick=()=> pM.classList.remove('open');
+
+// TAKE cycles Off → 1 → 2 → 4 bars. Needs the mic, so it asks on arm.
+document.getElementById('mTake').onclick=async ()=>{
+  const next = TAKE_BARS[(TAKE_BARS.indexOf(st.takeBars)+1) % TAKE_BARS.length];
+  if(next && !(await micReady())){
+    document.getElementById('mTakeV').textContent='mic blocked';
+    return;
+  }
+  setTake(next);
 };
-document.getElementById('trade').onclick=function(){
-  st.trade=!st.trade; this.textContent='Trade: '+(st.trade?'On':'Off');
-  this.style.background = st.trade ? 'var(--go)' : '';
-  this.style.color = st.trade ? '#06120c' : '';
-  st.tradePass=0; st.tradePhase='app'; updateTradeUI();
+document.getElementById('mRamp').onclick=()=>{
+  st.ramp=!st.ramp; st.rampRound=0;
+  if(st.ramp){ st.takeBars=0; updateRampUI(); } else refreshHeader();
+  syncModes(); updateTakeUI();
 };
-document.querySelectorAll('#stages button').forEach(b=>
+document.getElementById('mTrade').onclick=()=>{
+  st.trade=!st.trade;
+  if(st.trade) st.takeBars=0;
+  st.tradePass=0; st.tradePhase='app'; updateTradeUI(); syncModes(); updateTakeUI();
+};
+document.getElementById('mHalf').onclick=()=>{
+  if(st.takeBars) setTake(0);
+  setHalf((st.half+1)%3);
+};
+document.querySelectorAll('#voiceRow button').forEach(b=>
   b.onclick=()=> toggleVoice(b.dataset.v));
-document.getElementById('half').onclick=cycleHalf;
 
 // Teach panel — opened by tapping the groove name or the How-To button
 const pT=document.getElementById('panelT');
@@ -1472,9 +1522,8 @@ function buildTeach(){
     '<h3>What it is</h3><p>'+g.teach.what+'</p>'+
     '<h3>How to learn it</h3><p>'+g.teach.how+'</p>'+ tail;
 }
-// tapping the title/genre in the practice view re-opens the picker
-document.getElementById('gName').onclick=()=> openPicker(genreOf(curG()));
-document.getElementById('gMeta').onclick=()=> openPicker(genreOf(curG()));
+// the whole title block is the picker
+document.getElementById('nowBar').onclick=openPicker;
 document.getElementById('btnTeach').onclick=()=>{ buildTeach(); pT.classList.add('open'); };
 document.getElementById('closeT').onclick=()=> pT.classList.remove('open');
 
@@ -1489,7 +1538,6 @@ document.getElementById('closeL').onclick=()=> pL.classList.remove('open');
    same slide-over pattern as the How-To panel. Not in scope now. */
 
 // init — drills lead the array, but the app still opens on Boots & Cats.
-buildGenres();
 setGroove(DRILLS.length);
 </script>
 </body>
