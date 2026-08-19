@@ -87,7 +87,9 @@
   .syl.k{border-color:var(--kick)} .syl.s{border-color:var(--snare)}
   .syl.h{border-color:var(--hat)} .syl.o{border-color:var(--open)}
   .syl.b{border-color:var(--breath)}
-  .syl.rest{opacity:.3; min-width:24px; padding:13px 6px; font-weight:600}
+  /* rests are just spacers — quiet them so the syllables you read own the line */
+  .syl.rest{opacity:.14; min-width:12px; padding:13px 2px; font-weight:600;
+    background:transparent; border-color:transparent}
   /* velocity cue is weight + opacity only (no size delta) so the
      responsive clamp stays intact and rows never shift */
   .syl.v1{font-weight:500; opacity:.45}
@@ -105,7 +107,7 @@
     border-radius:11px;
   }
   .line.dense{gap:7px}
-  .line.dense .syl.rest{min-width:18px; padding:10px 5px}
+  .line.dense .syl.rest{min-width:10px; padding:10px 2px}
   /* A little air at each beat so you can SEE where the beats are */
   .syl.bt{margin-left:9px}
   .syl.muted{opacity:.16}
