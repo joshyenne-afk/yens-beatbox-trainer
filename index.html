@@ -150,12 +150,18 @@
   .rec .rlabel{font-size:19px; font-weight:900; letter-spacing:1px}
   .rec.live .rlabel{color:var(--stop)}
   .rec .rsub{font-size:14px; color:var(--dim); font-weight:700; margin-top:4px}
-  .takes{display:flex; gap:8px; margin-top:10px}
-  .takes button{
+  .takes{display:flex; flex-direction:column; gap:8px; margin-top:10px}
+  .takerow{display:flex; gap:8px}
+  .takerow .tplay{
     flex:1; height:56px; border:1px solid var(--line); background:var(--panel2);
     color:var(--txt); font-size:15px; font-weight:800; border-radius:14px;
   }
-  .takes button.playing{background:var(--go); color:#06120c; border-color:transparent}
+  .takerow .tplay.playing{background:var(--go); color:#06120c; border-color:transparent}
+  .takerow .tdel{
+    width:56px; height:56px; border:1px solid var(--line); background:var(--panel2);
+    color:var(--stop); font-size:22px; font-weight:900; border-radius:14px;
+  }
+  .takerow .tdel:active{background:#2a1013}
 
   /* ---- Practice log ---- */
   .logrow{
@@ -244,7 +250,7 @@
 <body>
 
 <header>
-  <div class="logo">YEN's <span>Beatbox</span> <small class="ver">v6</small></div>
+  <div class="logo">YEN's <span>Beatbox</span> <small class="ver">v6.1</small></div>
   <div style="display:flex;gap:8px">
     <button class="menu-btn narrow" id="btnLog">Log</button>
     <button class="menu-btn narrow" id="btnTeach">How&nbsp;To</button>
@@ -967,12 +973,23 @@ function updateTakeUI(){
   list.classList.toggle('hide', !rec.takes.length);
   list.innerHTML='';
   rec.takes.forEach((t,i)=>{
+    const row=document.createElement('div'); row.className='takerow';
     const b=document.createElement('button');
-    b.className = rec.playingIdx===i ? 'playing' : '';
+    b.className = 'tplay'+(rec.playingIdx===i ? ' playing' : '');
     b.textContent = (rec.playingIdx===i?'■ ':'▶ ')+t.bars+' bar · '+t.bpm;
     b.onclick=()=>playTake(i);
-    list.appendChild(b);
+    const del=document.createElement('button');
+    del.className='tdel'; del.textContent='✕'; del.title='Delete take';
+    del.onclick=(e)=>{ e.stopPropagation(); deleteTake(i); };
+    row.appendChild(b); row.appendChild(del);
+    list.appendChild(row);
   });
+}
+function deleteTake(i){
+  if(rec.playingIdx===i) stopTakePlayback();
+  else if(rec.playingIdx>i) rec.playingIdx--;   // keep index aligned
+  rec.takes.splice(i,1);
+  updateTakeUI();
 }
 
 /* ============================================================
