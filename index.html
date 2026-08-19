@@ -80,7 +80,7 @@
   .syl{
     font-size:clamp(22px,7vw,32px); font-weight:800; padding:12px 13px;
     border-radius:14px;
-    background:var(--panel); border:2px solid var(--line); color:var(--dim);
+    background:var(--panel); border:1.5px solid var(--line); color:var(--dim);
     transition:transform .04s ease, background .04s ease, color .04s ease, border-color .04s ease;
     line-height:1.1; min-width:46px; text-align:center;
   }
@@ -208,15 +208,16 @@
   .panel-body{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:10px 16px 30px}
   .glist button{
     width:100%; text-align:left; background:var(--panel); border:1px solid var(--line);
-    color:var(--txt); border-radius:16px; padding:20px; margin-bottom:12px;
+    color:var(--txt); border-radius:14px; padding:14px 16px; margin-bottom:8px;
   }
   .glist button.sel{border-color:var(--accent)}
   .glist button.sel .gn{color:var(--accent)}
-  .glist .gn{font-size:22px; font-weight:800}
-  .glist .gm{font-size:14px; color:var(--accent); margin-top:5px; font-weight:700;
+  .glist .gn{font-size:19px; font-weight:800}
+  .glist .gm{font-size:13px; color:var(--accent); margin-top:3px; font-weight:700;
     text-transform:uppercase; letter-spacing:.5px}
   .glist .gd{font-size:15px; color:var(--dim); margin-top:7px; font-weight:500;
     line-height:1.4}
+  .glist button.big{padding:18px 16px}
   .ghdr{font-size:14px; font-weight:800; color:var(--accent); text-transform:uppercase;
         letter-spacing:1.5px; margin:18px 4px 10px}
   .teach h3{font-size:17px; color:var(--accent); margin:20px 0 8px; font-weight:800}
@@ -1113,10 +1114,10 @@ function buildLine(){
 function refreshHeader(){
   const g=curG();
   document.getElementById('gName').textContent=g.name;
+  // keep the sub-line short — the target tempo already shows under BPM
   document.getElementById('gMeta').textContent = st.drill
      ? g.style+'  ·  '+g.drill.stages.length+' stage'+(g.drill.stages.length>1?'s':'')
-     : g.style+'  ·  '+(g.grid===12?'shuffle/triplet':'straight')+
-       '  ·  target '+g.target;
+     : g.style+'  ·  '+(g.grid===12?'shuffle':'straight');
   document.getElementById('bpm').textContent=st.bpm;
   const hint=document.getElementById('tHint');
   if(st.drill){ hint.textContent='drill tempo'; return; }
@@ -1184,6 +1185,7 @@ function openPicker(){
     h.className='ghdr'; h.textContent=gen; wrap.appendChild(h);
     if(gen==='Drills'){
       const sb=document.createElement('button');
+      sb.className='big';
       sb.innerHTML='<div class="gn">▶ Run the full session</div>'+
         '<div class="gm">~9 min · 5 drills · hands free</div>'+
         '<div class="gd">Breath, both isolation ladders, the accent walk, then '+
@@ -1193,16 +1195,16 @@ function openPicker(){
     }
     GROOVES.forEach((g,i)=>{
       if(genreOf(g)!==gen) return;
-      const one=(g.teach&&g.teach.what?g.teach.what:'').split(/(?<=[.!?])\s/)[0];
       const b=document.createElement('button');
       if(i===st.gi){ b.classList.add('sel'); curBtn=b; }
+      // compact rows: name + short meta only. The full description
+      // lives in How-To; a 24-item list shouldn't be a wall of text.
       const meta = isDrill(g)
         ? g.start+' BPM · '+g.drill.stages.length+' stage'+
-          (g.drill.stages.length>1?'s':'')+' · auto-advancing'
+          (g.drill.stages.length>1?'s':'')
         : g.start+'–'+g.target+' BPM · '+(g.grid===12?'shuffle':'straight');
       b.innerHTML='<div class="gn">'+g.name+'</div>'+
-        '<div class="gm">'+meta+'</div>'+
-        '<div class="gd">'+one+'</div>';
+        '<div class="gm">'+meta+'</div>';
       b.onclick=()=>{
         const wasP=st.playing; endSession(); stop(); setGroove(i);
         pG.classList.remove('open'); if(wasP)play();
